@@ -8,7 +8,7 @@ namespace Lern_API.Utilities
     {
         private static IJwtAlgorithm Algorithm { get; } = new HMACSHA256Algorithm();
 
-        public static T Decode<T>(string token, string secretKey) where T : IIdentity
+        public static T Decode<T>(string token, string secretKey) where T : IIdentity, new()
         {
             return new JwtBuilder()
                 .WithAlgorithm(Algorithm)

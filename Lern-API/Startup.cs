@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Lern_API.Utilities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -10,10 +11,9 @@ using Nancy.Owin;
 
 namespace Lern_API
 {
+    [ExcludeFromCodeCoverage]
     public class Startup
     {
-        private Logger Log { get; } = Logger.GetLogger(typeof(Startup));
-
         public Startup(IConfiguration configuration)
         {
             Configuration.Config = configuration;

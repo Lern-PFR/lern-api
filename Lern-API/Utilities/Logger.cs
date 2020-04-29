@@ -7,11 +7,12 @@ namespace Lern_API.Utilities
 {
     public class Logger
     {
-        private static string Format { get; } = "[{0}] - {1}|{2}:{3} : {4}";
+        public static string DefaultFormat { get; } = "{0}|{1}:{2} : {3}";
+        public static string Format { get; set; } = DefaultFormat;
 
         private ILog Log { get; }
 
-        private Logger(ILog logger)
+        public Logger(ILog logger)
         {
             Log = logger;
         }
@@ -28,17 +29,17 @@ namespace Lern_API.Utilities
 
         public void Info(string message, [CallerMemberName] string memberName = "", [CallerFilePath] string file = "", [CallerLineNumber] int lineNumber = 0)
         {
-            Log.InfoFormat(CultureInfo.InvariantCulture, Format, "INFO", file, memberName, lineNumber, message);
+            Log.InfoFormat(CultureInfo.InvariantCulture, Format, file, memberName, lineNumber, message);
         }
 		
         public void Warning(string message, [CallerMemberName] string memberName = "", [CallerFilePath] string file = "", [CallerLineNumber] int lineNumber = 0)
         {
-            Log.WarnFormat(CultureInfo.InvariantCulture, Format, "WARNING", file, memberName, lineNumber, message);
+            Log.WarnFormat(CultureInfo.InvariantCulture, Format, file, memberName, lineNumber, message);
         }
 
         public void Error(string message, [CallerMemberName] string memberName = "", [CallerFilePath] string file = "", [CallerLineNumber] int lineNumber = 0)
         {
-            Log.ErrorFormat(CultureInfo.InvariantCulture, Format, "ERROR", file, memberName, lineNumber, message);
+            Log.ErrorFormat(CultureInfo.InvariantCulture, Format, file, memberName, lineNumber, message);
         }
     }
 }

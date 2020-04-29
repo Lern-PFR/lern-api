@@ -74,11 +74,11 @@ namespace Lern_API
                 if (ctx.Response.StatusCode != HttpStatusCode.OK)
                     return;
 
-                // Vérifie que la configuration autorise la gzip sur ce contenu
+                // Vérifie que la configuration autorise le gzip sur ce contenu
                 if (!GzipSupportedMimeTypes.Any(x => x == ctx.Response.ContentType || ctx.Response.ContentType.StartsWith($"{x};")))
                     return;
 
-                // Vérifie que la requête ne soit pas plus petite que le minimum configuré
+                // Vérifie que la requête ne soit pas plus petite que le minimum configuré, si possible
                 if (ctx.Response.Headers.TryGetValue("Content-Length", out var contentLength))
                 {
                     var length = long.Parse(contentLength);
@@ -94,10 +94,8 @@ namespace Lern_API
 
                 ctx.Response.Contents = responseStream =>
                 {
-                    using (var compression = new GZipStream(responseStream, CompressionMode.Compress))
-                    {
-                        contents(compression);
-                    }
+                    using var compression = new GZipStream(responseStream, CompressionMode.Compress);
+                    contents(compression);
                 };
             });
         }

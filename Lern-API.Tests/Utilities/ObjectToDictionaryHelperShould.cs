@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using Lern_API.Tests.Attributes;
 using Lern_API.Utilities;
 using Xunit;
@@ -7,6 +8,14 @@ namespace Lern_API.Tests.Utilities
 {
     public class ObjectToDictionaryHelperShould
     {
+        [Fact]
+        public void Throw_On_Null_Object()
+        {
+            string var = null;
+
+            Assert.Throws<ArgumentNullException>(() => var.ToDictionary());
+        }
+
         [Theory]
         [AutoMoqData]
         public void Convert_Object_To_Dictionary(string obj)
