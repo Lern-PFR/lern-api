@@ -47,6 +47,8 @@ namespace Lern_API.Tests.Utilities
             Assert.NotNull(logger);
         }
 
+#pragma warning disable S3236 // Caller information arguments should not be provided explicitly
+
         [Theory]
         [AutoMoqData]
         public void Use_Info_Level(Mock<ILog> logger, string file, string memberName, int line, string message)
@@ -54,6 +56,7 @@ namespace Lern_API.Tests.Utilities
             logger.Setup(l => l.InfoFormat(CultureInfo.InvariantCulture, Logger.Format, file, memberName, line, message));
 
             var log = new Logger(logger.Object);
+
             log.Info(message, memberName, file, line);
 
             logger.VerifyAll();
@@ -82,5 +85,8 @@ namespace Lern_API.Tests.Utilities
 
             logger.VerifyAll();
         }
+
+#pragma warning restore S3236 // Caller information arguments should not be provided explicitly
+
     }
 }
