@@ -5,6 +5,7 @@
     <RootNamespace>Lern_API</RootNamespace>
     <UserSecretsId>d0c458ed-f2d1-4f90-827b-be394c804b34</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,7 +16,8 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.8" />
     <PackageReference Include="Nancy" Version="2.0.0" />
     <PackageReference Include="Nancy.Authentication.Stateless" Version="2.0.0" />
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="8.6.0.16497">
+    <PackageReference Include="NullGuard.Fody" Version="2.2.0" />
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="8.6.1.17183">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

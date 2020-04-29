@@ -11,7 +11,7 @@ namespace Lern_API.Utilities
 
         private ILog Log { get; }
 
-        public Logger(ILog logger)
+        private Logger(ILog logger)
         {
             Log = logger;
         }

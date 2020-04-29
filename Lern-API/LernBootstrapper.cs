@@ -16,8 +16,8 @@ namespace Lern_API
     {
         private Logger Log { get; } = Logger.GetLogger(typeof(LernBootstrapper));
 
-        private int GzipMinimumBytes { get; } = 1024; //Configuration.GetInt("GzipMinimumBytes");
-        private IEnumerable<string> GzipSupportedMimeTypes { get; } = new []{ "application/json" };//Configuration.GetList("GzipSupportedMimeTypes");
+        private int GzipMinimumBytes { get; } = Configuration.Get<int>("GzipMinimumBytes");
+        private IEnumerable<string> GzipSupportedMimeTypes { get; } = Configuration.GetList("GzipSupportedMimeTypes");
 
         // TODO: uniformiser les commentaires
         protected override void ApplicationStartup(TinyIoCContainer container, IPipelines pipelines)
@@ -39,7 +39,7 @@ namespace Lern_API
 
                 try
                 {
-                    var user = Jwt.Decode<User>(jwtToken);
+                    var user = JwtHelper.Decode<User>(jwtToken, Configuration.Get<string>("SecretKey"));
 
                     return new ClaimsPrincipal(user);
                 }

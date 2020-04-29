@@ -13,9 +13,6 @@ namespace Lern_API.Utilities
 
         public static IDictionary<string, T> ToDictionary<T>(this object source)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source), "Impossible de convertir l'objet source en dictionnaire : l'objet source est null.");
-
             var dictionary = new Dictionary<string, T>();
 
             foreach (PropertyDescriptor property in TypeDescriptor.GetProperties(source))

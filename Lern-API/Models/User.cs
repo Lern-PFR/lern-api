@@ -4,8 +4,8 @@ namespace Lern_API.Models
 {
     public class User : IIdentity
     {
-        public string AuthenticationType { get; }
-        public bool IsAuthenticated { get; }
-        public string Name { get; }
+        public string AuthenticationType { get; set;  }
+        public bool IsAuthenticated { get; set; }
+        public string Name { get; set; }
     }
 }

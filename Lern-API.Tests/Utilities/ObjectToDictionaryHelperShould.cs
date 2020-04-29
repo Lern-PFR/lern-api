@@ -1,0 +1,30 @@
+﻿using System.ComponentModel;
+using Lern_API.Tests.Attributes;
+using Lern_API.Utilities;
+using Xunit;
+
+namespace Lern_API.Tests.Utilities
+{
+    public class ObjectToDictionaryHelperShould
+    {
+        [Theory]
+        [AutoMoqData]
+        public void Convert_Object_To_Dictionary(string obj)
+        {
+            var dictionary = obj.ToDictionary();
+
+            var typeDescriptor = TypeDescriptor.GetProperties(obj);
+
+            Assert.NotNull(dictionary);
+            Assert.NotEmpty(dictionary);
+            Assert.Equal(dictionary.Count, typeDescriptor.Count);
+
+            foreach (PropertyDescriptor property in typeDescriptor)
+            {
+                var value = property.GetValue(obj);
+
+                Assert.Equal(value, dictionary[property.Name]);
+            }
+        }
+    }
+}
