@@ -89,6 +89,7 @@ namespace Lern_API
 
                 // Compresse le contenu de la requête
                 ctx.Response.Headers["Content-Encoding"] = "gzip";
+                ctx.Response.Headers.Remove("Content-Length");
                 var contents = ctx.Response.Contents;
 
                 ctx.Response.Contents = responseStream =>
