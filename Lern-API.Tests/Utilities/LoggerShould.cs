@@ -47,46 +47,41 @@ namespace Lern_API.Tests.Utilities
             Assert.NotNull(logger);
         }
 
-#pragma warning disable S3236 // Caller information arguments should not be provided explicitly
-
         [Theory]
         [AutoMoqData]
-        public void Use_Info_Level(Mock<ILog> logger, string file, string memberName, int line, string message)
+        public void Use_Info_Level(Mock<ILog> logger, string message)
         {
-            logger.Setup(l => l.InfoFormat(CultureInfo.InvariantCulture, Logger.Format, file, memberName, line, message));
+            logger.Setup(l => l.InfoFormat(CultureInfo.InvariantCulture, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), message));
 
             var log = new Logger(logger.Object);
-
-            log.Info(message, memberName, file, line);
+            log.Info(message);
 
             logger.VerifyAll();
         }
 
         [Theory]
         [AutoMoqData]
-        public void Use_Warn_Level(Mock<ILog> logger, string file, string memberName, int line, string message)
+        public void Use_Warn_Level(Mock<ILog> logger, string message)
         {
-            logger.Setup(l => l.WarnFormat(CultureInfo.InvariantCulture, Logger.Format, file, memberName, line, message));
+            logger.Setup(l => l.WarnFormat(CultureInfo.InvariantCulture, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), message));
 
             var log = new Logger(logger.Object);
-            log.Warning(message, memberName, file, line);
+            log.Warning(message);
 
             logger.VerifyAll();
         }
 
         [Theory]
         [AutoMoqData]
-        public void Use_Error_Level(Mock<ILog> logger, string file, string memberName, int line, string message)
+        public void Use_Error_Level(Mock<ILog> logger, string message)
         {
-            logger.Setup(l => l.ErrorFormat(CultureInfo.InvariantCulture, Logger.Format, file, memberName, line, message));
+            logger.Setup(l => l.ErrorFormat(CultureInfo.InvariantCulture, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), message));
 
             var log = new Logger(logger.Object);
-            log.Error(message, memberName, file, line);
+            log.Error(message);
 
             logger.VerifyAll();
         }
-
-#pragma warning restore S3236 // Caller information arguments should not be provided explicitly
 
     }
 }
