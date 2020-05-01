@@ -18,6 +18,11 @@ namespace Lern_API.Tests.Utilities
 
             Assert.Throws<ArgumentNullException>(() => JwtHelper.Decode<ClaimsIdentity>(null, secret));
             Assert.Throws<ArgumentNullException>(() => JwtHelper.Decode<ClaimsIdentity>(token, null));
+
+            Assert.Throws<ArgumentException>(() => JwtHelper.Encode(identity, " "));
+
+            Assert.Throws<ArgumentException>(() => JwtHelper.Decode<ClaimsIdentity>(" ", secret));
+            Assert.Throws<ArgumentException>(() => JwtHelper.Decode<ClaimsIdentity>(token, " "));
         }
 
         [Theory]

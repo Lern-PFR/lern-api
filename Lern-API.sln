@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.30002.166
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lern-API", "Lern-API\Lern-API.csproj", "{4696051E-C813-4D4C-9A3E-5812EB4E2104}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lern-API.Tests", "Lern-API.Tests\Lern-API.Tests.csproj", "{4DE5EFC8-2079-461D-8018-F9341A643CBE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lern-API.Tests", "Lern-API.Tests\Lern-API.Tests.csproj", "{4DE5EFC8-2079-461D-8018-F9341A643CBE}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{D4C59C99-3502-4A8A-B180-C6F6FE773FE2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{4DE5EFC8-2079-461D-8018-F9341A643CBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4DE5EFC8-2079-461D-8018-F9341A643CBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4DE5EFC8-2079-461D-8018-F9341A643CBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4C59C99-3502-4A8A-B180-C6F6FE773FE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4C59C99-3502-4A8A-B180-C6F6FE773FE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4C59C99-3502-4A8A-B180-C6F6FE773FE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4C59C99-3502-4A8A-B180-C6F6FE773FE2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

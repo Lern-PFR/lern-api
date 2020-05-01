@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.IO.Compression;
 using System.Linq;
 using System.Security.Claims;
+using JWT;
 using Lern_API.Models;
 using Lern_API.Utilities;
 using Nancy;
 using Nancy.Authentication.Stateless;
 using Nancy.Bootstrapper;
 using Nancy.TinyIoc;
+using PetaPoco;
+using PetaPoco.Providers;
 
 namespace Lern_API
 {
@@ -26,6 +29,8 @@ namespace Lern_API
 
             base.ApplicationStartup(container, pipelines);
 
+            Log.Info("Connexion à la base de données");
+
             // Ajout de la gestion de l'authentification par token JWT
             StatelessAuthentication.Enable(pipelines, new StatelessAuthenticationConfiguration(ctx =>
             {
@@ -39,15 +44,24 @@ namespace Lern_API
 
                 try
                 {
-                    var user = JwtHelper.Decode<User>(jwtToken, Configuration.Get<string>("SecretKey"));
+                    var identity = JwtHelper.Decode<Identity>(jwtToken, Configuration.Get<string>("SecretKey"));
 
-                    return new ClaimsPrincipal(user);
+                    return new ClaimsPrincipal(identity);
+                }
+                catch (TokenExpiredException)
+                {
+                    Log.Info("Token expiré");
+                }
+                catch (SignatureVerificationException)
+                {
+                    Log.Info("La signature du token est invalide");
                 }
                 catch (Exception)
                 {
-                    // Si le token n'a pas pu être décodé ou n'est pas valide, termine la fonction
-                    return null;
+                    // Si le token n'est pas correctement formatté
                 }
+
+                return null;
             }));
 
             Log.Info("Initialisation terminée");
@@ -100,10 +114,26 @@ namespace Lern_API
             });
         }
 
-        // Masquage des répertoires non autorisés
         protected override void ConfigureApplicationContainer(TinyIoCContainer container)
         {
-            // We don't call "base" here to prevent auto-discovery of types/dependencies
+            base.ConfigureApplicationContainer(container);
+
+            var host = Configuration.Get<string>("DbHost");
+            var username = Configuration.Get<string>("DbUsername");
+            var password = Configuration.Get<string>("DbPassword");
+            var db = Configuration.Get<string>("DbDatabase");
+            var port = Configuration.Get<int>("DbPort");
+
+            var database = DatabaseConfiguration.Build()
+                .UsingConnectionString($"Host={host};Username={username};password={password};database={db};port={port}")
+                .UsingProvider<PostgreSQLDatabaseProvider>()
+                .UsingDefaultMapper<ConventionMapper>(m =>
+                {
+                    m.InflectTableName = (inflector, s) => inflector.Pluralise(inflector.Underscore(s));
+                })
+                .Create();
+
+            container.Register(database);
         }
     }
 }

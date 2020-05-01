@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Security.Claims;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Lern_API.Models;
 using Lern_API.Tests.Attributes;
@@ -15,11 +13,11 @@ namespace Lern_API.Tests.Modules
 {
     public class IdentityModuleShould
     {
-        private readonly ITestOutputHelper output;
+        private readonly ITestOutputHelper _output;
 
         public IdentityModuleShould(ITestOutputHelper output)
         {
-            this.output = output;
+            _output = output;
         }
 
         [Fact]
@@ -72,7 +70,7 @@ namespace Lern_API.Tests.Modules
                 new KeyValuePair<string, string>("SecretKey", secret)
             }).Build();
 
-            var user = new User
+            var user = new Identity
             {
                 AuthenticationType = "Test",
                 IsAuthenticated = true,
@@ -88,8 +86,8 @@ namespace Lern_API.Tests.Modules
                 with.HttpRequest();
             });
 
-            output.WriteLine($"Secret = {secret}");
-            output.WriteLine($"Token = {token}");
+            _output.WriteLine($"Secret = {secret}");
+            _output.WriteLine($"Token = {token}");
 
             Assert.Equal(HttpStatusCode.OK, result.StatusCode);
             Assert.Equal(name, result.Body.AsString());

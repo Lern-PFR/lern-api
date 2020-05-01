@@ -1,13 +1,15 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Security.Principal;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using PetaPoco;
 
 namespace Lern_API.Models
 {
     [ExcludeFromCodeCoverage]
-    public class User : IIdentity
+    public class User
     {
-        public string AuthenticationType { get; set; }
-        public bool IsAuthenticated { get; set; }
+        public int Id { get; set; }
+        [ResultColumn(IncludeInAutoSelect.Yes)]
+        public DateTime CreatedOn { get; set; }
         public string Name { get; set; }
     }
 }
