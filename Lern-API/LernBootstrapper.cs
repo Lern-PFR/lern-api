@@ -168,6 +168,7 @@ namespace Lern_API
             try
             {
                 database.Execute("SELECT 1");
+                Log.Info("Connexion à la base de données réussie");
             }
             catch (Exception e)
             {

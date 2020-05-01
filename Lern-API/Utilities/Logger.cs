@@ -52,7 +52,7 @@ namespace Lern_API.Utilities
 
         public void Response(int id, HttpStatusCode status)
         {
-            Log.InfoFormat(CultureInfo.InvariantCulture, "[{0}] {1}", id, status);
+            Log.InfoFormat(CultureInfo.InvariantCulture, "[{0}] {1} {2}", id, (int) status, status);
         }
 
         public void Debug(string message, [CallerMemberName] string memberName = "", [CallerFilePath] string file = "", [CallerLineNumber] int lineNumber = 0)
