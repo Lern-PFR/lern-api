@@ -17,7 +17,7 @@ namespace Lern_API
 {
     public class LernBootstrapper : DefaultNancyBootstrapper
     {
-        private Logger Log { get; } = Logger.GetLogger(typeof(LernBootstrapper));
+        private ILogger Log { get; } = Logger.GetLogger(typeof(LernBootstrapper));
 
         private int GzipMinimumBytes { get; } = Configuration.Get<int>("GzipMinimumBytes");
         private IEnumerable<string> GzipSupportedMimeTypes { get; } = Configuration.GetList("GzipSupportedMimeTypes");
@@ -28,6 +28,24 @@ namespace Lern_API
             Log.Info("Initialisation en cours");
 
             base.ApplicationStartup(container, pipelines);
+
+            pipelines.BeforeRequest.AddItemToStartOfPipeline(ctx =>
+            {
+                if (ctx != null)
+                {
+                    Log.Request(ctx.Request.GetHashCode(), ctx.Request.Method, ctx.Request.Path, ctx.Request.UserHostAddress, ctx.Request.Headers.UserAgent);
+                }
+
+                return null;
+            });
+
+            pipelines.AfterRequest.AddItemToStartOfPipeline(ctx =>
+            {
+                if (ctx != null)
+                {
+                    Log.Response(ctx.Request.GetHashCode(), ctx.Response.StatusCode);
+                }
+            });
 
             Log.Info("Connexion à la base de données");
 
@@ -117,6 +135,8 @@ namespace Lern_API
         protected override void ConfigureApplicationContainer(TinyIoCContainer container)
         {
             base.ConfigureApplicationContainer(container);
+
+            container.Register(Log);
 
             var host = Configuration.Get<string>("DbHost");
             var username = Configuration.Get<string>("DbUsername");
