@@ -57,7 +57,7 @@ namespace Lern_API
                 }
             });
 
-            Log.Info("Connexion à la base de données");
+            var secretKey = Configuration.Get<string>("SecretKey");
 
             // Ajout de la gestion de l'authentification par token JWT
             StatelessAuthentication.Enable(pipelines, new StatelessAuthenticationConfiguration(ctx =>
@@ -72,7 +72,7 @@ namespace Lern_API
 
                 try
                 {
-                    var identity = JwtHelper.Decode<Identity>(jwtToken, Configuration.Get<string>("SecretKey"));
+                    var identity = JwtHelper.Decode<Identity>(jwtToken, secretKey);
 
                     return new ClaimsPrincipal(identity);
                 }
@@ -148,6 +148,8 @@ namespace Lern_API
 
             container.Register(Log);
 
+            Log.Info("Connexion à la base de données");
+
             var host = Configuration.Get<string>("DbHost");
             var username = Configuration.Get<string>("DbUsername");
             var password = Configuration.Get<string>("DbPassword");
@@ -162,6 +164,15 @@ namespace Lern_API
                     m.InflectTableName = (inflector, s) => inflector.Pluralise(inflector.Underscore(s));
                 })
                 .Create();
+
+            try
+            {
+                database.Execute("SELECT 1");
+            }
+            catch (Exception e)
+            {
+                Log.Error($"Impossible de se connecter à la base de données : {e.Message}");
+            }
 
             container.Register(database);
         }
