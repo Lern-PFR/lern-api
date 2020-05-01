@@ -1,6 +1,6 @@
 # Lern. - API
 
-![.NET Core](https://github.com/Lern-PFR/lern-api/workflows/.NET%20Core/badge.svg) ![Docker Image](https://github.com/Lern-PFR/lern-api/workflows/Docker%20Image/badge.svg)
+[![Docker Hub](https://img.shields.io/badge/docker-ready-blue.svg)](https://hub.docker.com/r/lernpfr/lern-api) ![.NET Core](https://github.com/Lern-PFR/lern-api/workflows/.NET%20Core/badge.svg) ![Docker Image](https://github.com/Lern-PFR/lern-api/workflows/Docker%20Image/badge.svg)
 
 Ce dépôt contient le code source de l'API du projet [Lern.](https://github.com/Lern-PFR/lern-production)
 
