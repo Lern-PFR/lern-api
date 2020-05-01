@@ -1,6 +1,5 @@
 using System;
-using System.IO;
-using System.Text;
+using System.Collections.Generic;
 using Lern_API.Tests.Attributes;
 using Lern_API.Utilities;
 using Microsoft.Extensions.Configuration;
@@ -44,9 +43,27 @@ namespace Lern_API.Tests.Utilities
 
         [Theory]
         [AutoMoqData]
+        public void Return_Value_From_Configuration(string key, string value)
+        {
+            Configuration.Config = new ConfigurationBuilder().AddInMemoryCollection(new[]
+            {
+                new KeyValuePair<string, string>(key, value)
+            }).Build();
+
+            var result = Configuration.Get<string>(key);
+
+            Assert.Equal(value, result);
+        }
+
+        [Theory]
+        [AutoMoqData]
         public void Return_List_From_Configuration(Mock<IConfiguration> configuration, string key)
         {
-            var configSection = new ConfigurationBuilder().AddJsonStream(new MemoryStream(Encoding.UTF8.GetBytes("{\"Array\": [\"valeur1\",\"valeur2\"]}"))).Build();
+            var configSection = new ConfigurationBuilder().AddInMemoryCollection(new[]
+            {
+                new KeyValuePair<string, string>("Array:0", "valeur1"),
+                new KeyValuePair<string, string>("Array:1", "valeur2")
+            }).Build();
 
             configuration.Setup(c => c.GetSection(key)).Returns(configSection.GetSection("Array"));
 
@@ -57,6 +74,21 @@ namespace Lern_API.Tests.Utilities
             Assert.NotNull(list);
             Assert.Collection(list, e => Assert.Equal("valeur1", e),
                 e => Assert.Equal("valeur2", e));
+        }
+
+        [Theory]
+        [AutoMoqData]
+        public void Use_Env_Var_Before_Config_File(string value, string list1, string list2)
+        {
+            Environment.SetEnvironmentVariable("ENV_VAR", value);
+            Environment.SetEnvironmentVariable("ENV_LIST", $"{list1};{list2}");
+
+            var result = Configuration.Get<string>("EnvVar");
+            var list = Configuration.GetList("EnvList");
+
+            Assert.Equal(value, result);
+            Assert.Collection(list, e => Assert.Equal(list1, e),
+                e => Assert.Equal(list2, e));
         }
     }
 }

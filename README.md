@@ -9,16 +9,30 @@ Ce dépôt contient le code source de l'API du projet [Lern.](https://github.com
 > Ce document détaille l'utilisation de l'API seule, sans client associé  
 > c.f. [lern-production](https://github.com/Lern-PFR/lern-production) pour utiliser l'image complète de production
 
-### Avec l'image Docker (recommandé)
+### Image Docker officielle
+
+```bash
+docker run -p 80:80 -p 443:443 lernpfr/lern-api:staging -e DB_HOST=127.0.0.1 -e DB_USERNAME=username -e DB_PASSWORD=password -e DB_DATABASE=database -e DB_PORT=5432 -e SECRET_KEY=random_cryptographic_key
+```
+
+Pour plus de détails sur les variables d'environnement utilisables, des explications complètes sont disponibles sur [Docker Hub](https://hub.docker.com/r/lernpfr/lern-api).
+
+### Depuis le code source
+
+#### Avec l'image Docker (recommandé)
 
 ```bash
 docker build . -t lern/lern-api
-docker run -p 80:80 -p 443:443 lern/lern-api
+docker run -p 80:80 -p 443:443 lern/lern-api -e DB_HOST=127.0.0.1 -e DB_USERNAME=username -e DB_PASSWORD=password -e DB_DATABASE=database -e DB_PORT=5432 -e SECRET_KEY=random_cryptographic_key
 ```
 
-### Dans un environnement .NET Core
+Pour plus de détails sur les variables d'environnement utilisables, des explications complètes sont disponibles sur [Docker Hub](https://hub.docker.com/r/lernpfr/lern-api).
+
+#### Dans un environnement .NET Core
 
 ```bash
 dotnet test
 dotnet run --project Lern-API/Lern-API.csproj
 ```
+
+Le fichier de configuration se trouve dans `Lern-API/appsettings.json`.

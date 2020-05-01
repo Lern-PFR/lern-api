@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
 using Lern_API.Tests.Attributes;
 using Lern_API.Utilities;
-using Microsoft.Extensions.Configuration;
 using Nancy;
 using Nancy.Testing;
 using Xunit;
@@ -59,11 +58,8 @@ namespace Lern_API.Tests.Modules
         [AutoMoqData]
         public async Task Has_Gzip_Compression(ILogger logger)
         {
-            Configuration.Config = new ConfigurationBuilder().AddInMemoryCollection(new[]
-            {
-                new KeyValuePair<string, string>("GzipMinimumBytes", "0"),
-                new KeyValuePair<string, string>("GzipSupportedMimeTypes:0", "text/plain")
-            }).Build();
+            Environment.SetEnvironmentVariable("GZIP_MINIMUM_BYTES", "0");
+            Environment.SetEnvironmentVariable("GZIP_SUPPORTED_MIME_TYPES", "text/plain");
 
             var browser = new Browser(new LernBootstrapper(logger), d => d.Header("Accept-Encoding", "gzip"));
 
@@ -85,11 +81,8 @@ namespace Lern_API.Tests.Modules
         [AutoMoqData]
         public async Task Use_Gzip_Only_When_OK(ILogger logger)
         {
-            Configuration.Config = new ConfigurationBuilder().AddInMemoryCollection(new[]
-            {
-                new KeyValuePair<string, string>("GzipMinimumBytes", "0"),
-                new KeyValuePair<string, string>("GzipSupportedMimeTypes:0", "text/plain")
-            }).Build();
+            Environment.SetEnvironmentVariable("GZIP_MINIMUM_BYTES", "0");
+            Environment.SetEnvironmentVariable("GZIP_SUPPORTED_MIME_TYPES", "text/plain");
 
             var browser = new Browser(new LernBootstrapper(logger), d => d.Header("Accept-Encoding", "gzip"));
 
@@ -113,11 +106,8 @@ namespace Lern_API.Tests.Modules
         [AutoMoqData]
         public async Task Use_Gzip_Only_When_Configured(ILogger logger)
         {
-            Configuration.Config = new ConfigurationBuilder().AddInMemoryCollection(new[]
-            {
-                new KeyValuePair<string, string>("GzipMinimumBytes", "0"),
-                new KeyValuePair<string, string>("GzipSupportedMimeTypes:0", "")
-            }).Build();
+            Environment.SetEnvironmentVariable("GZIP_MINIMUM_BYTES", "0");
+            Environment.SetEnvironmentVariable("GZIP_SUPPORTED_MIME_TYPES", "");
 
             var browser = new Browser(new LernBootstrapper(logger), d => d.Header("Accept-Encoding", "gzip"));
 
@@ -141,11 +131,8 @@ namespace Lern_API.Tests.Modules
         [AutoMoqData]
         public async Task Use_Gzip_Only_When_Client_Can(ILogger logger)
         {
-            Configuration.Config = new ConfigurationBuilder().AddInMemoryCollection(new[]
-            {
-                new KeyValuePair<string, string>("GzipMinimumBytes", "0"),
-                new KeyValuePair<string, string>("GzipSupportedMimeTypes:0", "text/plain")
-            }).Build();
+            Environment.SetEnvironmentVariable("GZIP_MINIMUM_BYTES", "0");
+            Environment.SetEnvironmentVariable("GZIP_SUPPORTED_MIME_TYPES", "text/plain");
 
             var browser = new Browser(new LernBootstrapper(logger));
 

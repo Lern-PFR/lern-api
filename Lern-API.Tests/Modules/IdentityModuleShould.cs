@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Threading.Tasks;
 using Lern_API.Models;
 using Lern_API.Tests.Attributes;
 using Lern_API.Utilities;
-using Microsoft.Extensions.Configuration;
 using Nancy;
 using Nancy.Testing;
 using Xunit;
@@ -66,10 +65,7 @@ namespace Lern_API.Tests.Modules
         [AutoMoqData]
         public async Task Return_Identity_With_Valid_Token(ILogger logger, string name, string secret)
         {
-            Configuration.Config = new ConfigurationBuilder().AddInMemoryCollection(new[]
-            {
-                new KeyValuePair<string, string>("SecretKey", secret)
-            }).Build();
+            Environment.SetEnvironmentVariable("SECRET_KEY", secret);
 
             var user = new Identity
             {

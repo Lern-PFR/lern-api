@@ -10,11 +10,18 @@ namespace Lern_API.Utilities
     {
         public static IConfiguration Config { get; set; } = new ConfigurationBuilder().Build();
 
+        private static string CamelToUpperSnake(string str) => string.Concat(str.Select((x, i) => i > 0 && char.IsUpper(x) ? "_" + x : x.ToString())).ToUpperInvariant();
+
         [return: AllowNull]
         public static T Get<T>(string key)
         {
             if (string.IsNullOrWhiteSpace(key))
                 throw new ArgumentException(nameof(key));
+
+            var env = Environment.GetEnvironmentVariable(CamelToUpperSnake(key));
+
+            if (!string.IsNullOrEmpty(env))
+                return (T)Convert.ChangeType(env, typeof(T));
 
             return Config.GetValue<T>(key);
         }
@@ -25,7 +32,12 @@ namespace Lern_API.Utilities
             if (string.IsNullOrWhiteSpace(key))
                 throw new ArgumentException(nameof(key));
             
-            return Config.GetSection(key).GetChildren().Select(c => c.Value).ToArray();
+            var env = Environment.GetEnvironmentVariable(CamelToUpperSnake(key));
+
+            if (!string.IsNullOrEmpty(env))
+                return env.Split(';');
+
+            return Config.GetSection(key).GetChildren().Select(c => c.Value);
         }
     }
 }
