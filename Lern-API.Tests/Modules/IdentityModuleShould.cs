@@ -20,10 +20,11 @@ namespace Lern_API.Tests.Modules
             _output = output;
         }
 
-        [Fact]
-        public async Task Return_Unauthorized_Without_Token()
+        [Theory]
+        [AutoMoqData]
+        public async Task Return_Unauthorized_Without_Token(ILogger logger)
         {
-            var browser = new Browser(new LernBootstrapper());
+            var browser = new Browser(new LernBootstrapper(logger));
 
             var result = await browser.Get("/me", with =>
             {
@@ -35,9 +36,9 @@ namespace Lern_API.Tests.Modules
 
         [Theory]
         [AutoMoqData]
-        public async Task Return_Unauthorized_With_Invalid_Token(string fakeToken)
+        public async Task Return_Unauthorized_With_Invalid_Token(ILogger logger, string fakeToken)
         {
-            var browser = new Browser(new LernBootstrapper(), d => d.Header("Authorization", $"Bearer {fakeToken}"));
+            var browser = new Browser(new LernBootstrapper(logger), d => d.Header("Authorization", $"Bearer {fakeToken}"));
 
             var result = await browser.Get("/me", with =>
             {
@@ -49,9 +50,9 @@ namespace Lern_API.Tests.Modules
 
         [Theory]
         [AutoMoqData]
-        public async Task Return_Unauthorized_With_Invalid_Header(string fakeHeader)
+        public async Task Return_Unauthorized_With_Invalid_Header(ILogger logger, string fakeHeader)
         {
-            var browser = new Browser(new LernBootstrapper(), d => d.Header("Authorization", fakeHeader));
+            var browser = new Browser(new LernBootstrapper(logger), d => d.Header("Authorization", fakeHeader));
 
             var result = await browser.Get("/me", with =>
             {
@@ -63,7 +64,7 @@ namespace Lern_API.Tests.Modules
 
         [Theory(Skip = "Ne fonctionne pas en environnement de test Windows, le code testé fonctionne dans le même environnement")]
         [AutoMoqData]
-        public async Task Return_Identity_With_Valid_Token(string name, string secret)
+        public async Task Return_Identity_With_Valid_Token(ILogger logger, string name, string secret)
         {
             Configuration.Config = new ConfigurationBuilder().AddInMemoryCollection(new[]
             {
@@ -79,7 +80,7 @@ namespace Lern_API.Tests.Modules
 
             var token = JwtHelper.Encode(user, secret);
 
-            var browser = new Browser(new LernBootstrapper(), d => d.Header("Authorization", $"Bearer {token}"));
+            var browser = new Browser(new LernBootstrapper(logger), d => d.Header("Authorization", $"Bearer {token}"));
 
             var result = await browser.Get("/me", with =>
             {

@@ -1,4 +1,6 @@
 ﻿using System.Threading.Tasks;
+using Lern_API.Tests.Attributes;
+using Lern_API.Utilities;
 using Nancy;
 using Nancy.Testing;
 using Xunit;
@@ -7,10 +9,11 @@ namespace Lern_API.Tests.Modules
 {
     public class IndexModuleShould
     {
-        [Fact]
-        public async Task Return_Status_OK()
+        [Theory]
+        [AutoMoqData]
+        public async Task Return_Status_OK(ILogger logger)
         {
-            var browser = new Browser(new LernBootstrapper());
+            var browser = new Browser(new LernBootstrapper(logger));
 
             var result = await browser.Get("/", with =>
             {
@@ -20,10 +23,11 @@ namespace Lern_API.Tests.Modules
             Assert.Equal(HttpStatusCode.OK, result.StatusCode);
         }
 
-        [Fact]
-        public async Task Return_Html_View()
+        [Theory]
+        [AutoMoqData]
+        public async Task Return_Html_View(ILogger logger)
         {
-            var browser = new Browser(new LernBootstrapper());
+            var browser = new Browser(new LernBootstrapper(logger));
 
             var result = await browser.Get("/", with =>
             {

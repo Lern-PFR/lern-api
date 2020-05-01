@@ -17,10 +17,20 @@ namespace Lern_API
 {
     public class LernBootstrapper : DefaultNancyBootstrapper
     {
-        private ILogger Log { get; } = Logger.GetLogger(typeof(LernBootstrapper));
+        private ILogger Log { get; }
 
         private int GzipMinimumBytes { get; } = Configuration.Get<int>("GzipMinimumBytes");
         private IEnumerable<string> GzipSupportedMimeTypes { get; } = Configuration.GetList("GzipSupportedMimeTypes");
+
+        public LernBootstrapper() : this(Logger.GetLogger(typeof(LernBootstrapper)))
+        {
+
+        }
+
+        public LernBootstrapper(ILogger log)
+        {
+            Log = log;
+        }
 
         // TODO: uniformiser les commentaires
         protected override void ApplicationStartup(TinyIoCContainer container, IPipelines pipelines)

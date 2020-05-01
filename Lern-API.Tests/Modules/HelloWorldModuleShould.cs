@@ -2,6 +2,7 @@
 using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
+using Lern_API.Tests.Attributes;
 using Lern_API.Utilities;
 using Microsoft.Extensions.Configuration;
 using Nancy;
@@ -12,10 +13,11 @@ namespace Lern_API.Tests.Modules
 {
     public class HelloWorldModuleShould
     {
-        [Fact]
-        public async Task Return_Status_OK()
+        [Theory]
+        [AutoMoqData]
+        public async Task Return_Status_OK(ILogger logger)
         {
-            var browser = new Browser(new LernBootstrapper());
+            var browser = new Browser(new LernBootstrapper(logger));
 
             var result = await browser.Get("/hello", with =>
             {
@@ -25,10 +27,11 @@ namespace Lern_API.Tests.Modules
             Assert.Equal(HttpStatusCode.OK, result.StatusCode);
         }
 
-        [Fact]
-        public async Task Return_Hello_World()
+        [Theory]
+        [AutoMoqData]
+        public async Task Return_Hello_World(ILogger logger)
         {
-            var browser = new Browser(new LernBootstrapper());
+            var browser = new Browser(new LernBootstrapper(logger));
 
             var result = await browser.Get("/hello", with =>
             {
@@ -38,10 +41,11 @@ namespace Lern_API.Tests.Modules
             Assert.Equal("Hello, world!", result.Body.AsString());
         }
 
-        [Fact]
-        public async Task Return_404_On_False_Route()
+        [Theory]
+        [AutoMoqData]
+        public async Task Return_404_On_False_Route(ILogger logger)
         {
-            var browser = new Browser(new LernBootstrapper());
+            var browser = new Browser(new LernBootstrapper(logger));
 
             var result = await browser.Get("/false_route", with =>
             {
@@ -51,8 +55,9 @@ namespace Lern_API.Tests.Modules
             Assert.Equal(HttpStatusCode.NotFound, result.StatusCode);
         }
 
-        [Fact]
-        public async Task Has_Gzip_Compression()
+        [Theory]
+        [AutoMoqData]
+        public async Task Has_Gzip_Compression(ILogger logger)
         {
             Configuration.Config = new ConfigurationBuilder().AddInMemoryCollection(new[]
             {
@@ -60,7 +65,7 @@ namespace Lern_API.Tests.Modules
                 new KeyValuePair<string, string>("GzipSupportedMimeTypes:0", "text/plain")
             }).Build();
 
-            var browser = new Browser(new LernBootstrapper(), d => d.Header("Accept-Encoding", "gzip"));
+            var browser = new Browser(new LernBootstrapper(logger), d => d.Header("Accept-Encoding", "gzip"));
 
             var result = await browser.Get("/hello", with =>
             {
@@ -76,8 +81,9 @@ namespace Lern_API.Tests.Modules
             Assert.Equal("Hello, world!", await reader.ReadToEndAsync());
         }
 
-        [Fact]
-        public async Task Use_Gzip_Only_When_OK()
+        [Theory]
+        [AutoMoqData]
+        public async Task Use_Gzip_Only_When_OK(ILogger logger)
         {
             Configuration.Config = new ConfigurationBuilder().AddInMemoryCollection(new[]
             {
@@ -85,7 +91,7 @@ namespace Lern_API.Tests.Modules
                 new KeyValuePair<string, string>("GzipSupportedMimeTypes:0", "text/plain")
             }).Build();
 
-            var browser = new Browser(new LernBootstrapper(), d => d.Header("Accept-Encoding", "gzip"));
+            var browser = new Browser(new LernBootstrapper(logger), d => d.Header("Accept-Encoding", "gzip"));
 
             var result = await browser.Get("/false_route", with =>
             {
@@ -103,8 +109,9 @@ namespace Lern_API.Tests.Modules
             });
         }
 
-        [Fact]
-        public async Task Use_Gzip_Only_When_Configured()
+        [Theory]
+        [AutoMoqData]
+        public async Task Use_Gzip_Only_When_Configured(ILogger logger)
         {
             Configuration.Config = new ConfigurationBuilder().AddInMemoryCollection(new[]
             {
@@ -112,7 +119,7 @@ namespace Lern_API.Tests.Modules
                 new KeyValuePair<string, string>("GzipSupportedMimeTypes:0", "")
             }).Build();
 
-            var browser = new Browser(new LernBootstrapper(), d => d.Header("Accept-Encoding", "gzip"));
+            var browser = new Browser(new LernBootstrapper(logger), d => d.Header("Accept-Encoding", "gzip"));
 
             var result = await browser.Get("/hello", with =>
             {
@@ -130,8 +137,9 @@ namespace Lern_API.Tests.Modules
             });
         }
 
-        [Fact]
-        public async Task Use_Gzip_Only_When_Client_Can()
+        [Theory]
+        [AutoMoqData]
+        public async Task Use_Gzip_Only_When_Client_Can(ILogger logger)
         {
             Configuration.Config = new ConfigurationBuilder().AddInMemoryCollection(new[]
             {
@@ -139,7 +147,7 @@ namespace Lern_API.Tests.Modules
                 new KeyValuePair<string, string>("GzipSupportedMimeTypes:0", "text/plain")
             }).Build();
 
-            var browser = new Browser(new LernBootstrapper());
+            var browser = new Browser(new LernBootstrapper(logger));
 
             var result = await browser.Get("/hello", with =>
             {

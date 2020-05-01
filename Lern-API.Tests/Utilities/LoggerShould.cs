@@ -4,6 +4,7 @@ using Lern_API.Tests.Attributes;
 using Lern_API.Utilities;
 using log4net;
 using Moq;
+using Nancy;
 using Xunit;
 
 namespace Lern_API.Tests.Utilities
@@ -49,9 +50,21 @@ namespace Lern_API.Tests.Utilities
 
         [Theory]
         [AutoMoqData]
+        public void Use_Debug_Level(Mock<ILog> logger, string message)
+        {
+            logger.Setup(l => l.DebugFormat(CultureInfo.InvariantCulture, It.IsAny<string>(), It.IsAny<object[]>()));
+
+            var log = new Logger(logger.Object);
+            log.Debug(message);
+
+            logger.VerifyAll();
+        }
+
+        [Theory]
+        [AutoMoqData]
         public void Use_Info_Level(Mock<ILog> logger, string message)
         {
-            logger.Setup(l => l.InfoFormat(CultureInfo.InvariantCulture, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), message));
+            logger.Setup(l => l.InfoFormat(CultureInfo.InvariantCulture, It.IsAny<string>(), It.IsAny<object[]>()));
 
             var log = new Logger(logger.Object);
             log.Info(message);
@@ -63,7 +76,7 @@ namespace Lern_API.Tests.Utilities
         [AutoMoqData]
         public void Use_Warn_Level(Mock<ILog> logger, string message)
         {
-            logger.Setup(l => l.WarnFormat(CultureInfo.InvariantCulture, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), message));
+            logger.Setup(l => l.WarnFormat(CultureInfo.InvariantCulture, It.IsAny<string>(), It.IsAny<object[]>()));
 
             var log = new Logger(logger.Object);
             log.Warning(message);
@@ -75,7 +88,7 @@ namespace Lern_API.Tests.Utilities
         [AutoMoqData]
         public void Use_Error_Level(Mock<ILog> logger, string message)
         {
-            logger.Setup(l => l.ErrorFormat(CultureInfo.InvariantCulture, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), message));
+            logger.Setup(l => l.ErrorFormat(CultureInfo.InvariantCulture, It.IsAny<string>(), It.IsAny<object[]>()));
 
             var log = new Logger(logger.Object);
             log.Error(message);
@@ -83,5 +96,28 @@ namespace Lern_API.Tests.Utilities
             logger.VerifyAll();
         }
 
+        [Theory]
+        [AutoMoqData]
+        public void Wire_Requests_To_Info_Level(Mock<ILog> logger, int id, string method, string route, string address, string useragent)
+        {
+            logger.Setup(l => l.InfoFormat(CultureInfo.InvariantCulture, It.IsAny<string>(), It.IsAny<object[]>()));
+
+            var log = new Logger(logger.Object);
+            log.Request(id, method, route, address, useragent);
+
+            logger.VerifyAll();
+        }
+
+        [Theory]
+        [AutoMoqData]
+        public void Wire_Responses_To_Info_Level(Mock<ILog> logger, int id, HttpStatusCode status)
+        {
+            logger.Setup(l => l.InfoFormat(CultureInfo.InvariantCulture, It.IsAny<string>(), It.IsAny<object[]>()));
+
+            var log = new Logger(logger.Object);
+            log.Response(id, status);
+
+            logger.VerifyAll();
+        }
     }
 }
