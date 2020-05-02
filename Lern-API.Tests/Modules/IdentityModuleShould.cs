@@ -5,6 +5,7 @@ using Lern_API.Tests.Attributes;
 using Lern_API.Utilities;
 using Nancy;
 using Nancy.Testing;
+using PetaPoco;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -21,9 +22,9 @@ namespace Lern_API.Tests.Modules
 
         [Theory]
         [AutoMoqData]
-        public async Task Return_Unauthorized_Without_Token(ILogger logger)
+        public async Task Return_Unauthorized_Without_Token(ILogger logger, IDatabase database)
         {
-            var browser = new Browser(new LernBootstrapper(logger));
+            var browser = new Browser(new LernBootstrapper(logger, database));
 
             var result = await browser.Get("/me", with =>
             {
@@ -35,9 +36,9 @@ namespace Lern_API.Tests.Modules
 
         [Theory]
         [AutoMoqData]
-        public async Task Return_Unauthorized_With_Invalid_Token(ILogger logger, string fakeToken)
+        public async Task Return_Unauthorized_With_Invalid_Token(ILogger logger, IDatabase database, string fakeToken)
         {
-            var browser = new Browser(new LernBootstrapper(logger), d => d.Header("Authorization", $"Bearer {fakeToken}"));
+            var browser = new Browser(new LernBootstrapper(logger, database), d => d.Header("Authorization", $"Bearer {fakeToken}"));
 
             var result = await browser.Get("/me", with =>
             {
@@ -49,9 +50,9 @@ namespace Lern_API.Tests.Modules
 
         [Theory]
         [AutoMoqData]
-        public async Task Return_Unauthorized_With_Invalid_Header(ILogger logger, string fakeHeader)
+        public async Task Return_Unauthorized_With_Invalid_Header(ILogger logger, IDatabase database, string fakeHeader)
         {
-            var browser = new Browser(new LernBootstrapper(logger), d => d.Header("Authorization", fakeHeader));
+            var browser = new Browser(new LernBootstrapper(logger, database), d => d.Header("Authorization", fakeHeader));
 
             var result = await browser.Get("/me", with =>
             {
@@ -63,7 +64,7 @@ namespace Lern_API.Tests.Modules
 
         [Theory(Skip = "Ne fonctionne pas en environnement de test Windows, le code testé fonctionne dans le même environnement")]
         [AutoMoqData]
-        public async Task Return_Identity_With_Valid_Token(ILogger logger, string name, string secret)
+        public async Task Return_Identity_With_Valid_Token(ILogger logger, IDatabase database, string name, string secret)
         {
             Environment.SetEnvironmentVariable("SECRET_KEY", secret);
 
@@ -76,7 +77,7 @@ namespace Lern_API.Tests.Modules
 
             var token = JwtHelper.Encode(user, secret);
 
-            var browser = new Browser(new LernBootstrapper(logger), d => d.Header("Authorization", $"Bearer {token}"));
+            var browser = new Browser(new LernBootstrapper(logger, database), d => d.Header("Authorization", $"Bearer {token}"));
 
             var result = await browser.Get("/me", with =>
             {

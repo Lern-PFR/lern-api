@@ -39,5 +39,16 @@ namespace Lern_API.Utilities
 
             return Config.GetSection(key).GetChildren().Select(c => c.Value);
         }
+
+        public static string GetConnectionString()
+        {
+            var host = Get<string>("DbHost");
+            var username = Get<string>("DbUsername");
+            var password = Get<string>("DbPassword");
+            var db = Get<string>("DbDatabase");
+            var port = Get<int>("DbPort");
+
+            return $"Host={host};Username={username};password={password};database={db};port={port}";
+        }
     }
 }

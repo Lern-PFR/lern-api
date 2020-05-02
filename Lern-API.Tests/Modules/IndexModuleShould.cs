@@ -3,6 +3,7 @@ using Lern_API.Tests.Attributes;
 using Lern_API.Utilities;
 using Nancy;
 using Nancy.Testing;
+using PetaPoco;
 using Xunit;
 
 namespace Lern_API.Tests.Modules
@@ -11,9 +12,9 @@ namespace Lern_API.Tests.Modules
     {
         [Theory]
         [AutoMoqData]
-        public async Task Return_Status_OK(ILogger logger)
+        public async Task Return_Status_OK(ILogger logger, IDatabase database)
         {
-            var browser = new Browser(new LernBootstrapper(logger));
+            var browser = new Browser(new LernBootstrapper(logger, database));
 
             var result = await browser.Get("/", with =>
             {
@@ -25,9 +26,9 @@ namespace Lern_API.Tests.Modules
 
         [Theory]
         [AutoMoqData]
-        public async Task Return_Html_View(ILogger logger)
+        public async Task Return_Html_View(ILogger logger, IDatabase database)
         {
-            var browser = new Browser(new LernBootstrapper(logger));
+            var browser = new Browser(new LernBootstrapper(logger, database));
 
             var result = await browser.Get("/", with =>
             {

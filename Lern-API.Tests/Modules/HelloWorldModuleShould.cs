@@ -6,6 +6,7 @@ using Lern_API.Tests.Attributes;
 using Lern_API.Utilities;
 using Nancy;
 using Nancy.Testing;
+using PetaPoco;
 using Xunit;
 
 namespace Lern_API.Tests.Modules
@@ -14,9 +15,9 @@ namespace Lern_API.Tests.Modules
     {
         [Theory]
         [AutoMoqData]
-        public async Task Return_Status_OK(ILogger logger)
+        public async Task Return_Status_OK(ILogger logger, IDatabase database)
         {
-            var browser = new Browser(new LernBootstrapper(logger));
+            var browser = new Browser(new LernBootstrapper(logger, database));
 
             var result = await browser.Get("/hello", with =>
             {
@@ -28,9 +29,9 @@ namespace Lern_API.Tests.Modules
 
         [Theory]
         [AutoMoqData]
-        public async Task Return_Hello_World(ILogger logger)
+        public async Task Return_Hello_World(ILogger logger, IDatabase database)
         {
-            var browser = new Browser(new LernBootstrapper(logger));
+            var browser = new Browser(new LernBootstrapper(logger, database));
 
             var result = await browser.Get("/hello", with =>
             {
@@ -42,9 +43,9 @@ namespace Lern_API.Tests.Modules
 
         [Theory]
         [AutoMoqData]
-        public async Task Return_404_On_False_Route(ILogger logger)
+        public async Task Return_404_On_False_Route(ILogger logger, IDatabase database)
         {
-            var browser = new Browser(new LernBootstrapper(logger));
+            var browser = new Browser(new LernBootstrapper(logger, database));
 
             var result = await browser.Get("/false_route", with =>
             {
@@ -56,12 +57,12 @@ namespace Lern_API.Tests.Modules
 
         [Theory]
         [AutoMoqData]
-        public async Task Has_Gzip_Compression(ILogger logger)
+        public async Task Has_Gzip_Compression(ILogger logger, IDatabase database)
         {
             Environment.SetEnvironmentVariable("GZIP_MINIMUM_BYTES", "0");
             Environment.SetEnvironmentVariable("GZIP_SUPPORTED_MIME_TYPES", "text/plain");
 
-            var browser = new Browser(new LernBootstrapper(logger), d => d.Header("Accept-Encoding", "gzip"));
+            var browser = new Browser(new LernBootstrapper(logger, database), d => d.Header("Accept-Encoding", "gzip"));
 
             var result = await browser.Get("/hello", with =>
             {
@@ -79,12 +80,12 @@ namespace Lern_API.Tests.Modules
 
         [Theory]
         [AutoMoqData]
-        public async Task Use_Gzip_Only_When_OK(ILogger logger)
+        public async Task Use_Gzip_Only_When_OK(ILogger logger, IDatabase database)
         {
             Environment.SetEnvironmentVariable("GZIP_MINIMUM_BYTES", "0");
             Environment.SetEnvironmentVariable("GZIP_SUPPORTED_MIME_TYPES", "text/plain");
 
-            var browser = new Browser(new LernBootstrapper(logger), d => d.Header("Accept-Encoding", "gzip"));
+            var browser = new Browser(new LernBootstrapper(logger, database), d => d.Header("Accept-Encoding", "gzip"));
 
             var result = await browser.Get("/false_route", with =>
             {
@@ -104,12 +105,12 @@ namespace Lern_API.Tests.Modules
 
         [Theory]
         [AutoMoqData]
-        public async Task Use_Gzip_Only_When_Configured(ILogger logger)
+        public async Task Use_Gzip_Only_When_Configured(ILogger logger, IDatabase database)
         {
             Environment.SetEnvironmentVariable("GZIP_MINIMUM_BYTES", "0");
             Environment.SetEnvironmentVariable("GZIP_SUPPORTED_MIME_TYPES", "");
 
-            var browser = new Browser(new LernBootstrapper(logger), d => d.Header("Accept-Encoding", "gzip"));
+            var browser = new Browser(new LernBootstrapper(logger, database), d => d.Header("Accept-Encoding", "gzip"));
 
             var result = await browser.Get("/hello", with =>
             {
@@ -129,12 +130,12 @@ namespace Lern_API.Tests.Modules
 
         [Theory]
         [AutoMoqData]
-        public async Task Use_Gzip_Only_When_Client_Can(ILogger logger)
+        public async Task Use_Gzip_Only_When_Client_Can(ILogger logger, IDatabase database)
         {
             Environment.SetEnvironmentVariable("GZIP_MINIMUM_BYTES", "0");
             Environment.SetEnvironmentVariable("GZIP_SUPPORTED_MIME_TYPES", "text/plain");
 
-            var browser = new Browser(new LernBootstrapper(logger));
+            var browser = new Browser(new LernBootstrapper(logger, database));
 
             var result = await browser.Get("/hello", with =>
             {

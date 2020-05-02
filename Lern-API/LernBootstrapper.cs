@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO.Compression;
 using System.Linq;
 using System.Security.Claims;
+using FluentMigrator.Runner;
 using JWT;
 using Lern_API.Models;
 using Lern_API.Utilities;
@@ -18,25 +19,34 @@ namespace Lern_API
     public class LernBootstrapper : DefaultNancyBootstrapper
     {
         private ILogger Log { get; }
+        private IDatabase Database { get; }
+        private IMigrationRunner MigrationRunner { get; }
+        private bool IsProduction { get; }
 
         private int GzipMinimumBytes { get; } = Configuration.Get<int>("GzipMinimumBytes");
         private IEnumerable<string> GzipSupportedMimeTypes { get; } = Configuration.GetList("GzipSupportedMimeTypes");
 
-        public LernBootstrapper() : this(Logger.GetLogger(typeof(LernBootstrapper)))
+        public LernBootstrapper(IMigrationRunner migrationRunner, bool isProduction = false) :
+            this(Logger.GetLogger(typeof(LernBootstrapper)),
+                DatabaseConfiguration.Build()
+                    .UsingConnectionString(Configuration.GetConnectionString())
+                    .UsingProvider<PostgreSQLDatabaseProvider>()
+                    .UsingDefaultMapper<ConventionMapper>(m => m.InflectTableName = (inflector, s) => inflector.Pluralise(inflector.Underscore(s)))
+                    .Create())
         {
-
+            MigrationRunner = migrationRunner;
+            IsProduction = isProduction;
         }
 
-        public LernBootstrapper(ILogger log)
+        public LernBootstrapper(ILogger log, IDatabase database)
         {
             Log = log;
+            Database = database;
         }
 
         // TODO: uniformiser les commentaires
         protected override void ApplicationStartup(TinyIoCContainer container, IPipelines pipelines)
         {
-            Log.Info("Initialisation en cours");
-
             base.ApplicationStartup(container, pipelines);
 
             pipelines.BeforeRequest.AddItemToStartOfPipeline(ctx =>
@@ -148,34 +158,47 @@ namespace Lern_API
 
             container.Register(Log);
 
-            Log.Info("Connexion à la base de données");
-
-            var host = Configuration.Get<string>("DbHost");
-            var username = Configuration.Get<string>("DbUsername");
-            var password = Configuration.Get<string>("DbPassword");
-            var db = Configuration.Get<string>("DbDatabase");
-            var port = Configuration.Get<int>("DbPort");
-
-            var database = DatabaseConfiguration.Build()
-                .UsingConnectionString($"Host={host};Username={username};password={password};database={db};port={port}")
-                .UsingProvider<PostgreSQLDatabaseProvider>()
-                .UsingDefaultMapper<ConventionMapper>(m =>
-                {
-                    m.InflectTableName = (inflector, s) => inflector.Pluralise(inflector.Underscore(s));
-                })
-                .Create();
+            var connected = false;
 
             try
             {
-                database.Execute("SELECT 1");
-                Log.Info("Connexion à la base de données réussie");
+                Retry.Do(() =>
+                {
+                    Log.Info("Tentative de connexion à la base de données...");
+
+                    Database.Execute("SELECT 1");
+                    connected = true;
+
+                    Log.Info("Connexion à la base de données réussie");
+                }, TimeSpan.FromSeconds(5));
             }
-            catch (Exception e)
+            catch (AggregateException e)
             {
-                Log.Error($"Impossible de se connecter à la base de données : {e.Message}");
+                Log.Error($"Les tentatives de connexion à la base de données ont échoué : {e.InnerExceptions.Last().Message}");
+
+                if (IsProduction)
+                {
+                    Environment.Exit(1);
+                }
             }
 
-            container.Register(database);
+            if (MigrationRunner != null && connected)
+            {
+                if (!MigrationRunner.HasMigrationsToApplyUp())
+                {
+                    Log.Info("La base de données est à jour");
+                }
+                else
+                {
+                    Log.Info("Migration de la base de données vers une nouvelle version...");
+
+                    MigrationRunner.MigrateUp();
+
+                    Log.Info("Migration terminée");
+                }
+            }
+
+            container.Register(Database);
         }
     }
 }

@@ -90,5 +90,24 @@ namespace Lern_API.Tests.Utilities
             Assert.Collection(list, e => Assert.Equal(list1, e),
                 e => Assert.Equal(list2, e));
         }
+
+        [Theory]
+        [AutoMoqData]
+        public void Build_Valid_Connection_String(string host, string username, string password, string database, int port)
+        {
+            Environment.SetEnvironmentVariable("DB_HOST", host);
+            Environment.SetEnvironmentVariable("DB_USERNAME", username);
+            Environment.SetEnvironmentVariable("DB_PASSWORD", password);
+            Environment.SetEnvironmentVariable("DB_DATABASE", database);
+            Environment.SetEnvironmentVariable("DB_PORT", port.ToString());
+
+            var result = Configuration.GetConnectionString().Split(';');
+
+            Assert.Contains(result, e => e.ToLower().Equals($"host={host}"));
+            Assert.Contains(result, e => e.ToLower().Equals($"username={username}"));
+            Assert.Contains(result, e => e.ToLower().Equals($"password={password}"));
+            Assert.Contains(result, e => e.ToLower().Equals($"database={database}"));
+            Assert.Contains(result, e => e.ToLower().Equals($"port={port}"));
+        }
     }
 }
