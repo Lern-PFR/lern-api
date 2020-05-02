@@ -23,7 +23,7 @@ namespace Lern_API.Utilities
 
     public class Logger : ILogger
     {
-        public static string DefaultFormat { get; } = "{0}|{1}:{2} : {3}";
+        public static string DefaultFormat { get; } = "{0}.{1}:{2} : {3}";
         public static string Format { get; set; } = DefaultFormat;
 
         private static string GetFileName(string path) => Path.GetFileNameWithoutExtension(path.Substring(path.LastIndexOfAny(new []{'/', '\\'}) + 1));
