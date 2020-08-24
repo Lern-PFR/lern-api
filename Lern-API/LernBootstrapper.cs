@@ -4,8 +4,9 @@ using System.IO.Compression;
 using System.Linq;
 using System.Security.Claims;
 using FluentMigrator.Runner;
-using JWT;
+using JWT.Exceptions;
 using Lern_API.Models;
+using Lern_API.Repositories;
 using Lern_API.Utilities;
 using Nancy;
 using Nancy.Authentication.Stateless;
@@ -59,7 +60,7 @@ namespace Lern_API
                 return null;
             });
 
-            pipelines.AfterRequest.AddItemToStartOfPipeline(ctx =>
+            pipelines.AfterRequest.AddItemToEndOfPipeline(ctx =>
             {
                 if (ctx != null)
                 {
@@ -199,6 +200,9 @@ namespace Lern_API
             }
 
             container.Register(Database);
+
+            // Ajout des Repository
+            container.Register<UserRepository>();
         }
     }
 }

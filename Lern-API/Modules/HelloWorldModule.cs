@@ -4,7 +4,7 @@ namespace Lern_API.Modules
 {
     public sealed class HelloWorldModule : NancyModule
     {
-        public HelloWorldModule() : base("/hello")
+        public HelloWorldModule() : base("/api/hello")
         {
             Get("", _ => "Hello, world!");
         }

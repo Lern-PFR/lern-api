@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using Lern_API.Tests.Attributes;
 using Lern_API.Utilities;
@@ -9,6 +10,7 @@ using Xunit;
 
 namespace Lern_API.Tests.Utilities
 {
+    [ExcludeFromCodeCoverage]
     public class LoggerShould
     {
         [Fact]

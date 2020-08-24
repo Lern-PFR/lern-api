@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ using Xunit;
 
 namespace Lern_API.Tests.Modules
 {
+    [ExcludeFromCodeCoverage]
     public class HelloWorldModuleShould
     {
         [Theory]
@@ -19,7 +21,7 @@ namespace Lern_API.Tests.Modules
         {
             var browser = new Browser(new LernBootstrapper(logger, database));
 
-            var result = await browser.Get("/hello", with =>
+            var result = await browser.Get("/api/hello", with =>
             {
                 with.HttpRequest();
             });
@@ -33,7 +35,7 @@ namespace Lern_API.Tests.Modules
         {
             var browser = new Browser(new LernBootstrapper(logger, database));
 
-            var result = await browser.Get("/hello", with =>
+            var result = await browser.Get("/api/hello", with =>
             {
                 with.HttpRequest();
             });
@@ -43,16 +45,17 @@ namespace Lern_API.Tests.Modules
 
         [Theory]
         [AutoMoqData]
-        public async Task Return_404_On_False_Route(ILogger logger, IDatabase database)
+        public async Task Return_Html_On_False_Route(ILogger logger, IDatabase database)
         {
             var browser = new Browser(new LernBootstrapper(logger, database));
 
-            var result = await browser.Get("/false_route", with =>
+            var result = await browser.Get("/api/false_route", with =>
             {
                 with.HttpRequest();
             });
 
-            Assert.Equal(HttpStatusCode.NotFound, result.StatusCode);
+            Assert.Equal(HttpStatusCode.OK, result.StatusCode);
+            Assert.Equal("text/html", result.ContentType);
         }
 
         [Theory]
@@ -64,7 +67,7 @@ namespace Lern_API.Tests.Modules
 
             var browser = new Browser(new LernBootstrapper(logger, database), d => d.Header("Accept-Encoding", "gzip"));
 
-            var result = await browser.Get("/hello", with =>
+            var result = await browser.Get("/api/hello", with =>
             {
                 with.HttpRequest();
             });
@@ -87,7 +90,7 @@ namespace Lern_API.Tests.Modules
 
             var browser = new Browser(new LernBootstrapper(logger, database), d => d.Header("Accept-Encoding", "gzip"));
 
-            var result = await browser.Get("/false_route", with =>
+            var result = await browser.Get("/api/false_route", with =>
             {
                 with.HttpRequest();
             });
@@ -112,7 +115,7 @@ namespace Lern_API.Tests.Modules
 
             var browser = new Browser(new LernBootstrapper(logger, database), d => d.Header("Accept-Encoding", "gzip"));
 
-            var result = await browser.Get("/hello", with =>
+            var result = await browser.Get("/api/hello", with =>
             {
                 with.HttpRequest();
             });
@@ -137,7 +140,7 @@ namespace Lern_API.Tests.Modules
 
             var browser = new Browser(new LernBootstrapper(logger, database));
 
-            var result = await browser.Get("/hello", with =>
+            var result = await browser.Get("/api/hello", with =>
             {
                 with.HttpRequest();
             });

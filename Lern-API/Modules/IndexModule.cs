@@ -1,4 +1,6 @@
-﻿using Nancy;
+﻿using Lern_API.DataTransferObjects;
+using Nancy;
+using Nancy.ModelBinding;
 
 namespace Lern_API.Modules
 {
@@ -6,7 +8,18 @@ namespace Lern_API.Modules
     {
         public IndexModule()
         {
-            Get("/", _ => Response.AsFile("Content/index.html", "text/html"));
+            Get("", _ => GetIndex());
+            Get("/{path*}", _ =>
+            {
+                this.BindAndValidate<IndexRequest>();
+
+                return !ModelValidationResult.IsValid ? HttpStatusCode.NotAcceptable : GetIndex();
+            });
+        }
+
+        public object GetIndex()
+        {
+            return Negotiate.WithView("Content/index.html");
         }
     }
 }

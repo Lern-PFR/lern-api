@@ -1,11 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using Lern_API.Tests.Attributes;
 using Lern_API.Utilities;
 using Xunit;
 
 namespace Lern_API.Tests.Utilities
 {
+    [ExcludeFromCodeCoverage]
     public class ObjectToDictionaryHelperShould
     {
         [Fact]

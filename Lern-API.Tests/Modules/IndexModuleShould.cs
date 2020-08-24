@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 using Lern_API.Tests.Attributes;
 using Lern_API.Utilities;
 using Nancy;
@@ -8,6 +9,7 @@ using Xunit;
 
 namespace Lern_API.Tests.Modules
 {
+    [ExcludeFromCodeCoverage]
     public class IndexModuleShould
     {
         [Theory]

@@ -1,12 +1,14 @@
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using FluentMigrator.Runner;
 using Lern_API.Migrations;
 using Lern_API.Utilities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.StaticFiles.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Nancy.Owin;
@@ -25,12 +27,6 @@ namespace Lern_API
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            // Allow synchronous writes for HTTP reponses
-            services.Configure<KestrelServerOptions>(options =>
-            {
-                options.AllowSynchronousIO = true;
-            });
-
             // Ajout du système de migration de bases de données
             services.AddFluentMigratorCore()
                 .ConfigureRunner(rb => rb
@@ -49,6 +45,11 @@ namespace Lern_API
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseStaticFiles(new StaticFileOptions(new SharedOptions
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Content"))
+            }));
 
             app.UseOwin(x => x.UseNancy(new NancyOptions
             {

@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Lern_API.Tests.Attributes;
 using Lern_API.Utilities;
 using Xunit;
 
 namespace Lern_API.Tests.Utilities
 {
+    [ExcludeFromCodeCoverage]
     public class RetryShould
     {
         [Fact]
@@ -19,7 +21,7 @@ namespace Lern_API.Tests.Utilities
 
         [Theory]
         [AutoMoqData]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S108:Nested blocks of code should not be left empty")]
+        [SuppressMessage("Major Code Smell", "S108:Nested blocks of code should not be left empty")]
         public void Retry_Given_Times(int maxRetry)
         {
             var retried = 0;
@@ -46,7 +48,7 @@ namespace Lern_API.Tests.Utilities
 
         [Theory]
         [AutoMoqData]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S108:Nested blocks of code should not be left empty")]
+        [SuppressMessage("Major Code Smell", "S108:Nested blocks of code should not be left empty")]
         public void Retry_Given_Times_With_Return_Value(int maxRetry)
         {
             var retried = 0;

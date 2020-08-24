@@ -27,6 +27,5 @@ namespace Lern_API.Utilities
 
             return dictionary;
         }
-
     }
 }
