@@ -1,18 +1,18 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using FluentMigrator;
+﻿using FluentMigrator;
 
 namespace Lern_API.Migrations
 {
-    [ExcludeFromCodeCoverage]
-    [Migration(2020_05_02)]
+    [Migration(2020_10_09)]
     public class AddUserTable : Migration
     {
         public override void Up()
         {
             Create.Table("users")
-                .WithColumn("Id").AsInt32().NotNullable().PrimaryKey().Identity()
+                .WithColumn("Id").AsGuid().PrimaryKey().WithDefault(SystemMethods.NewGuid)
                 .WithColumn("CreatedOn").AsDateTime().NotNullable().WithDefault(SystemMethods.CurrentUTCDateTime)
-                .WithColumn("Name").AsString().NotNullable().Unique();
+                .WithColumn("Name").AsString(50).NotNullable().Unique()
+                .WithColumn("Email").AsString().NotNullable().Unique()
+                .WithColumn("Password").AsString().NotNullable();
         }
 
         public override void Down()

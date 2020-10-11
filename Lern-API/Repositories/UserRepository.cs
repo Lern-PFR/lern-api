@@ -1,73 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Lern_API.Models;
-using Lern_API.Utilities;
-using NullGuard;
+using Microsoft.Extensions.Logging;
 using PetaPoco;
 
 namespace Lern_API.Repositories
 {
     public interface IUserRepository : IRepository<User>
     {
+        public Task<User> GetByLogin(string login);
     }
 
-    public class UserRepository : Repository, IUserRepository
+    public class UserRepository : Repository<User>, IUserRepository
     {
-        public UserRepository(ILogger logger, IDatabase database) : base(logger, database)
+        public UserRepository(ILogger<UserRepository> logger, IDatabase database) : base(logger, database)
         {
         }
 
-        public IEnumerable<User> All()
+        public async Task<User> GetByLogin(string login)
         {
-            return RunOrDefault(() => Database.Fetch<User>());
-        }
-
-        public async Task<IEnumerable<User>> AllAsync()
-        {
-            return await RunOrDefault(async () => await Database.FetchAsync<User>());
-        }
-
-        [return: AllowNull]
-        public User Get(int id)
-        {
-            return RunOrDefault(() => Database.SingleOrDefault<User>(id));
-        }
-
-        [return: AllowNull]
-        public async Task<User> GetAsync(int id)
-        {
-            return await RunOrDefault(async () => await Database.SingleOrDefaultAsync<User>(id));
-        }
-
-        public int Create(User user)
-        {
-            return Convert.ToInt32(RunOrDefault(() => Database.Insert(user)));
-        }
-
-        public async Task<int> CreateAsync(User user)
-        {
-            return Convert.ToInt32(await RunOrDefault(async () => await Database.InsertAsync(user)));
-        }
-
-        public bool Update(User user)
-        {
-            return RunOrDefault(() => Database.Update(user)) == user.Id;
-        }
-
-        public async Task<bool> UpdateAsync(User user)
-        {
-            return await RunOrDefault(async () => await Database.UpdateAsync(user)) == user.Id;
-        }
-
-        public bool Delete(User user)
-        {
-            return RunOrDefault(() => Database.Delete<User>(user)) == user.Id;
-        }
-
-        public async Task<bool> DeleteAsync(User user)
-        {
-            return await RunOrDefault(() => Database.DeleteAsync<User>(user)) == user.Id;
+            return await RunOrDefault(async () => await Database.FirstOrDefaultAsync<User>(x => x.Name == login || x.Email == login));
         }
     }
 }

@@ -2,53 +2,32 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Lern_API.Models;
-using Lern_API.Utilities;
+using Microsoft.Extensions.Logging;
 using Npgsql;
-using NullGuard;
 using PetaPoco;
 
 namespace Lern_API.Repositories
 {
-    public interface IRepository<T>
+    public interface IRepository<TEntity> where TEntity : AbstractModel
     {
-        IEnumerable<T> All();
-        Task<IEnumerable<T>> AllAsync();
-        User Get(int id);
-        Task<T> GetAsync(int id);
-        int Create(T user);
-        Task<int> CreateAsync(T user);
-        bool Update(T user);
-        Task<bool> UpdateAsync(T user);
-        bool Delete(T user);
-        Task<bool> DeleteAsync(T user);
+        Task<IEnumerable<TEntity>> All();
+        Task<TEntity> Get(Guid id);
+        Task<Guid> Create(TEntity entity);
+        Task<bool> Update(TEntity entity);
+        Task<bool> Delete(TEntity entity);
     }
 
-    public abstract class Repository
+    public class Repository<TEntity> : IRepository<TEntity> where TEntity : AbstractModel
     {
         private ILogger Log { get; }
         protected IDatabase Database { get; }
 
-        protected Repository(ILogger logger, IDatabase database)
+        public Repository(ILogger<Repository<TEntity>> logger, IDatabase database)
         {
             Log = logger;
             Database = database;
         }
 
-        [return: AllowNull]
-        public T RunOrDefault<T>(Func<T> func)
-        {
-            try
-            {
-                return func();
-            }
-            catch (Exception e) when (e is AggregateException || e is PostgresException)
-            {
-                Log.Warning($"Erreur de base de données : {e.Message}");
-                return default;
-            }
-        }
-
-        [return: AllowNull]
         public async Task<T> RunOrDefault<T>(Func<Task<T>> func)
         {
             try
@@ -57,9 +36,44 @@ namespace Lern_API.Repositories
             }
             catch (Exception e) when (e is AggregateException || e is PostgresException)
             {
-                Log.Warning($"Erreur de base de données : {e.Message}");
+                Log.LogError($"Erreur de base de données : {e.Message}");
                 return default;
             }
+        }
+
+        public async Task<IEnumerable<TEntity>> All()
+        {
+            return await RunOrDefault(async () => await Database.FetchAsync<TEntity>());
+        }
+
+        public async Task<TEntity> Get(Guid id)
+        {
+            return await RunOrDefault(async () => await Database.SingleOrDefaultAsync<TEntity>(id));
+        }
+
+        public async Task<Guid> Create(TEntity entity)
+        {
+            if (entity.Id == Guid.Empty)
+                entity.Id = Guid.NewGuid();
+
+            var result = await RunOrDefault(async () => await Database.InsertAsync(entity));
+
+            return result switch
+            {
+                null => Guid.Empty,
+                Guid id => id,
+                _ => Guid.TryParse(result.ToString(), out var guid) ? guid : Guid.Empty
+            };
+        }
+
+        public async Task<bool> Update(TEntity entity)
+        {
+            return await RunOrDefault(async () => await Database.UpdateAsync(entity)) == 1;
+        }
+
+        public async Task<bool> Delete(TEntity entity)
+        {
+            return await RunOrDefault(async () => await Database.DeleteAsync<TEntity>(entity)) == 1;
         }
     }
 }

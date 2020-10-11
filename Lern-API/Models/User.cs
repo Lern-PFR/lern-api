@@ -1,15 +1,26 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using PetaPoco;
+﻿using System.ComponentModel.DataAnnotations;
+using FluentValidation;
 
 namespace Lern_API.Models
 {
-    [ExcludeFromCodeCoverage]
-    public class User
+    public class User : AbstractModel
     {
-        public int Id { get; set; }
-        [ResultColumn(IncludeInAutoSelect.Yes)]
-        public DateTime CreatedOn { get; set; }
+        [Required]
         public string Name { get; set; }
+        [Required]
+        public string Email { get; set; }
+        [Required]
+        public string Password { internal get; set; }
+    }
+
+    public class UserValidator : AbstractValidator<User>
+    {
+        public UserValidator()
+        {
+            RuleFor(x => x.Id).Empty();
+            RuleFor(x => x.Name).NotNull().Length(3, 50);
+            RuleFor(x => x.Email).NotNull().EmailAddress();
+            RuleFor(x => x.Password).NotNull().MinimumLength(8);
+        }
     }
 }
