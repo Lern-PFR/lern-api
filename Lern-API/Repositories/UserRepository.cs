@@ -18,7 +18,7 @@ namespace Lern_API.Repositories
 
         public async Task<User> GetByLogin(string login)
         {
-            return await RunOrDefault(async () => await Database.FirstOrDefaultAsync<User>(x => x.Name == login || x.Email == login));
+            return await RunOrDefault(async () => await Database.SingleOrDefaultAsync<User>("WHERE name = @0 OR email = @0", login));
         }
     }
 }

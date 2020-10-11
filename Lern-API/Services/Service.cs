@@ -12,7 +12,7 @@ namespace Lern_API.Services
         Task<IEnumerable<TEntity>> GetAll();
         Task<TEntity> Get(Guid id);
         Task<Guid> Create(TEntity entity);
-        Task<bool> Update(TEntity entity);
+        Task<TEntity> Update(TEntity entity, IEnumerable<string> columns);
         Task<bool> Delete(TEntity entity);
     }
 
@@ -27,27 +27,27 @@ namespace Lern_API.Services
             Repository = repository;
         }
 
-        public async Task<IEnumerable<TEntity>> GetAll()
+        public virtual async Task<IEnumerable<TEntity>> GetAll()
         {
             return await Repository.All();
         }
 
-        public async Task<TEntity> Get(Guid id)
+        public virtual async Task<TEntity> Get(Guid id)
         {
             return await Repository.Get(id);
         }
 
-        public async Task<Guid> Create(TEntity entity)
+        public virtual async Task<Guid> Create(TEntity entity)
         {
             return await Repository.Create(entity);
         }
 
-        public async Task<bool> Update(TEntity entity)
+        public virtual async Task<TEntity> Update(TEntity entity, IEnumerable<string> columns)
         {
-            return await Repository.Update(entity);
+            return await Repository.Update(entity, columns);
         }
 
-        public async Task<bool> Delete(TEntity entity)
+        public virtual async Task<bool> Delete(TEntity entity)
         {
             return await Repository.Delete(entity);
         }

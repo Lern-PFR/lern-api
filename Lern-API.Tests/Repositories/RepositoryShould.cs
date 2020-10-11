@@ -105,11 +105,11 @@ namespace Lern_API.Tests.Repositories
         public async Task Update_Entity(ILogger<Repository<Entity>> logger, Entity entity)
         {
             var database = new Mock<IDatabase>();
-            database.Setup(x => x.UpdateAsync(entity));
+            database.Setup(x => x.UpdateAsync(entity, null));
 
             var repository = new Repository<Entity>(logger, database.Object);
 
-            await repository.Update(entity);
+            await repository.Update(entity, null);
 
             database.VerifyAll();
         }

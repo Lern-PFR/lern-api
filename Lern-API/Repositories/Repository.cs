@@ -13,7 +13,7 @@ namespace Lern_API.Repositories
         Task<IEnumerable<TEntity>> All();
         Task<TEntity> Get(Guid id);
         Task<Guid> Create(TEntity entity);
-        Task<bool> Update(TEntity entity);
+        Task<TEntity> Update(TEntity entity, IEnumerable<string> columns);
         Task<bool> Delete(TEntity entity);
     }
 
@@ -66,9 +66,14 @@ namespace Lern_API.Repositories
             };
         }
 
-        public async Task<bool> Update(TEntity entity)
+        public async Task<TEntity> Update(TEntity entity, IEnumerable<string> columns)
         {
-            return await RunOrDefault(async () => await Database.UpdateAsync(entity)) == 1;
+            var done = await RunOrDefault(async () => await Database.UpdateAsync(entity, columns)) == 1;
+
+            if (done)
+                return await RunOrDefault(async () => await Database.SingleOrDefaultAsync<TEntity>(entity.Id));
+            
+            return default;
         }
 
         public async Task<bool> Delete(TEntity entity)

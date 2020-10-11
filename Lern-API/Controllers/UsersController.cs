@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using FluentValidation.AspNetCore;
 using Lern_API.DataTransferObjects.Requests;
 using Lern_API.DataTransferObjects.Responses;
+using Lern_API.Helpers.AspNetCore;
 using Lern_API.Helpers.JWT;
 using Lern_API.Models;
 using Lern_API.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace Lern_API.Controllers
 {
@@ -14,10 +17,12 @@ namespace Lern_API.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
+        private readonly ILogger _log;
         private readonly IUserService _users;
 
-        public UsersController(IUserService users)
+        public UsersController(ILogger<UsersController> logger, IUserService users)
         {
+            _log = logger;
             _users = users;
         }
 
@@ -35,7 +40,7 @@ namespace Lern_API.Controllers
         /// <param name="id">User Id</param>
         /// <returns>User associated to given Id</returns>
         /// <response code="200">User associated to given Id</response>
-        /// <response code="404">If no user exists with given Id</response>
+        /// <response code="404">If given user could not be found</response>
         [RequireAuthentication]
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(Guid id)
@@ -54,7 +59,7 @@ namespace Lern_API.Controllers
         /// <param name="user"></param>
         /// <returns>User Id associated to the new user</returns>
         /// <response code="200">Id associated to the new user</response>
-        /// <response code="409">If given name or email already exists in our database</response>
+        /// <response code="409">If given name or email already exists</response>
         [HttpPost]
         public async Task<ActionResult<Guid>> CreateUser(User user)
         {
@@ -67,13 +72,35 @@ namespace Lern_API.Controllers
         }
 
         /// <summary>
+        /// Update an existing user
+        /// </summary>
+        /// <param name="id">Id associated with the user to update</param>
+        /// <param name="user"></param>
+        /// <returns>Updated user</returns>
+        /// <response code="200">Updated user with the new values</response>
+        /// <response code="404">If given user could not be found</response>
+        [HttpPut("{id}")]
+        [EnableBodyRewind]
+        public async Task<ActionResult<User>> UpdateUser(Guid id, [CustomizeValidator(RuleSet = "Update")] User user)
+        {
+            user.Id = id;
+
+            var newUser = await _users.Update(user, await HttpContext.GetColumns());
+
+            if (newUser == null)
+                return NotFound();
+
+            return newUser;
+        }
+
+        /// <summary>
         /// Log in to get an access token
         /// </summary>
         /// <param name="request">User credentials</param>
         /// <returns>User information and an access token</returns>
         /// <response code="200">User information and an access token</response>
         /// <response code="400">If given name or email already exists in our database</response>
-        [HttpPost("/login")]
+        [HttpPost("/api/Login")]
         public async Task<ActionResult<LoginResponse>> Login(LoginRequest request)
         {
             var response = await _users.Login(request);

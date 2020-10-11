@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Lern_API.DataTransferObjects.Requests;
 using Lern_API.DataTransferObjects.Responses;
 using Lern_API.Helpers.JWT;
@@ -17,6 +19,23 @@ namespace Lern_API.Services
     {
         public UserService(ILogger<UserService> logger, IUserRepository repository) : base(logger, repository)
         {
+        }
+
+        public override async Task<Guid> Create(User entity)
+        {
+            entity.Password = BCrypt.Net.BCrypt.EnhancedHashPassword(entity.Password);
+
+            return await base.Create(entity);
+        }
+
+        public override async Task<User> Update(User entity, IEnumerable<string> columns)
+        {
+            if (entity.Password != null)
+            {
+                entity.Password = BCrypt.Net.BCrypt.EnhancedHashPassword(entity.Password);
+            }
+
+            return await base.Update(entity, columns);
         }
 
         public async Task<LoginResponse> Login(LoginRequest request)

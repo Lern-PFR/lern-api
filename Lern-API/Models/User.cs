@@ -1,15 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace Lern_API.Models
 {
     public class User : AbstractModel
     {
-        [Required]
         public string Name { get; set; }
-        [Required]
         public string Email { get; set; }
-        [Required]
         public string Password { internal get; set; }
     }
 
@@ -21,6 +17,14 @@ namespace Lern_API.Models
             RuleFor(x => x.Name).NotNull().Length(3, 50);
             RuleFor(x => x.Email).NotNull().EmailAddress();
             RuleFor(x => x.Password).NotNull().MinimumLength(8);
+
+            RuleSet("Update", () =>
+            {
+                RuleFor(x => x.Id).Empty();
+                RuleFor(x => x.Name).Length(3, 50);
+                RuleFor(x => x.Email).EmailAddress();
+                RuleFor(x => x.Password).MinimumLength(8);
+            });
         }
     }
 }

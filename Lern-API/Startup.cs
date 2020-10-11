@@ -45,7 +45,8 @@ namespace Lern_API
                 new PostgreSQLDatabaseProvider(),
                 new ConventionMapper
                 {
-                    InflectTableName = (inflector, s) => inflector.Pluralise(inflector.Underscore(s))
+                    InflectTableName = (inflector, s) => inflector.Pluralise(inflector.Underscore(s)),
+                    InflectColumnName = (inflector, s) => inflector.Camelise(s)
                 }
             ));
 
@@ -54,7 +55,7 @@ namespace Lern_API
                 .ConfigureRunner(rb => rb
                     .AddPostgres()
                     .WithGlobalConnectionString(Configuration.GetConnectionString())
-                    .ScanIn(typeof(AddUserTable).Assembly).For.Migrations());
+                    .ScanIn(typeof(InitializeDatabase).Assembly).For.Migrations());
 
             // Ajout des contrôleurs applicatifs
             services.AddControllers()

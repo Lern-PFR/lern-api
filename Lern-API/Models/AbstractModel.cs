@@ -7,6 +7,6 @@ namespace Lern_API.Models
     {
         public Guid Id { get; set; }
         [ResultColumn(IncludeInAutoSelect.Yes)]
-        public DateTime CreatedOn { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }
