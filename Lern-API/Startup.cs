@@ -105,10 +105,11 @@ namespace Lern_API
                     BearerFormat = "JWT"
                 });
 
-                options.OperationFilter<AddAuthHeaderOperationFilter>();
-
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml");
                 options.IncludeXmlComments(xmlPath);
+
+                options.OperationFilter<AddAuthHeaderOperationFilter>();
+                options.SchemaFilter<ReadOnlyPropertiesFilter>();
             });
 
             // Ajout des en-têtes CORS

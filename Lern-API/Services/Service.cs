@@ -39,11 +39,15 @@ namespace Lern_API.Services
 
         public virtual async Task<Guid> Create(TEntity entity)
         {
+            // TODO: filter columns by read-only attribute
+
             return await Repository.Create(entity);
         }
 
         public virtual async Task<TEntity> Update(TEntity entity, IEnumerable<string> columns)
         {
+            // TODO: filter columns by read-only attribute
+
             return await Repository.Update(entity, columns);
         }
 

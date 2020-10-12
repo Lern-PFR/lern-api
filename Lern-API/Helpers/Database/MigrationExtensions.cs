@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using FluentMigrator;
+using FluentMigrator.Builders.Create.Table;
 using FluentMigrator.Runner;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace Lern_API.Helpers.Database
 {
     [ExcludeFromCodeCoverage]
-    public static class MigrationExtension
+    public static class MigrationExtensions
     {
         private static ILogger _logger;
 
@@ -32,6 +34,24 @@ namespace Lern_API.Helpers.Database
             }
 
             return app;
+        }
+
+        public static ICreateTableColumnOptionOrWithColumnSyntax InheritAbstractModel(this ICreateTableWithColumnSyntax table)
+        {
+            return table
+                .WithId()
+                .WithCreatedAt();
+        }
+
+        public static ICreateTableColumnOptionOrWithColumnSyntax WithId(this ICreateTableWithColumnSyntax table)
+        {
+            return table.WithColumn("id").AsGuid().NotNullable().PrimaryKey();
+        }
+
+        public static ICreateTableColumnOptionOrWithColumnSyntax WithCreatedAt(this ICreateTableWithColumnSyntax table)
+        {
+            return table
+                .WithColumn("createdAt").AsDateTime().NotNullable().WithDefault(SystemMethods.CurrentUTCDateTime);
         }
     }
 }

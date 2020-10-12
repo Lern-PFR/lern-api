@@ -9,7 +9,6 @@ using Lern_API.Helpers.JWT;
 using Lern_API.Models;
 using Lern_API.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace Lern_API.Controllers
 {

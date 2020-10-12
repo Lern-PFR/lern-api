@@ -1,13 +1,29 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using FluentValidation;
+using Lern_API.Helpers.Swagger;
 
 namespace Lern_API.Models
 {
     public class User : AbstractModel
     {
-        public string Name { get; set; }
+        [ReadOnly]
+        public Guid? Manager { get; set; }
+        public string Firstname { get; set; }
+        public string Lastname { get; set; }
+        public string Nickname { get; set; }
         public string Email { get; set; }
         public string Password { internal get; set; }
+        [ReadOnly]
+        public int? Tokens { get; set; }
+        [ReadOnly]
+        public int? MaxTopics { get; set; }
+        [ReadOnly]
+        public bool? Active { get; set; }
+        [ReadOnly]
+        public bool? Admin { get; set; }
+        [ReadOnly]
+        public bool? VerifiedCreator { get; set; }
     }
 
     [ExcludeFromCodeCoverage]
@@ -15,17 +31,31 @@ namespace Lern_API.Models
     {
         public UserValidator()
         {
-            RuleFor(x => x.Id).Empty();
-            RuleFor(x => x.Name).NotNull().Length(3, 50);
-            RuleFor(x => x.Email).NotNull().EmailAddress();
-            RuleFor(x => x.Password).NotNull().MinimumLength(8);
+            RuleFor(x => x.Manager).Empty();
+            RuleFor(x => x.Firstname).NotNull().Length(3, 50);
+            RuleFor(x => x.Lastname).NotNull().Length(3, 100);
+            RuleFor(x => x.Nickname).NotNull().Length(3, 50);
+            RuleFor(x => x.Email).NotNull().EmailAddress().MaximumLength(254);
+            RuleFor(x => x.Password).NotNull().Length(8, 100);
+            RuleFor(x => x.Tokens).Empty();
+            RuleFor(x => x.MaxTopics).Empty();
+            RuleFor(x => x.Active).Empty();
+            RuleFor(x => x.Admin).Empty();
+            RuleFor(x => x.VerifiedCreator).Empty();
 
             RuleSet("Update", () =>
             {
-                RuleFor(x => x.Id).Empty();
-                RuleFor(x => x.Name).Length(3, 50);
-                RuleFor(x => x.Email).EmailAddress();
-                RuleFor(x => x.Password).MinimumLength(8);
+                RuleFor(x => x.Manager).Empty();
+                RuleFor(x => x.Firstname).Length(3, 50);
+                RuleFor(x => x.Lastname).Length(3, 100);
+                RuleFor(x => x.Nickname).Length(3, 50);
+                RuleFor(x => x.Email).EmailAddress().MaximumLength(254);
+                RuleFor(x => x.Password).Length(8, 100);
+                RuleFor(x => x.Tokens).Empty();
+                RuleFor(x => x.MaxTopics).Empty();
+                RuleFor(x => x.Active).Empty();
+                RuleFor(x => x.Admin).Empty();
+                RuleFor(x => x.VerifiedCreator).Empty();
             });
         }
     }
