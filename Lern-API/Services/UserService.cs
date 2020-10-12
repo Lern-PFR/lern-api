@@ -31,9 +31,7 @@ namespace Lern_API.Services
         public override async Task<User> Update(User entity, IEnumerable<string> columns)
         {
             if (entity.Password != null)
-            {
                 entity.Password = BCrypt.Net.BCrypt.EnhancedHashPassword(entity.Password);
-            }
 
             return await base.Update(entity, columns);
         }

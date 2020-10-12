@@ -1,10 +1,12 @@
-﻿using FluentMigrator.Runner;
+﻿using System.Diagnostics.CodeAnalysis;
+using FluentMigrator.Runner;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Lern_API.Helpers.Database
 {
+    [ExcludeFromCodeCoverage]
     public static class MigrationExtension
     {
         private static ILogger _logger;

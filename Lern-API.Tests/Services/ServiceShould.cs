@@ -14,9 +14,8 @@ namespace Lern_API.Tests.Services
     {
         [Theory]
         [AutoMoqData]
-        public async Task Get_All_Entities(ILogger<Service<Entity, IRepository<Entity>>> logger)
+        public async Task Get_All_Entities(ILogger<Service<Entity, IRepository<Entity>>> logger, Mock<IRepository<Entity>> repository)
         {
-            var repository = new Mock<IRepository<Entity>>();
             repository.Setup(x => x.All());
 
             var service = new Service<Entity, IRepository<Entity>>(logger, repository.Object);
@@ -27,9 +26,8 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Get_Entity(ILogger<Service<Entity, IRepository<Entity>>> logger, Guid id)
+        public async Task Get_Entity(ILogger<Service<Entity, IRepository<Entity>>> logger, Mock<IRepository<Entity>> repository, Guid id)
         {
-            var repository = new Mock<IRepository<Entity>>();
             repository.Setup(x => x.Get(id));
 
             var service = new Service<Entity, IRepository<Entity>>(logger, repository.Object);
@@ -40,9 +38,8 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Create_Entity(ILogger<Service<Entity, IRepository<Entity>>> logger, Entity entity)
+        public async Task Create_Entity(ILogger<Service<Entity, IRepository<Entity>>> logger, Mock<IRepository<Entity>> repository, Entity entity)
         {
-            var repository = new Mock<IRepository<Entity>>();
             repository.Setup(x => x.Create(entity));
 
             var service = new Service<Entity, IRepository<Entity>>(logger, repository.Object);
@@ -53,9 +50,8 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Update_Entity(ILogger<Service<Entity, IRepository<Entity>>> logger, Entity entity)
+        public async Task Update_Entity(ILogger<Service<Entity, IRepository<Entity>>> logger, Mock<IRepository<Entity>> repository, Entity entity)
         {
-            var repository = new Mock<IRepository<Entity>>();
             repository.Setup(x => x.Update(entity, null));
 
             var service = new Service<Entity, IRepository<Entity>>(logger, repository.Object);
@@ -66,9 +62,8 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Delete_Entity(ILogger<Service<Entity, IRepository<Entity>>> logger, Entity entity)
+        public async Task Delete_Entity(ILogger<Service<Entity, IRepository<Entity>>> logger, Mock<IRepository<Entity>> repository, Entity entity)
         {
-            var repository = new Mock<IRepository<Entity>>();
             repository.Setup(x => x.Delete(entity));
 
             var service = new Service<Entity, IRepository<Entity>>(logger, repository.Object);

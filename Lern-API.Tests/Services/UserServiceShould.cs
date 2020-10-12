@@ -14,10 +14,9 @@ namespace Lern_API.Tests.Services
     {
         [Theory]
         [AutoMoqData]
-        public async Task Get_User_By_Login(ILogger<UserService> logger, LoginRequest request)
+        public async Task Get_User_By_Login(ILogger<UserService> logger, Mock<IUserRepository> repository, LoginRequest request)
         {
             User user = null;
-            var repository = new Mock<IUserRepository>();
             repository.Setup(x => x.GetByLogin(request.Login)).ReturnsAsync(user);
 
             var service = new UserService(logger, repository.Object);

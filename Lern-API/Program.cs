@@ -1,8 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
 namespace Lern_API
 {
+    [ExcludeFromCodeCoverage]
     public static class Program
     {
         public static void Main(string[] args) => CreateHostBuilder(args).Build().Run();

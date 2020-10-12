@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using FluentValidation;
 
 namespace Lern_API.DataTransferObjects.Requests
@@ -11,6 +12,7 @@ namespace Lern_API.DataTransferObjects.Requests
         public string Password { get; set; }
     }
 
+    [ExcludeFromCodeCoverage]
     public class LoginRequestValidator : AbstractValidator<LoginRequest>
     {
         public LoginRequestValidator()

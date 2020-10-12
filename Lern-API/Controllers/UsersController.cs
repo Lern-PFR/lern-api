@@ -17,12 +17,10 @@ namespace Lern_API.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly ILogger _log;
         private readonly IUserService _users;
 
-        public UsersController(ILogger<UsersController> logger, IUserService users)
+        public UsersController(IUserService users)
         {
-            _log = logger;
             _users = users;
         }
 

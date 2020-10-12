@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Lern_API.Helpers.JWT
 {
+    [ExcludeFromCodeCoverage]
     public class JwtMiddleware
     {
         private readonly RequestDelegate _next;

@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using System.Diagnostics.CodeAnalysis;
+using FluentValidation;
 
 namespace Lern_API.Models
 {
@@ -9,6 +10,7 @@ namespace Lern_API.Models
         public string Password { internal get; set; }
     }
 
+    [ExcludeFromCodeCoverage]
     public class UserValidator : AbstractValidator<User>
     {
         public UserValidator()

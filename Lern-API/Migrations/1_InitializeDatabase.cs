@@ -1,7 +1,9 @@
-﻿using FluentMigrator;
+﻿using System.Diagnostics.CodeAnalysis;
+using FluentMigrator;
 
 namespace Lern_API.Migrations
 {
+    [ExcludeFromCodeCoverage]
     [Migration(1)]
     public class InitializeDatabase : Migration
     {

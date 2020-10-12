@@ -53,7 +53,7 @@ namespace Lern_API.Repositories
 
         public async Task<Guid> Create(TEntity entity)
         {
-            if (entity.Id == Guid.Empty)
+            if (entity.Id == default)
                 entity.Id = Guid.NewGuid();
 
             var result = await RunOrDefault(async () => await Database.InsertAsync(entity));

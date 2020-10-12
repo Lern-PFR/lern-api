@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -6,6 +7,7 @@ using PetaPoco;
 
 namespace Lern_API.Helpers.Database
 {
+    [ExcludeFromCodeCoverage]
     public static class DatabaseExtension
     {
         private static ILogger _logger;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -8,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Lern_API.Helpers.JWT
 {
+    [ExcludeFromCodeCoverage]
     public static class JwtExtensions
     {
         public static User GetUser(this HttpContext context) => (User) context.Items["User"];

@@ -57,9 +57,8 @@ namespace Lern_API.Tests.Repositories
 
         [Theory]
         [AutoMoqData]
-        public async Task Return_All_Entities(ILogger<Repository<Entity>> logger, List<Entity> entities)
+        public async Task Return_All_Entities(ILogger<Repository<Entity>> logger, Mock<IDatabase> database, List<Entity> entities)
         {
-            var database = new Mock<IDatabase>();
             database.Setup(x => x.FetchAsync<Entity>()).ReturnsAsync(entities);
 
             var repository = new Repository<Entity>(logger, database.Object);
@@ -73,9 +72,8 @@ namespace Lern_API.Tests.Repositories
 
         [Theory]
         [AutoMoqData]
-        public async Task Get_Entity(ILogger<Repository<Entity>> logger, Entity entity)
+        public async Task Get_Entity(ILogger<Repository<Entity>> logger, Mock<IDatabase> database, Entity entity)
         {
-            var database = new Mock<IDatabase>();
             database.Setup(x => x.SingleOrDefaultAsync<Entity>(It.IsAny<Guid>())).ReturnsAsync(entity);
 
             var repository = new Repository<Entity>(logger, database.Object);
@@ -88,9 +86,8 @@ namespace Lern_API.Tests.Repositories
 
         [Theory]
         [AutoMoqData]
-        public async Task Create_Entity(ILogger<Repository<Entity>> logger, Entity entity)
+        public async Task Create_Entity(ILogger<Repository<Entity>> logger, Mock<IDatabase> database, Entity entity)
         {
-            var database = new Mock<IDatabase>();
             database.Setup(x => x.InsertAsync(entity));
 
             var repository = new Repository<Entity>(logger, database.Object);
@@ -102,9 +99,8 @@ namespace Lern_API.Tests.Repositories
 
         [Theory]
         [AutoMoqData]
-        public async Task Update_Entity(ILogger<Repository<Entity>> logger, Entity entity)
+        public async Task Update_Entity(ILogger<Repository<Entity>> logger, Mock<IDatabase> database, Entity entity)
         {
-            var database = new Mock<IDatabase>();
             database.Setup(x => x.UpdateAsync(entity, null));
 
             var repository = new Repository<Entity>(logger, database.Object);
@@ -116,9 +112,8 @@ namespace Lern_API.Tests.Repositories
 
         [Theory]
         [AutoMoqData]
-        public async Task Delete_Entity(ILogger<Repository<Entity>> logger, Entity entity)
+        public async Task Delete_Entity(ILogger<Repository<Entity>> logger, Mock<IDatabase> database, Entity entity)
         {
-            var database = new Mock<IDatabase>();
             database.Setup(x => x.DeleteAsync<Entity>(entity));
 
             var repository = new Repository<Entity>(logger, database.Object);

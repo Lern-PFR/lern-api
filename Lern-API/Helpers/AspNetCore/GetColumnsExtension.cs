@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -7,10 +8,14 @@ using Microsoft.AspNetCore.Http;
 
 namespace Lern_API.Helpers.AspNetCore
 {
+    [ExcludeFromCodeCoverage]
     public static class GetColumnsExtension
     {
         public static async Task<IEnumerable<string>> GetColumns(this HttpContext context)
         {
+            if (context == null)
+                return null;
+
             if (!context.Request.Body.CanSeek)
                 throw new InvalidOperationException($"Veuillez ajouter l'attribut {nameof(EnableBodyRewindAttribute)} à votre méthode afin d'utiliser {nameof(GetColumns)}");
 
