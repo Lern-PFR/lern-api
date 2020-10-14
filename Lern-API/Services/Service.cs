@@ -13,7 +13,7 @@ namespace Lern_API.Services
         Task<TEntity> Get(Guid id);
         Task<Guid> Create(TEntity entity);
         Task<TEntity> Update(TEntity entity, IEnumerable<string> columns);
-        Task<bool> Delete(TEntity entity);
+        Task<bool> Delete(Guid id);
     }
 
     public class Service<TEntity, TRepository> : IService<TEntity, TRepository> where TEntity : AbstractModel where TRepository : IRepository<TEntity>
@@ -39,21 +39,17 @@ namespace Lern_API.Services
 
         public virtual async Task<Guid> Create(TEntity entity)
         {
-            // TODO: filter columns by read-only attribute
-
             return await Repository.Create(entity);
         }
 
         public virtual async Task<TEntity> Update(TEntity entity, IEnumerable<string> columns)
         {
-            // TODO: filter columns by read-only attribute
-
             return await Repository.Update(entity, columns);
         }
 
-        public virtual async Task<bool> Delete(TEntity entity)
+        public virtual async Task<bool> Delete(Guid id)
         {
-            return await Repository.Delete(entity);
+            return await Repository.Delete(id);
         }
     }
 }

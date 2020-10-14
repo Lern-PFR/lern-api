@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
+using System.Linq;
 using System.Threading.Tasks;
+using Lern_API.Helpers.Swagger;
 using Lern_API.Models;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using PetaPoco;
+using PetaPoco.Core.Inflection;
 
 namespace Lern_API.Repositories
 {
@@ -14,7 +18,7 @@ namespace Lern_API.Repositories
         Task<TEntity> Get(Guid id);
         Task<Guid> Create(TEntity entity);
         Task<TEntity> Update(TEntity entity, IEnumerable<string> columns);
-        Task<bool> Delete(TEntity entity);
+        Task<bool> Delete(Guid id);
     }
 
     public class Repository<TEntity> : IRepository<TEntity> where TEntity : AbstractModel
@@ -56,18 +60,40 @@ namespace Lern_API.Repositories
             if (entity.Id == default)
                 entity.Id = Guid.NewGuid();
 
-            var result = await RunOrDefault(async () => await Database.InsertAsync(entity));
+            var inflector = new EnglishInflector();
+            var table = inflector.Pluralise(inflector.Underscore(typeof(TEntity).Name));
+            var primaryKey = inflector.Camelise(nameof(entity.Id));
+
+            dynamic poco = new ExpandoObject();
+            var pocoDict = (IDictionary<string, object>) poco;
+
+            foreach (var prop in typeof(TEntity).GetProperties())
+            {
+                if (prop.GetCustomAttributes(typeof(ReadOnlyAttribute), true).SingleOrDefault() != null)
+                    continue;
+
+                pocoDict.Add(inflector.Camelise(prop.Name), prop.GetValue(entity));
+            }
+
+            pocoDict.Add(primaryKey, entity.Id);
+
+            var result = await RunOrDefault(async () => await Database.InsertAsync(table, primaryKey, false, poco));
 
             return result switch
             {
                 null => Guid.Empty,
                 Guid id => id,
-                _ => Guid.TryParse(result.ToString(), out var guid) ? guid : Guid.Empty
+                _ => Guid.TryParse(result.ToString(), out Guid guid) ? guid : Guid.Empty
             };
         }
 
         public async Task<TEntity> Update(TEntity entity, IEnumerable<string> columns)
         {
+            var inflector = new EnglishInflector();
+            var readOnlyProperties = typeof(TEntity).GetProperties().Where(x =>
+                x.GetCustomAttributes(typeof(ReadOnlyAttribute), true).SingleOrDefault() != null).Select(x => inflector.Camelise(x.Name));
+            columns = columns.Where(x => !readOnlyProperties.Contains(x));
+
             var done = await RunOrDefault(async () => await Database.UpdateAsync(entity, columns)) == 1;
 
             if (done)
@@ -76,9 +102,9 @@ namespace Lern_API.Repositories
             return default;
         }
 
-        public async Task<bool> Delete(TEntity entity)
+        public async Task<bool> Delete(Guid id)
         {
-            return await RunOrDefault(async () => await Database.DeleteAsync<TEntity>(entity)) == 1;
+            return await RunOrDefault(async () => await Database.DeleteAsync<TEntity>(id)) == 1;
         }
     }
 }

@@ -88,7 +88,7 @@ namespace Lern_API.Tests.Repositories
         [AutoMoqData]
         public async Task Create_Entity(ILogger<Repository<Entity>> logger, Mock<IDatabase> database, Entity entity)
         {
-            database.Setup(x => x.InsertAsync(entity));
+            database.Setup(x => x.InsertAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<object>()));
 
             var repository = new Repository<Entity>(logger, database.Object);
 
@@ -101,24 +101,25 @@ namespace Lern_API.Tests.Repositories
         [AutoMoqData]
         public async Task Update_Entity(ILogger<Repository<Entity>> logger, Mock<IDatabase> database, Entity entity)
         {
-            database.Setup(x => x.UpdateAsync(entity, null));
+            var columns = new string[0];
+            database.Setup(x => x.UpdateAsync(entity, columns));
 
             var repository = new Repository<Entity>(logger, database.Object);
 
-            await repository.Update(entity, null);
+            await repository.Update(entity, columns);
 
             database.VerifyAll();
         }
 
         [Theory]
         [AutoMoqData]
-        public async Task Delete_Entity(ILogger<Repository<Entity>> logger, Mock<IDatabase> database, Entity entity)
+        public async Task Delete_Entity(ILogger<Repository<Entity>> logger, Mock<IDatabase> database, Guid id)
         {
-            database.Setup(x => x.DeleteAsync<Entity>(entity));
+            database.Setup(x => x.DeleteAsync<Entity>(id));
 
             var repository = new Repository<Entity>(logger, database.Object);
 
-            await repository.Delete(entity);
+            await repository.Delete(id);
 
             database.VerifyAll();
         }

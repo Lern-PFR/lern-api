@@ -62,12 +62,12 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Delete_Entity(ILogger<Service<Entity, IRepository<Entity>>> logger, Mock<IRepository<Entity>> repository, Entity entity)
+        public async Task Delete_Entity(ILogger<Service<Entity, IRepository<Entity>>> logger, Mock<IRepository<Entity>> repository, Guid id)
         {
-            repository.Setup(x => x.Delete(entity));
+            repository.Setup(x => x.Delete(id));
 
             var service = new Service<Entity, IRepository<Entity>>(logger, repository.Object);
-            await service.Delete(entity);
+            await service.Delete(id);
 
             repository.VerifyAll();
         }

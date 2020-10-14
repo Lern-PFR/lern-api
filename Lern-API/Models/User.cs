@@ -31,31 +31,19 @@ namespace Lern_API.Models
     {
         public UserValidator()
         {
-            RuleFor(x => x.Manager).Empty();
             RuleFor(x => x.Firstname).NotNull().Length(3, 50);
             RuleFor(x => x.Lastname).NotNull().Length(3, 100);
             RuleFor(x => x.Nickname).NotNull().Length(3, 50);
             RuleFor(x => x.Email).NotNull().EmailAddress().MaximumLength(254);
             RuleFor(x => x.Password).NotNull().Length(8, 100);
-            RuleFor(x => x.Tokens).Empty();
-            RuleFor(x => x.MaxTopics).Empty();
-            RuleFor(x => x.Active).Empty();
-            RuleFor(x => x.Admin).Empty();
-            RuleFor(x => x.VerifiedCreator).Empty();
 
             RuleSet("Update", () =>
             {
-                RuleFor(x => x.Manager).Empty();
                 RuleFor(x => x.Firstname).Length(3, 50);
                 RuleFor(x => x.Lastname).Length(3, 100);
                 RuleFor(x => x.Nickname).Length(3, 50);
                 RuleFor(x => x.Email).EmailAddress().MaximumLength(254);
                 RuleFor(x => x.Password).Length(8, 100);
-                RuleFor(x => x.Tokens).Empty();
-                RuleFor(x => x.MaxTopics).Empty();
-                RuleFor(x => x.Active).Empty();
-                RuleFor(x => x.Admin).Empty();
-                RuleFor(x => x.VerifiedCreator).Empty();
             });
         }
     }
