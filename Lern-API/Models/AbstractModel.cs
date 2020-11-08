@@ -1,5 +1,5 @@
 ﻿using System;
-using Lern_API.Helpers.Swagger;
+using Lern_API.Helpers.Database;
 using PetaPoco;
 
 namespace Lern_API.Models
@@ -11,5 +11,8 @@ namespace Lern_API.Models
         [ReadOnly]
         [ResultColumn(IncludeInAutoSelect.Yes)]
         public DateTime CreatedAt { get; set; }
+        [ReadOnly]
+        [ResultColumn(IncludeInAutoSelect.Yes)]
+        public DateTime UpdatedAt { get; set; }
     }
 }

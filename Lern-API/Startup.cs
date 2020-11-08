@@ -47,8 +47,8 @@ namespace Lern_API
                 new PostgreSQLDatabaseProvider(),
                 new ConventionMapper
                 {
-                    InflectTableName = (inflector, s) => inflector.Pluralise(inflector.Underscore(s)),
-                    InflectColumnName = (inflector, s) => inflector.Camelise(s)
+                    InflectTableName = Inflector.Table,
+                    InflectColumnName = Inflector.Column
                 }
             ));
 
@@ -120,7 +120,7 @@ namespace Lern_API
             services.AddScoped<IUserRepository, UserRepository>();
 
             // Ajout des services
-            services.AddScoped(typeof(IService<,>), typeof(Service<,>));
+            services.AddScoped(typeof(IService<>), typeof(Service<>));
             services.AddScoped<IUserService, UserService>();
         }
 

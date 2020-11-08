@@ -1,36 +1,42 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using FluentValidation;
-using Lern_API.Helpers.Swagger;
+using Lern_API.Helpers.Database;
+using Lern_API.Services;
+using PetaPoco;
 
 namespace Lern_API.Models
 {
     public class User : AbstractModel
     {
         [ReadOnly]
-        public Guid? Manager { get; set; }
+        public Guid? ManagerId { get; set; }
+        [ReadOnly]
+        [ResultColumn]
+        public User Manager { get; set; }
         public string Firstname { get; set; }
         public string Lastname { get; set; }
         public string Nickname { get; set; }
         public string Email { get; set; }
         public string Password { internal get; set; }
         [ReadOnly]
-        public int? Tokens { get; set; }
+        public int Tokens { get; set; }
         [ReadOnly]
-        public int? MaxTopics { get; set; }
+        public int MaxSubjects { get; set; }
         [ReadOnly]
-        public bool? Active { get; set; }
+        public bool Active { get; set; }
         [ReadOnly]
-        public bool? Admin { get; set; }
+        public bool Admin { get; set; }
         [ReadOnly]
-        public bool? VerifiedCreator { get; set; }
+        public bool VerifiedCreator { get; set; }
     }
 
     [ExcludeFromCodeCoverage]
     public class UserValidator : AbstractValidator<User>
     {
-        public UserValidator()
+        public UserValidator(IService<User> service)
         {
+            RuleFor(x => x.ManagerId).MustExist(service);
             RuleFor(x => x.Firstname).NotNull().Length(3, 50);
             RuleFor(x => x.Lastname).NotNull().Length(3, 100);
             RuleFor(x => x.Nickname).NotNull().Length(3, 50);

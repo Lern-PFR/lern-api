@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Lern_API.Models;
 using Microsoft.Extensions.Logging;
 using PetaPoco;
@@ -7,7 +8,7 @@ namespace Lern_API.Repositories
 {
     public interface IUserRepository : IRepository<User>
     {
-        public Task<User> GetByLogin(string login);
+        public Task<User> GetByLogin(string login, CancellationToken token = default);
     }
 
     public class UserRepository : Repository<User>, IUserRepository
@@ -16,9 +17,9 @@ namespace Lern_API.Repositories
         {
         }
 
-        public async Task<User> GetByLogin(string login)
+        public async Task<User> GetByLogin(string login, CancellationToken token = default)
         {
-            return await RunOrDefault(async () => await Database.SingleOrDefaultAsync<User>("WHERE nickname = @0 OR email = @0", login));
+            return await RunOrDefault(async () => await Database.SingleOrDefaultAsync<User>(token, "WHERE nickname = @0 OR email = @0", login));
         }
     }
 }

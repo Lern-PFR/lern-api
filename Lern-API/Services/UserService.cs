@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Lern_API.DataTransferObjects.Requests;
 using Lern_API.DataTransferObjects.Responses;
@@ -12,7 +13,7 @@ namespace Lern_API.Services
 {
     public interface IUserService : IService<User, IUserRepository>
     {
-        Task<LoginResponse> Login(LoginRequest request);
+        Task<LoginResponse> Login(LoginRequest request, CancellationToken token = default);
     }
 
     public class UserService : Service<User, IUserRepository>, IUserService
@@ -21,24 +22,24 @@ namespace Lern_API.Services
         {
         }
 
-        public override async Task<Guid> Create(User entity)
+        public override async Task<Guid> Create(User entity, CancellationToken token = default)
         {
             entity.Password = BCrypt.Net.BCrypt.EnhancedHashPassword(entity.Password);
 
-            return await base.Create(entity);
+            return await base.Create(entity, token);
         }
 
-        public override async Task<User> Update(User entity, IEnumerable<string> columns)
+        public override async Task<User> Update(User entity, IEnumerable<string> columns, CancellationToken token = default)
         {
             if (entity.Password != null)
                 entity.Password = BCrypt.Net.BCrypt.EnhancedHashPassword(entity.Password);
 
-            return await base.Update(entity, columns);
+            return await base.Update(entity, columns, token);
         }
 
-        public async Task<LoginResponse> Login(LoginRequest request)
+        public async Task<LoginResponse> Login(LoginRequest request, CancellationToken token = default)
         {
-            var user = await Repository.GetByLogin(request.Login);
+            var user = await Repository.GetByLogin(request.Login, token);
 
             if (user == null || !BCrypt.Net.BCrypt.EnhancedVerify(request.Password, user.Password))
                 return null;

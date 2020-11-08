@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.0" />
+    <PackageReference Include="CancellationTokenAnalyzers" Version="1.0.1" />
     <PackageReference Include="FluentMigrator" Version="3.2.9" />
     <PackageReference Include="FluentMigrator.Runner" Version="3.2.9" />
     <PackageReference Include="FluentMigrator.Runner.Postgres" Version="3.2.9" />

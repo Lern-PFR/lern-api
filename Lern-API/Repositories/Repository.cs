@@ -2,23 +2,24 @@
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using Lern_API.Helpers.Swagger;
+using Lern_API.Helpers.Database;
 using Lern_API.Models;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using PetaPoco;
-using PetaPoco.Core.Inflection;
 
 namespace Lern_API.Repositories
 {
     public interface IRepository<TEntity> where TEntity : AbstractModel
     {
-        Task<IEnumerable<TEntity>> All();
-        Task<TEntity> Get(Guid id);
-        Task<Guid> Create(TEntity entity);
-        Task<TEntity> Update(TEntity entity, IEnumerable<string> columns);
-        Task<bool> Delete(Guid id);
+        Task<IEnumerable<TEntity>> All(CancellationToken token = default);
+        Task<TEntity> Get(Guid id, CancellationToken token = default);
+        Task<Guid> Create(TEntity entity, CancellationToken token = default, bool ignoreReadOnly = false);
+        Task<TEntity> Update(TEntity entity, IEnumerable<string> columns, CancellationToken token = default);
+        Task<bool> Delete(Guid id, CancellationToken token = default);
+        Task<bool> Exists(Guid id, CancellationToken token = default);
     }
 
     public class Repository<TEntity> : IRepository<TEntity> where TEntity : AbstractModel
@@ -45,39 +46,47 @@ namespace Lern_API.Repositories
             }
         }
 
-        public async Task<IEnumerable<TEntity>> All()
+        public async Task<IEnumerable<TEntity>> All(CancellationToken token = default)
         {
-            return await RunOrDefault(async () => await Database.FetchAsync<TEntity>());
+            return await RunOrDefault(async () => await Database.FetchAsync<TEntity>(token));
         }
 
-        public async Task<TEntity> Get(Guid id)
+        public async Task<TEntity> Get(Guid id, CancellationToken token = default)
         {
-            return await RunOrDefault(async () => await Database.SingleOrDefaultAsync<TEntity>(id));
+            return await RunOrDefault(async () => await Database.SingleOrDefaultAsync<TEntity>(token, id));
         }
 
-        public async Task<Guid> Create(TEntity entity)
+        public async Task<Guid> Create(TEntity entity, CancellationToken token = default, bool ignoreReadOnly = false)
         {
             if (entity.Id == default)
                 entity.Id = Guid.NewGuid();
 
-            var inflector = new EnglishInflector();
-            var table = inflector.Pluralise(inflector.Underscore(typeof(TEntity).Name));
-            var primaryKey = inflector.Camelise(nameof(entity.Id));
+            object result;
 
-            dynamic poco = new ExpandoObject();
-            var pocoDict = (IDictionary<string, object>) poco;
-
-            foreach (var prop in typeof(TEntity).GetProperties())
+            if (!ignoreReadOnly)
             {
-                if (prop.GetCustomAttributes(typeof(ReadOnlyAttribute), true).SingleOrDefault() != null)
-                    continue;
+                var table = Inflector.Table<TEntity>();
+                var primaryKey = Inflector.Column(nameof(entity.Id));
 
-                pocoDict.Add(inflector.Camelise(prop.Name), prop.GetValue(entity));
+                dynamic poco = new ExpandoObject();
+                var pocoDict = (IDictionary<string, object>) poco;
+
+                foreach (var prop in typeof(TEntity).GetProperties())
+                {
+                    if (prop.GetCustomAttributes(typeof(ReadOnlyAttribute), true).SingleOrDefault() != null)
+                        continue;
+
+                    pocoDict.Add(Inflector.Column(prop.Name), prop.GetValue(entity));
+                }
+
+                pocoDict.Add(primaryKey, entity.Id);
+
+                result = await RunOrDefault(async () => await Database.InsertAsync(token, table, primaryKey, false, poco));
             }
-
-            pocoDict.Add(primaryKey, entity.Id);
-
-            var result = await RunOrDefault(async () => await Database.InsertAsync(table, primaryKey, false, poco));
+            else
+            {
+                result = await RunOrDefault(async () => await Database.InsertAsync(token, entity));
+            }
 
             return result switch
             {
@@ -87,24 +96,28 @@ namespace Lern_API.Repositories
             };
         }
 
-        public async Task<TEntity> Update(TEntity entity, IEnumerable<string> columns)
+        public async Task<TEntity> Update(TEntity entity, IEnumerable<string> columns, CancellationToken token = default)
         {
-            var inflector = new EnglishInflector();
             var readOnlyProperties = typeof(TEntity).GetProperties().Where(x =>
-                x.GetCustomAttributes(typeof(ReadOnlyAttribute), true).SingleOrDefault() != null).Select(x => inflector.Camelise(x.Name));
+                x.GetCustomAttributes(typeof(ReadOnlyAttribute), true).SingleOrDefault() != null).Select(x => Inflector.Column(x.Name));
             columns = columns.Where(x => !readOnlyProperties.Contains(x));
 
-            var done = await RunOrDefault(async () => await Database.UpdateAsync(entity, columns)) == 1;
+            var done = await RunOrDefault(async () => await Database.UpdateAsync(token, entity, columns)) == 1;
 
             if (done)
-                return await RunOrDefault(async () => await Database.SingleOrDefaultAsync<TEntity>(entity.Id));
+                return await RunOrDefault(async () => await Database.SingleOrDefaultAsync<TEntity>(token, entity.Id));
             
             return default;
         }
 
-        public async Task<bool> Delete(Guid id)
+        public async Task<bool> Delete(Guid id, CancellationToken token = default)
         {
-            return await RunOrDefault(async () => await Database.DeleteAsync<TEntity>(id)) == 1;
+            return await RunOrDefault(async () => await Database.DeleteAsync<TEntity>(token, id)) == 1;
+        }
+
+        public async Task<bool> Exists(Guid id, CancellationToken token = default)
+        {
+            return await RunOrDefault(async () => await Database.ExistsAsync<TEntity>(token, id));
         }
     }
 }

@@ -29,7 +29,7 @@ namespace Lern_API.Controllers
         /// <returns>A list of all registered users</returns>
         [RequireAuthentication]
         [HttpGet]
-        public async Task<IEnumerable<User>> GetAllUsers() => await _users.GetAll();
+        public async Task<IEnumerable<User>> GetAllUsers() => await _users.GetAll(HttpContext.RequestAborted);
 
         /// <summary>
         /// Returns a single user
@@ -42,7 +42,7 @@ namespace Lern_API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(Guid id)
         {
-            var user = await _users.Get(id);
+            var user = await _users.Get(id, HttpContext.RequestAborted);
 
             if (user == null)
                 return NotFound();
@@ -60,7 +60,7 @@ namespace Lern_API.Controllers
         [HttpPost]
         public async Task<ActionResult<Guid>> CreateUser(User user)
         {
-            var id = await _users.Create(user);
+            var id = await _users.Create(user, HttpContext.RequestAborted);
 
             if (id == Guid.Empty)
                 return Conflict();
@@ -82,7 +82,7 @@ namespace Lern_API.Controllers
         {
             user.Id = id;
 
-            var newUser = await _users.Update(user, await HttpContext.GetColumns());
+            var newUser = await _users.Update(user, await HttpContext.GetColumns(), HttpContext.RequestAborted);
 
             if (newUser == null)
                 return NotFound();
@@ -100,7 +100,7 @@ namespace Lern_API.Controllers
         [HttpPost("/api/Login")]
         public async Task<ActionResult<LoginResponse>> Login(LoginRequest request)
         {
-            var response = await _users.Login(request);
+            var response = await _users.Login(request, HttpContext.RequestAborted);
 
             if (response == null)
                 return BadRequest(new ErrorResponse("Login or password is incorrect"));
