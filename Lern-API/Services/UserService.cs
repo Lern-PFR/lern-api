@@ -1,45 +1,91 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Lern_API.DataTransferObjects.Requests;
 using Lern_API.DataTransferObjects.Responses;
 using Lern_API.Helpers.JWT;
 using Lern_API.Models;
-using Lern_API.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Lern_API.Services
 {
-    public interface IUserService : IService<User, IUserRepository>
+    public interface IUserService : IService<User>
     {
         Task<LoginResponse> Login(LoginRequest request, CancellationToken token = default);
     }
 
-    public class UserService : Service<User, IUserRepository>, IUserService
+    public class UserService : IUserService
     {
-        public UserService(ILogger<UserService> logger, IUserRepository repository) : base(logger, repository)
+        private readonly LernContext _context;
+
+        public UserService(ILogger<UserService> logger, LernContext context)
         {
+            _context = context;
         }
 
-        public override async Task<Guid> Create(User entity, CancellationToken token = default)
+        public async Task<IEnumerable<User>> GetAll(CancellationToken token = default)
+        {
+            return await _context.Users.ToListAsync(token);
+        }
+
+        public async Task<User> Get(Guid id, CancellationToken token = default)
+        {
+            return await _context.Users.FindAsync(new object[] { id }, token);
+        }
+
+        public async Task<User> Create(User entity, CancellationToken token = default)
         {
             entity.Password = BCrypt.Net.BCrypt.EnhancedHashPassword(entity.Password);
 
-            return await base.Create(entity, token);
+            var entityEntry = await _context.Users.AddAsync(entity, token);
+            await _context.SaveChangesAsync(token);
+
+            return entityEntry.Entity;
         }
 
-        public override async Task<User> Update(User entity, IEnumerable<string> columns, CancellationToken token = default)
+        public async Task<User> Update(User entity, IEnumerable<string> columns, CancellationToken token = default)
         {
             if (entity.Password != null)
                 entity.Password = BCrypt.Net.BCrypt.EnhancedHashPassword(entity.Password);
 
-            return await base.Update(entity, columns, token);
+            var user = await Get(entity.Id, token);
+            var props = user.GetType().GetProperties(BindingFlags.Public);
+
+            foreach (var key in columns)
+            {
+                var prop = props.First(x => x.Name == key);
+                prop.SetValue(user, prop.GetValue(entity));
+            }
+
+            _context.Entry(user).State = EntityState.Modified;
+            await _context.SaveChangesAsync(token);
+
+            return user;
+        }
+
+        public async Task<bool> Delete(Guid id, CancellationToken token = default)
+        {
+            var user = await _context.Users.FindAsync(new object[] { id }, token);
+
+            if (user == null)
+                return false;
+
+            _context.Remove(user);
+            return true;
+        }
+
+        public async Task<bool> Exists(Guid id, CancellationToken token = default)
+        {
+            return await _context.Users.AnyAsync(x => x.Id == id, token);
         }
 
         public async Task<LoginResponse> Login(LoginRequest request, CancellationToken token = default)
         {
-            var user = await Repository.GetByLogin(request.Login, token);
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Nickname == request.Login || x.Email == request.Login, token);
 
             if (user == null || !BCrypt.Net.BCrypt.EnhancedVerify(request.Password, user.Password))
                 return null;

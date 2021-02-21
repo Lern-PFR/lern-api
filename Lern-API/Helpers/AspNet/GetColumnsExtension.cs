@@ -6,7 +6,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
-namespace Lern_API.Helpers.AspNetCore
+namespace Lern_API.Helpers.AspNet
 {
     [ExcludeFromCodeCoverage]
     public static class GetColumnsExtension
@@ -20,8 +20,19 @@ namespace Lern_API.Helpers.AspNetCore
                 throw new InvalidOperationException($"Veuillez ajouter l'attribut {nameof(EnableBodyRewindAttribute)} à votre méthode afin d'utiliser {nameof(GetColumns)}");
 
             context.Request.Body.Position = 0;
-            var dictionary = await JsonSerializer.DeserializeAsync<Dictionary<string, object>>(context.Request.Body);
-            return dictionary.Keys.AsEnumerable();
+
+            Dictionary<string, object> dictionary;
+
+            try
+            {
+                dictionary = await JsonSerializer.DeserializeAsync<Dictionary<string, object>>(context.Request.Body);
+            }
+            catch (JsonException)
+            {
+                dictionary = new Dictionary<string, object>();
+            }
+
+            return dictionary?.Keys.AsEnumerable();
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using FluentValidation.AspNetCore;
 using Lern_API.DataTransferObjects.Requests;
 using Lern_API.DataTransferObjects.Responses;
-using Lern_API.Helpers.AspNetCore;
+using Lern_API.Helpers.AspNet;
 using Lern_API.Helpers.JWT;
 using Lern_API.Models;
 using Lern_API.Services;
@@ -58,14 +58,14 @@ namespace Lern_API.Controllers
         /// <response code="200">Id associated to the new user</response>
         /// <response code="409">If given name or email already exists</response>
         [HttpPost]
-        public async Task<ActionResult<Guid>> CreateUser(User user)
+        public async Task<ActionResult<User>> CreateUser(User user)
         {
-            var id = await _users.Create(user, HttpContext.RequestAborted);
+            var result = await _users.Create(user, HttpContext.RequestAborted);
 
-            if (id == Guid.Empty)
+            if (result == null)
                 return Conflict();
 
-            return id;
+            return result;
         }
 
         /// <summary>
@@ -76,8 +76,9 @@ namespace Lern_API.Controllers
         /// <returns>Updated user</returns>
         /// <response code="200">Updated user with the new values</response>
         /// <response code="404">If given user could not be found</response>
-        [HttpPut("{id}")]
+        [RequireAuthentication]
         [EnableBodyRewind]
+        [HttpPut("{id}")]
         public async Task<ActionResult<User>> UpdateUser(Guid id, [CustomizeValidator(RuleSet = "Update")] User user)
         {
             user.Id = id;

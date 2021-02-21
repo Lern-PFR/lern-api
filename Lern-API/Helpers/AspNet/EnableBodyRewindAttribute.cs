@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace Lern_API.Helpers.AspNetCore
+namespace Lern_API.Helpers.AspNet
 {
     [ExcludeFromCodeCoverage]
     public class EnableBodyRewindAttribute : Attribute, IAuthorizationFilter
@@ -12,7 +12,7 @@ namespace Lern_API.Helpers.AspNetCore
         {
             var req = context.HttpContext.Request;
 
-            // Allows using several time the stream in ASP.Net Core
+            // Allows using several time the stream in ASP.NET
             req.EnableBuffering();
         }
     }

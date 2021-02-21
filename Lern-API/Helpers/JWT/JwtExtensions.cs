@@ -12,12 +12,14 @@ namespace Lern_API.Helpers.JWT
     [ExcludeFromCodeCoverage]
     public static class JwtExtensions
     {
+        private static string SecretKey { get; } = Configuration.Get<string>("SecretKey") ?? Guid.NewGuid().ToString();
+
         public static User GetUser(this HttpContext context) => (User) context.Items["User"];
 
         public static string GenerateToken(this User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(Configuration.Get<string>("SecretKey"));
+            var key = Encoding.ASCII.GetBytes(SecretKey);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {

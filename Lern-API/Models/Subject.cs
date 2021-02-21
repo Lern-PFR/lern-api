@@ -1,9 +1,8 @@
 ﻿using System;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using FluentValidation;
-using Lern_API.Helpers.Database;
-using Lern_API.Services;
-using Microsoft.AspNetCore.Mvc.Filters;
-using PetaPoco;
 
 namespace Lern_API.Models
 {
@@ -13,24 +12,27 @@ namespace Lern_API.Models
         Approved = 1
     }
 
-    public class Subject : AbstractModel
+    public class Subject
     {
-        [ReadOnly]
-        public Guid? AuthorId { get; set; }
-        [ReadOnly]
-        [ResultColumn]
+        [ReadOnly(true), Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public Guid Id { get; set; }
+        [ReadOnly(true)]
+        public DateTime CreatedAt { get; set; }
+        [ReadOnly(true)]
+        public DateTime UpdatedAt { get; set; }
+        [ReadOnly(true)]
         public User Author { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        [ReadOnly]
+        [ReadOnly(true)]
         public SubjectState State { get; set; }
     }
 
     public class SubjectValidator : AbstractValidator<Subject>
     {
-        public SubjectValidator(IService<User> service)
+        public SubjectValidator()
         {
-            RuleFor(x => x.AuthorId).NotNull().MustExist(service);
+            RuleFor(x => x.Author).NotNull();
             RuleFor(x => x.Title).NotNull().NotEmpty().Length(3, 50);
             RuleFor(x => x.Description).NotNull().NotEmpty().Length(10, 300);
 

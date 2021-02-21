@@ -1,5 +1,5 @@
-﻿using System.Linq;
-using Lern_API.Helpers.Database;
+﻿using System.ComponentModel;
+using System.Linq;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -13,7 +13,6 @@ namespace Lern_API.Helpers.Swagger
                 return;
 
             schema.ReadOnly = true;
-            schema.Deprecated = true;
 
             if (schema.Properties == null)
                 return;

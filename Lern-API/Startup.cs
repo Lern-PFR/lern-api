@@ -3,29 +3,24 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using FluentMigrator.Runner;
 using FluentValidation.AspNetCore;
 using Lern_API.DataTransferObjects.Requests;
 using Lern_API.Helpers;
-using Lern_API.Helpers.Database;
 using Lern_API.Helpers.JWT;
 using Lern_API.Helpers.Swagger;
-using Lern_API.Migrations;
 using Lern_API.Models;
-using Lern_API.Repositories;
 using Lern_API.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using PetaPoco;
-using PetaPoco.Providers;
 
 namespace Lern_API
 {
@@ -42,22 +37,7 @@ namespace Lern_API
         public void ConfigureServices(IServiceCollection services)
         {
             // Ajout du système de communication avec la base de données
-            services.AddScoped<IDatabase, Database>(ctx => new Database(
-                Configuration.GetConnectionString(),
-                new PostgreSQLDatabaseProvider(),
-                new ConventionMapper
-                {
-                    InflectTableName = Inflector.Table,
-                    InflectColumnName = Inflector.Column
-                }
-            ));
-
-            // Ajout du système de migration de bases de données
-            services.AddFluentMigratorCore()
-                .ConfigureRunner(rb => rb
-                    .AddPostgres()
-                    .WithGlobalConnectionString(Configuration.GetConnectionString())
-                    .ScanIn(typeof(InitializeDatabase).Assembly).For.Migrations());
+            services.AddDbContext<LernContext>(options => options.UseNpgsql(Configuration.GetConnectionString()));
 
             // Ajout des contrôleurs applicatifs
             services.AddControllers()
@@ -115,12 +95,7 @@ namespace Lern_API
             // Ajout des en-têtes CORS
             services.AddCors();
 
-            // Ajout des repository
-            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-            services.AddScoped<IUserRepository, UserRepository>();
-
             // Ajout des services
-            services.AddScoped(typeof(IService<>), typeof(Service<>));
             services.AddScoped<IUserService, UserService>();
         }
 
@@ -161,10 +136,6 @@ namespace Lern_API
             {
                 endpoints.MapControllers();
             });
-
-            app.EnsureDatabase();
-
-            app.Migrate();
         }
     }
 }
