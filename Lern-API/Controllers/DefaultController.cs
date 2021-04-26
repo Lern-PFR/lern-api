@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Lern_API.Controllers
 {
+    // ReSharper disable once RouteTemplates.ControllerRouteParameterIsNotPassedToMethods
     [Route("{**url}", Order = int.MaxValue)]
     [ApiController]
     public class DefaultController : ControllerBase
@@ -12,6 +13,7 @@ namespace Lern_API.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
+        // ReSharper disable once RouteTemplates.MethodMissingRouteParameters
         public IActionResult CatchAll()
         {
             return File(

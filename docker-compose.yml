@@ -17,28 +17,16 @@ services:
       POSTGRES_PASSWORD: lern-dev-password
       POSTGRES_DB: lern-dev-db
       PGDATA: /data/postgres
+    ports:
+     - 5432:5432
     volumes:
      - postgres:/data/postgres
     networks:
      - postgres
     restart: unless-stopped
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-     - PGADMIN_DEFAULT_EMAIL=lern@lernd.fr
-     - PGADMIN_DEFAULT_PASSWORD=lern-dev-password
-    volumes:
-     - pgadmin:/pgadmin
-    ports:
-     - 8080:80
-    networks:
-     - postgres
-    depends_on:
-     - database
 
 networks:
   postgres:
 
 volumes:
   postgres:
-  pgadmin:

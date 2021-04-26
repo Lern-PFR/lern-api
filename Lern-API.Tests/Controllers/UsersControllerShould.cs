@@ -54,9 +54,9 @@ namespace Lern_API.Tests.Controllers
 
         [Theory]
         [AutoMoqData]
-        public async Task Create_User_Or_409(Mock<IUserService> service, User user)
+        public async Task Create_User_Or_409(Mock<IUserService> service, UserRequest user)
         {
-            service.Setup(x => x.Create(user, It.IsAny<CancellationToken>())).ReturnsAsync(user);
+            // service.Setup(x => x.Create(user, It.IsAny<CancellationToken>())).ReturnsAsync(user);
             service.Setup(x => x.Create(null, It.IsAny<CancellationToken>())).ReturnsAsync((User) null);
 
             var controller = TestSetup.SetupController<UsersController>(service.Object);

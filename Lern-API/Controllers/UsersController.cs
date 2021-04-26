@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation.AspNetCore;
 using Lern_API.DataTransferObjects.Requests;
 using Lern_API.DataTransferObjects.Responses;
-using Lern_API.Helpers.AspNet;
 using Lern_API.Helpers.JWT;
 using Lern_API.Models;
 using Lern_API.Services;
@@ -29,7 +29,12 @@ namespace Lern_API.Controllers
         /// <returns>A list of all registered users</returns>
         [RequireAuthentication]
         [HttpGet]
-        public async Task<IEnumerable<User>> GetAllUsers() => await _users.GetAll(HttpContext.RequestAborted);
+        public async Task<IEnumerable<UserResponse>> GetAllUsers()
+        {
+            var users = await _users.GetAll(HttpContext.RequestAborted);
+
+            return users.Select(user => new UserResponse(user));
+        }
 
         /// <summary>
         /// Returns a single user
@@ -39,15 +44,15 @@ namespace Lern_API.Controllers
         /// <response code="200">User associated to given Id</response>
         /// <response code="404">If given user could not be found</response>
         [RequireAuthentication]
-        [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(Guid id)
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<UserResponse>> GetUser(Guid id)
         {
             var user = await _users.Get(id, HttpContext.RequestAborted);
 
             if (user == null)
                 return NotFound();
 
-            return user;
+            return new UserResponse(user);
         }
 
         /// <summary>
@@ -58,7 +63,7 @@ namespace Lern_API.Controllers
         /// <response code="200">Id associated to the new user</response>
         /// <response code="409">If given name or email already exists</response>
         [HttpPost]
-        public async Task<ActionResult<User>> CreateUser(User user)
+        public async Task<ActionResult<User>> CreateUser(UserRequest user)
         {
             var result = await _users.Create(user, HttpContext.RequestAborted);
 
@@ -71,19 +76,22 @@ namespace Lern_API.Controllers
         /// <summary>
         /// Update an existing user
         /// </summary>
-        /// <param name="id">Id associated with the user to update</param>
+        /// <param name="id">User Id</param>
         /// <param name="user"></param>
         /// <returns>Updated user</returns>
         /// <response code="200">Updated user with the new values</response>
+        /// <response code="401">If you do not have the right to update this user</response>
         /// <response code="404">If given user could not be found</response>
         [RequireAuthentication]
-        [EnableBodyRewind]
-        [HttpPut("{id}")]
-        public async Task<ActionResult<User>> UpdateUser(Guid id, [CustomizeValidator(RuleSet = "Update")] User user)
+        [HttpPut("{id:guid}")]
+        public async Task<ActionResult<User>> UpdateUser(Guid id, [CustomizeValidator(RuleSet = "Update")] UserRequest user)
         {
-            user.Id = id;
+            var currentUser = HttpContext.GetUser();
 
-            var newUser = await _users.Update(user, await HttpContext.GetColumns(), HttpContext.RequestAborted);
+            if (currentUser.Id != id && !currentUser.Admin)
+                return Unauthorized();
+
+            var newUser = await _users.Update(id, user, HttpContext.RequestAborted);
 
             if (newUser == null)
                 return NotFound();
@@ -107,6 +115,19 @@ namespace Lern_API.Controllers
                 return BadRequest(new ErrorResponse("Login or password is incorrect"));
 
             return response;
+        }
+
+        /// <summary>
+        /// Returns the currently logged in user
+        /// </summary>
+        /// <returns>User information</returns>
+        /// <response code="200">User information</response>
+        /// <response code="401">If the current session token expired or is invalid</response>
+        [RequireAuthentication]
+        [HttpGet("/api/Whoami")]
+        public ActionResult<User> Whoami()
+        {
+            return HttpContext.GetUser();
         }
     }
 }

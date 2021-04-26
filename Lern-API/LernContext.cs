@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Lern_API.Models;
@@ -24,6 +23,11 @@ namespace Lern_API
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<User>()
+                .HasIndex(x => x.Nickname).IsUnique();
+            modelBuilder.Entity<User>()
+                .HasIndex(x => x.Email).IsUnique();
+
             modelBuilder.Entity<Course>()
                 .HasKey(x => new { x.Id, x.Version });
 
@@ -48,7 +52,7 @@ namespace Lern_API
             return await base.SaveChangesAsync(cancellationToken);
         }
 
-        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = new CancellationToken())
+        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
         {
             AddTimestamps();
             return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
@@ -57,18 +61,13 @@ namespace Lern_API
         private void AddTimestamps()
         {
             var entities = ChangeTracker.Entries()
-                .Where(x => 
-                        x.Entity.GetType().GetProperties(BindingFlags.Public)
-                            .Select(prop => prop.Name)
-                            .Any(propName => propName.Contains("CreatedAt") || propName.Contains("UpdatedAt")) &&
-                        (x.State == EntityState.Added || x.State == EntityState.Modified)
-                );
+                .Where(x => x.State is EntityState.Added or EntityState.Modified);
 
             foreach (var entity in entities)
             {
                 var now = DateTime.UtcNow;
-                var createdAt = entity.GetType().GetProperty("CreatedAt");
-                var updatedAt = entity.GetType().GetProperty("UpdatedAt");
+                var createdAt = entity.Entity.GetType().GetProperty("CreatedAt");
+                var updatedAt = entity.Entity.GetType().GetProperty("UpdatedAt");
 
                 if (entity.State == EntityState.Added && createdAt != null)
                     createdAt.SetValue(entity.Entity, now);

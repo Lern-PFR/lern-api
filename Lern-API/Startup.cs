@@ -8,7 +8,6 @@ using Lern_API.DataTransferObjects.Requests;
 using Lern_API.Helpers;
 using Lern_API.Helpers.JWT;
 using Lern_API.Helpers.Swagger;
-using Lern_API.Models;
 using Lern_API.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -44,7 +43,7 @@ namespace Lern_API
                 // Configuration de la validation des modèles
                 .AddFluentValidation(fv =>
                 {
-                    fv.RegisterValidatorsFromAssemblyContaining<UserValidator>();
+                    fv.RegisterValidatorsFromAssemblyContaining<UserRequestValidator>();
                     fv.RegisterValidatorsFromAssemblyContaining<LoginRequestValidator>();
                     fv.ImplicitlyValidateChildProperties = true;
                 })

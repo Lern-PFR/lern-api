@@ -34,6 +34,7 @@ namespace Lern_API.Models
 
             RuleSet("Update", () =>
             {
+                RuleFor(x => x.Id).NotEmpty();
                 RuleFor(x => x.Title).Length(3, 50);
                 RuleFor(x => x.Description).Length(10, 300);
                 RuleFor(x => x.Order).GreaterThanOrEqualTo(0);

@@ -14,9 +14,7 @@ namespace Lern_API.Helpers.JWT
     {
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            var user = (User) context.HttpContext.Items["User"];
-
-            if (user == null)
+            if (context.HttpContext.Items["User"] is not User)
                 context.Result = new JsonResult(new ErrorResponse("Unauthorized")) { StatusCode = StatusCodes.Status401Unauthorized };
         }
     }
