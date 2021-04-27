@@ -75,6 +75,7 @@ namespace Lern_API.Controllers
 
         /// <summary>
         /// Update an existing user
+        /// Password can be null if you do not want to update it
         /// </summary>
         /// <param name="id">User Id</param>
         /// <param name="user"></param>
@@ -91,10 +92,15 @@ namespace Lern_API.Controllers
             if (currentUser.Id != id && !currentUser.Admin)
                 return Unauthorized();
 
+            var exists = await _users.Exists(id, HttpContext.RequestAborted);
+
+            if (!exists)
+                return NotFound();
+
             var newUser = await _users.Update(id, user, HttpContext.RequestAborted);
 
             if (newUser == null)
-                return NotFound();
+                return Conflict();
 
             return newUser;
         }

@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace Lern_API.Models
 {
-    public class User
+    public class User : IModelBase
     {
         [ReadOnly(true), Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }

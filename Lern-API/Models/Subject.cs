@@ -12,7 +12,7 @@ namespace Lern_API.Models
         Approved = 1
     }
 
-    public class Subject
+    public class Subject : IModelBase
     {
         [ReadOnly(true), Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }

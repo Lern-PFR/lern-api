@@ -1,7 +1,9 @@
 ﻿using System;
+using Lern_API.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Lern_API.Tests.Utils
 {
@@ -22,9 +24,18 @@ namespace Lern_API.Tests.Utils
             return controller;
         }
 
+        public static T SetupSession<T>(this T controller, User user) where T : ControllerBase
+        {
+            controller.ControllerContext.HttpContext.Items.Add("User", user);
+            return controller;
+        }
+
         public static LernContext SetupContext()
         {
-            var options = new DbContextOptionsBuilder<LernContext>().UseInMemoryDatabase("TestDB").Options;
+            var options = new DbContextOptionsBuilder<LernContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+                .Options;
 
             var context = new LernContext(options);
             context.Database.EnsureCreated();

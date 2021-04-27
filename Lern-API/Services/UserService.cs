@@ -34,6 +34,11 @@ namespace Lern_API.Services
         {
             if (entity.Password != null)
                 entity.Password = BCrypt.Net.BCrypt.EnhancedHashPassword(entity.Password);
+            else
+            {
+                var storedUser = await Get(id, token);
+                entity.Password = storedUser.Password;
+            }
 
             return await base.Update(id, entity, token);
         }

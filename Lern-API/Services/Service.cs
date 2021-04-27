@@ -3,25 +3,27 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Lern_API.Helpers.Models;
+using Lern_API.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Lern_API.Services
 {
-    public interface IService<TEntity, in TDataTransferObject> where TEntity : class, new()
+    public interface IService<TEntity, in TDataTransferObject> where TEntity : class, IModelBase, new()
     {
         Task<IEnumerable<TEntity>> GetAll(CancellationToken token = default);
         Task<TEntity> Get(Guid id, CancellationToken token = default);
         Task<TEntity> Create(TDataTransferObject entity, CancellationToken token = default);
         Task<TEntity> Update(Guid id, TDataTransferObject entity, CancellationToken token = default);
-        Task<TEntity> Update(TEntity entity, CancellationToken token = default);
         Task<bool> Delete(Guid id, CancellationToken token = default);
         Task<bool> Exists(Guid id, CancellationToken token = default);
+        Task<T> ExecuteTransaction<T>(Func<DbSet<TEntity>, Task<T>> operations, CancellationToken token = default);
+        Task<T> ExecuteTransaction<T>(Func<DbSet<TEntity>, T> operations, CancellationToken token = default);
     }
 
-    public class Service<TEntity, TDataTransferObject> : IService<TEntity, TDataTransferObject> where TEntity : class, new()
+    public class Service<TEntity, TDataTransferObject> : IService<TEntity, TDataTransferObject> where TEntity : class, IModelBase, new()
     {
-        private LernContext Context { get; }
-        private DbSet<TEntity> DbSet { get; }
+        protected LernContext Context { get; }
+        protected DbSet<TEntity> DbSet { get; }
 
         public Service(LernContext context)
         {
@@ -34,26 +36,26 @@ namespace Lern_API.Services
             var final = new TEntity();
             final.CloneFrom(entity);
 
-            var entityEntry = await SafeExecute(async () => await DbSet.AddAsync(final, token), token);
+            var entityEntry = await SafeExecute(async set => await set.AddAsync(final, token), token);
 
             return entityEntry?.Entity;
         }
 
         public virtual async Task<bool> Delete(Guid id, CancellationToken token = default)
         {
-            var entity = await DbSet.FindAsync(new object[] { id }, token);
+            var exists = await Exists(id, token);
 
-            if (entity == default)
+            if (!exists)
                 return false;
 
-            var result = await SafeExecute(() => DbSet.Remove(entity), token);
+            var result = await SafeExecute(async set => set.Remove(await Get(id, token)), token);
 
             return !result.Equals(default);
         }
 
         public virtual async Task<bool> Exists(Guid id, CancellationToken token = default)
         {
-            return await DbSet.FindAsync(new object[] { id }, token) != default;
+            return await DbSet.AnyAsync(x => x.Id == id, token);
         }
 
         public virtual async Task<TEntity> Get(Guid id, CancellationToken token = default)
@@ -72,25 +74,28 @@ namespace Lern_API.Services
             
             entry.CloneFrom(entity);
 
-            await SafeExecute(() => DbSet.Update(entry), token);
+            var result = await SafeExecute(set => set.Update(entry), token);
 
-            return entry;
+            return result?.Entity;
         }
 
-        public virtual async Task<TEntity> Update(TEntity entity, CancellationToken token = default)
+        public async Task<T> ExecuteTransaction<T>(Func<DbSet<TEntity>, Task<T>> operations, CancellationToken token = default)
         {
-            var result = await SafeExecute(() => DbSet.Update(entity), token);
-
-            return result.Entity;
+            return await SafeExecute(operations, token);
         }
 
-        private async Task<T> SafeExecute<T>(Func<Task<T>> operations, CancellationToken token = default)
+        public async Task<T> ExecuteTransaction<T>(Func<DbSet<TEntity>, T> operations, CancellationToken token = default)
+        {
+            return await SafeExecute(operations, token);
+        }
+
+        protected async Task<T> SafeExecute<T>(Func<DbSet<TEntity>, Task<T>> operations, CancellationToken token = default)
         {
             await using var transaction = await Context.Database.BeginTransactionAsync(token);
 
             try
             {
-                var result = await operations();
+                var result = await operations(DbSet);
 
                 await Context.SaveChangesAsync(token);
                 await transaction.CommitAsync(token);
@@ -104,13 +109,13 @@ namespace Lern_API.Services
             }
         }
 
-        private async Task<T> SafeExecute<T>(Func<T> operations, CancellationToken token = default)
+        protected async Task<T> SafeExecute<T>(Func<DbSet<TEntity>, T> operations, CancellationToken token = default)
         {
             await using var transaction = await Context.Database.BeginTransactionAsync(token);
 
             try
             {
-                var result = operations();
+                var result = operations(DbSet);
 
                 await Context.SaveChangesAsync(token);
                 await transaction.CommitAsync(token);

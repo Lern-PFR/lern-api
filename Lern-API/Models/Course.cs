@@ -6,7 +6,7 @@ using FluentValidation;
 
 namespace Lern_API.Models
 {
-    public class Course 
+    public class Course : IModelBase
     {
         [ReadOnly(true), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
