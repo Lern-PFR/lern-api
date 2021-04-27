@@ -92,6 +92,11 @@ namespace Lern_API
                 options.SchemaFilter<ReadOnlyPropertiesFilter>();
             });
 
+            services.AddSpaStaticFiles(configuration =>
+            {
+                configuration.RootPath = "Content";
+            });
+
             // Ajout des en-têtes CORS
             services.AddCors();
 
@@ -110,11 +115,6 @@ namespace Lern_API
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            app.UseStaticFiles(new StaticFileOptions(new SharedOptions
-            {
-                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Content"))
-            }));
 
             app.UseCors(options =>
             {
@@ -137,6 +137,12 @@ namespace Lern_API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+            });
+
+            app.UseSpaStaticFiles();
+            app.UseSpa(spa =>
+            {
+                spa.Options.DefaultPage = "/index.html";
             });
         }
     }
