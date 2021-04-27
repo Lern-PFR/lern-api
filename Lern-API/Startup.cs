@@ -9,6 +9,7 @@ using Lern_API.Helpers;
 using Lern_API.Helpers.JWT;
 using Lern_API.Helpers.Swagger;
 using Lern_API.Services;
+using Lern_API.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -99,9 +100,11 @@ namespace Lern_API
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory, LernContext context)
         {
             loggerFactory.AddLog4Net();
+
+            Retry.Do(() => context.Database.Migrate(), TimeSpan.FromSeconds(3), 20);
 
             if (env.IsDevelopment())
             {
