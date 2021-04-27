@@ -1,32 +1,36 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using FluentValidation;
+﻿using System;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Lern_API.Models
 {
-    public class User : AbstractModel
+    public class User : IModelBase
     {
-        public string Name { get; set; }
+        [ReadOnly(true), Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public Guid Id { get; set; }
+        [ReadOnly(true)]
+        public DateTime CreatedAt { get; set; }
+        [ReadOnly(true)]
+        public DateTime UpdatedAt { get; set; }
+        [ReadOnly(true)]
+        public User Manager { get; set; }
+        public string Firstname { get; set; }
+        public string Lastname { get; set; }
+        public string Nickname { get; set; }
         public string Email { get; set; }
-        public string Password { internal get; set; }
-    }
-
-    [ExcludeFromCodeCoverage]
-    public class UserValidator : AbstractValidator<User>
-    {
-        public UserValidator()
-        {
-            RuleFor(x => x.Id).Empty();
-            RuleFor(x => x.Name).NotNull().Length(3, 50);
-            RuleFor(x => x.Email).NotNull().EmailAddress();
-            RuleFor(x => x.Password).NotNull().MinimumLength(8);
-
-            RuleSet("Update", () =>
-            {
-                RuleFor(x => x.Id).Empty();
-                RuleFor(x => x.Name).Length(3, 50);
-                RuleFor(x => x.Email).EmailAddress();
-                RuleFor(x => x.Password).MinimumLength(8);
-            });
-        }
+        [JsonIgnore]
+        public string Password { get; set; }
+        [ReadOnly(true), DefaultValue(0)]
+        public int Tokens { get; set; } = 0;
+        [ReadOnly(true), DefaultValue(5)]
+        public int MaxSubjects { get; set; } = 5;
+        [ReadOnly(true), DefaultValue(true)]
+        public bool Active { get; set; } = true;
+        [ReadOnly(true), DefaultValue(false)]
+        public bool Admin { get; set; } = false;
+        [ReadOnly(true), DefaultValue(false)]
+        public bool VerifiedCreator { get; set; } = false;
     }
 }

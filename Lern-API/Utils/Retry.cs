@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using System.Threading;
 
-namespace Lern_API.Helpers.Database
+namespace Lern_API.Utils
 {
     public static class Retry
     {
-        public static void Do(Action action, TimeSpan retryInterval, int maxAttemptCount = 3)
+        public static void Do(
+            Action action,
+            TimeSpan retryInterval,
+            int maxAttemptCount = 3)
         {
-            if (action == null)
-                throw new ArgumentNullException(nameof(action));
-
             Do<object>(() =>
             {
                 action();
@@ -18,14 +18,11 @@ namespace Lern_API.Helpers.Database
             }, retryInterval, maxAttemptCount);
         }
 
-        public static T Do<T>(Func<T> action, TimeSpan retryInterval, int maxAttemptCount = 3)
+        public static T Do<T>(
+            Func<T> action,
+            TimeSpan retryInterval,
+            int maxAttemptCount = 3)
         {
-            if (action == null)
-                throw new ArgumentNullException(nameof(action));
-
-            if (maxAttemptCount < 1)
-                throw new ArgumentException(nameof(maxAttemptCount));
-
             var exceptions = new List<Exception>();
 
             for (var attempted = 0; attempted < maxAttemptCount; attempted++)
@@ -36,7 +33,6 @@ namespace Lern_API.Helpers.Database
                     {
                         Thread.Sleep(retryInterval);
                     }
-
                     return action();
                 }
                 catch (Exception ex)
@@ -44,7 +40,6 @@ namespace Lern_API.Helpers.Database
                     exceptions.Add(ex);
                 }
             }
-
             throw new AggregateException(exceptions);
         }
     }
