@@ -74,7 +74,7 @@ namespace Lern_API.Controllers
         }
 
         /// <summary>
-        /// Update an existing user
+        /// Update an existing user.
         /// Password can be null if you do not want to update it
         /// </summary>
         /// <param name="id">User Id</param>

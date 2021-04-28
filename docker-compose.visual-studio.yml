@@ -6,12 +6,10 @@ services:
     build:
       context: .
       dockerfile: Lern-API/Dockerfile
-    ports:
-      - 80:80
     depends_on:
-      - database
+     - database
     networks:
-      - postgres
+     - postgres
   database:
     image: postgres:12-alpine
     environment:
@@ -19,10 +17,12 @@ services:
       POSTGRES_PASSWORD: lern-dev-password
       POSTGRES_DB: lern-dev-db
       PGDATA: /data/postgres
+    ports:
+     - 5432:5432
     volumes:
-      - postgres:/data/postgres
+     - postgres:/data/postgres
     networks:
-      - postgres
+     - postgres
     restart: unless-stopped
 
 networks:
