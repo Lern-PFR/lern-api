@@ -25,7 +25,7 @@ Pour plus de détails sur les variables d'environnement utilisables, des explica
 docker-compose up
 ```
 
-L'API est disponible après initialisation à l'adresse [](http://localhost:81/)
+L'API est disponible après initialisation à l'adresse http://localhost:81/
 
 #### Avec l'image Docker
 
