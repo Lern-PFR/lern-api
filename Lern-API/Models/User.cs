@@ -15,12 +15,18 @@ namespace Lern_API.Models
         [ReadOnly(true)]
         public DateTime UpdatedAt { get; set; }
         [ReadOnly(true)]
+        public Guid ManagerId { get; set; }
+        [ReadOnly(true)]
         public User Manager { get; set; }
+        [Required, MinLength(3), MaxLength(50)]
         public string Firstname { get; set; }
+        [Required, MinLength(3), MaxLength(100)]
         public string Lastname { get; set; }
+        [Required, MinLength(3), MaxLength(50)]
         public string Nickname { get; set; }
+        [Required, MaxLength(254)]
         public string Email { get; set; }
-        [JsonIgnore]
+        [JsonIgnore, MinLength(8), MaxLength(100)]
         public string Password { get; set; }
         [ReadOnly(true), DefaultValue(0)]
         public int Tokens { get; set; } = 0;

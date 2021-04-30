@@ -2,8 +2,6 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
-using FluentValidation;
 
 namespace Lern_API.Models
 {
@@ -15,30 +13,15 @@ namespace Lern_API.Models
         public DateTime CreatedAt { get; set; }
         [ReadOnly(true)]
         public DateTime UpdatedAt { get; set; }
-        [ReadOnly(true)]
+        [Required]
+        public Guid SubjectId { get; set; }
+        [Required]
         public Subject Subject { get; set; }
+        [Required, MinLength(3), MaxLength(50)]
         public string Title { get; set; }
+        [Required, MinLength(10), MaxLength(300)]
         public string Description { get; set; }
+        [Required]
         public int Order { get; set; }
-    }
-
-    [ExcludeFromCodeCoverage]
-    public class ModuleValidator : AbstractValidator<Module>
-    {
-        public ModuleValidator()
-        {
-            RuleFor(x => x.Subject).NotNull();
-            RuleFor(x => x.Title).NotNull().Length(3, 50);
-            RuleFor(x => x.Description).NotNull().Length(10, 300);
-            RuleFor(x => x.Order).NotNull().GreaterThanOrEqualTo(0);
-
-            RuleSet("Update", () =>
-            {
-                RuleFor(x => x.Id).NotEmpty();
-                RuleFor(x => x.Title).Length(3, 50);
-                RuleFor(x => x.Description).Length(10, 300);
-                RuleFor(x => x.Order).GreaterThanOrEqualTo(0);
-            });
-        }
     }
 }

@@ -15,6 +15,13 @@ namespace Lern_API
         public DbSet<Module> Modules { get; set; }
         public DbSet<Concept> Concepts { get; set; }
         public DbSet<Course> Courses { get; set; }
+        public DbSet<Exercise> Exercises { get; set; }
+        public DbSet<Question> Questions { get; set; }
+        public DbSet<Answer> Answers { get; set; }
+        public DbSet<Result> Results { get; set; }
+        public DbSet<Article> Articles { get; set; }
+        public DbSet<Progression> Progressions { get; set; }
+        public DbSet<Purchase> Purchases { get; set; }
 
         public LernContext(DbContextOptions options) : base(options)
         {
@@ -30,6 +37,12 @@ namespace Lern_API
 
             modelBuilder.Entity<Course>()
                 .HasKey(x => new { x.Id, x.Version });
+
+            modelBuilder.Entity<Result>()
+                .HasKey(x => new { x.QuestionId, x.UserId });
+
+            modelBuilder.Entity<Progression>()
+                .HasKey(x => new { x.UserId, x.SubjectId });
 
             base.OnModelCreating(modelBuilder);
         }

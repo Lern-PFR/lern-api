@@ -45,7 +45,7 @@ namespace Lern_API.Services
 
         public async Task<LoginResponse> Login(LoginRequest request, CancellationToken token = default)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.Nickname == request.Login || x.Email == request.Login, token);
+            var user = await DbSet.FirstOrDefaultAsync(x => x.Nickname == request.Login || x.Email == request.Login, token);
 
             if (user == null || !BCrypt.Net.BCrypt.EnhancedVerify(request.Password, user.Password))
                 return null;
