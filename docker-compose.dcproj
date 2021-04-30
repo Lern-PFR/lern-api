@@ -7,15 +7,16 @@
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
     <DockerServiceUrl>{Scheme}://localhost:{ServicePort}</DockerServiceUrl>
     <DockerServiceName>lern-api</DockerServiceName>
+    <DockerComposeProjectName>lern-api_visualstudio</DockerComposeProjectName>
+    <DockerComposeBaseFilePath>docker-compose.visual-studio</DockerComposeBaseFilePath>
+    <DockerComposeBuildArguments>--pull</DockerComposeBuildArguments>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="docker-compose.override.yml">
-      <DependentUpon>docker-compose.yml</DependentUpon>
+    <None Include="docker-compose.visual-studio.override.yml">
+      <DependentUpon>docker-compose.visual-studio.yml</DependentUpon>
     </None>
+    <None Include="docker-compose.visual-studio.yml" />
     <None Include="docker-compose.yml" />
     <None Include=".dockerignore" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="docker-compose.linux.yml" />
   </ItemGroup>
 </Project>

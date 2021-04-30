@@ -12,18 +12,26 @@ Ce dépôt contient le code source de l'API du projet [Lern.](https://github.com
 ### Image Docker officielle
 
 ```bash
-docker run -p 80:80 -p 443:443 lernpfr/lern-api:staging -e DB_HOST=127.0.0.1 -e DB_USERNAME=username -e DB_PASSWORD=password -e DB_DATABASE=database -e DB_PORT=5432 -e SECRET_KEY=random_cryptographic_key
+docker run -p 80:80 -p 443:443 lernpfr/lern-api -e DB_HOST=127.0.0.1 -e DB_USERNAME=username -e DB_PASSWORD=password -e DB_DATABASE=database -e DB_PORT=5432 -e SECRET_KEY=random_cryptographic_key
 ```
 
 Pour plus de détails sur les variables d'environnement utilisables, des explications complètes sont disponibles sur [Docker Hub](https://hub.docker.com/r/lernpfr/lern-api).
 
 ### Depuis le code source
 
-#### Avec l'image Docker (recommandé)
+#### Avec docker-compose (recommandé)
 
 ```bash
-docker build . -t lern/lern-api
-docker run -p 80:80 -p 443:443 lern/lern-api -e DB_HOST=127.0.0.1 -e DB_USERNAME=username -e DB_PASSWORD=password -e DB_DATABASE=database -e DB_PORT=5432 -e SECRET_KEY=random_cryptographic_key
+docker-compose up
+```
+
+L'API est disponible après initialisation à l'adresse http://localhost:81/
+
+#### Avec l'image Docker
+
+```bash
+docker build . -t lern/lern-api:custom
+docker run -p 80:80 -p 443:443 lern/lern-api:custom -e DB_HOST=127.0.0.1 -e DB_USERNAME=username -e DB_PASSWORD=password -e DB_DATABASE=database -e DB_PORT=5432 -e SECRET_KEY=random_cryptographic_key
 ```
 
 Pour plus de détails sur les variables d'environnement utilisables, des explications complètes sont disponibles sur [Docker Hub](https://hub.docker.com/r/lernpfr/lern-api).
