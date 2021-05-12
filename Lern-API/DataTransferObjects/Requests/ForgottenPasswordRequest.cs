@@ -3,16 +3,16 @@ using FluentValidation;
 
 namespace Lern_API.DataTransferObjects.Requests
 {
-    public class ForgottenPasswordDefinitionRequest
+    public class ForgottenPasswordRequest
     {
         public string Token { get; set; }
         public string Password { get; set; }
     }
 
     [ExcludeFromCodeCoverage]
-    public class ForgottenPasswordDefinitionRequestValidator : AbstractValidator<ForgottenPasswordDefinitionRequest>
+    public class ForgottenPasswordRequestValidator : AbstractValidator<ForgottenPasswordRequest>
     {
-        public ForgottenPasswordDefinitionRequestValidator()
+        public ForgottenPasswordRequestValidator()
         {
             RuleFor(x => x.Token).NotNull().NotEmpty();
             RuleFor(x => x.Password).NotNull().Length(8, 100);

@@ -67,7 +67,7 @@ namespace Lern_API.Services
 
             if (user != null)
             {
-                await _mails.SendEmailAsync(user, "Account recovery", "RecoverAccount", new
+                await _mails.SendEmailAsync(user, "Récupération du compte", "RecoverAccount", new
                 {
                     Username = user.Nickname,
                     GeneratedLink = Url.Combine(appBaseUrl, user.GenerateForgottenPasswordToken())
@@ -88,6 +88,9 @@ namespace Lern_API.Services
                 return false;
 
             var user = await Get(userId.Value, token);
+
+            if (user == null)
+                return false;
 
             var userRequest = new UserRequest();
             userRequest.CloneFrom(user);

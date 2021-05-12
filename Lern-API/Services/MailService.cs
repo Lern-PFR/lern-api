@@ -33,6 +33,8 @@ namespace Lern_API.Services
         {
             using var scope = _serviceProvider.CreateScope();
 
+            // This method is untestable because of this line
+            // Unfortunately, this line is required for the IFluentEmailFactory to be retrieved without crashing the entire server
             return await scope.ServiceProvider.GetRequiredService<IFluentEmailFactory>()
                 .Create()
                 .To(recipientAddress, recipientName)

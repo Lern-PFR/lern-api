@@ -149,7 +149,7 @@ namespace Lern_API.Controllers
         /// <param name="request">The token sent by email along with the new password</param>
         /// <returns></returns>
         [HttpPost("/api/ForgottenPassword")]
-        public async Task<IActionResult> ForgottenPasswordDefinition(ForgottenPasswordDefinitionRequest request)
+        public async Task<IActionResult> ForgottenPasswordDefinition(ForgottenPasswordRequest request)
         {
             var result = await _users.DefineForgottenPassword(request.Token, request.Password, HttpContext.RequestAborted);
 

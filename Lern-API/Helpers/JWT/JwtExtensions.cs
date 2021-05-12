@@ -54,7 +54,7 @@ namespace Lern_API.Helpers.JWT
             try
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(Configuration.Get<string>("SecretKey"));
+                var key = Encoding.ASCII.GetBytes(SecretKey);
 
                 tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {

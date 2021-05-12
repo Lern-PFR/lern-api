@@ -152,9 +152,49 @@ namespace Lern_API.Tests.Controllers
 
         [Theory]
         [AutoMoqData]
-        public void Return_Current_User(Mock<IUserService> service, User user)
+        public void Return_OK_On_Forgotten_Password(IUserService service, string login)
         {
-            var controller = TestSetup.SetupController<UsersController>(service.Object).SetupSession(user);
+            var controller = TestSetup.SetupController<UsersController>(service);
+
+            var result = controller.ForgottenPassword(login);
+
+            result.Should().NotBeNull();
+            result.Result.Should().BeOfType<OkResult>();
+        }
+
+        [Theory]
+        [AutoMoqData]
+        public void Return_OK_On_Valid_Forgotten_Password_Definition(Mock<IUserService> service, ForgottenPasswordRequest request)
+        {
+            service.Setup(x => x.DefineForgottenPassword(request.Token, request.Password, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+
+            var controller = TestSetup.SetupController<UsersController>(service.Object);
+
+            var result = controller.ForgottenPasswordDefinition(request);
+
+            result.Should().NotBeNull();
+            result.Result.Should().BeOfType<OkResult>();
+        }
+
+        [Theory]
+        [AutoMoqData]
+        public void Return_400_On_Valid_Forgotten_Password_Definition(Mock<IUserService> service, ForgottenPasswordRequest request)
+        {
+            service.Setup(x => x.DefineForgottenPassword(request.Token, request.Password, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+
+            var controller = TestSetup.SetupController<UsersController>(service.Object);
+
+            var result = controller.ForgottenPasswordDefinition(request);
+
+            result.Should().NotBeNull();
+            result.Result.Should().BeOfType<BadRequestResult>();
+        }
+
+        [Theory]
+        [AutoMoqData]
+        public void Return_Current_User(IUserService service, User user)
+        {
+            var controller = TestSetup.SetupController<UsersController>(service).SetupSession(user);
 
             var result = controller.Whoami();
 
