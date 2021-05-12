@@ -5,23 +5,21 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Lern_API.Models
 {
-    public class Concept : IModelBase
+    public class Answer : IModelBase
     {
         [ReadOnly(true), Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
+        [ReadOnly(true), Required]
+        public Guid QuestionId { get; set; }
+        [ReadOnly(true), Required]
+        public Question Question { get; set; }
         [ReadOnly(true)]
         public DateTime CreatedAt { get; set; }
         [ReadOnly(true)]
         public DateTime UpdatedAt { get; set; }
+        [Required, MinLength(3), MaxLength(300)]
+        public string Text { get; set; }
         [Required]
-        public Guid ModuleId { get; set; }
-        [Required]
-        public Module Module { get; set; }
-        [Required, MinLength(3), MaxLength(50)]
-        public string Title { get; set; }
-        [Required, MinLength(10), MaxLength(300)]
-        public string Description { get; set; }
-        [Required]
-        public int Order { get; set; }
+        public bool Valid { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json.Serialization;
 using FluentValidation.AspNetCore;
 using Lern_API.DataTransferObjects.Requests;
 using Lern_API.Helpers;
@@ -13,11 +14,9 @@ using Lern_API.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.StaticFiles.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
@@ -41,6 +40,10 @@ namespace Lern_API
 
             // Ajout des contrôleurs applicatifs
             services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                })
                 // Configuration de la validation des modèles
                 .AddFluentValidation(fv =>
                 {
@@ -101,6 +104,7 @@ namespace Lern_API
             services.AddCors();
 
             // Ajout des services
+            services.AddScoped(typeof(IService<,>), typeof(Service<,>));
             services.AddScoped<IUserService, UserService>();
         }
 
@@ -123,10 +127,13 @@ namespace Lern_API
                 options.AllowAnyMethod();
             });
 
-            app.UseSwagger().UseSwaggerUI(c =>
+            if (env.IsDevelopment())
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lern. API");
-            });
+                app.UseSwagger().UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lern. API");
+                });
+            }
 
             app.UseRouting();
             app.UseAuthentication();

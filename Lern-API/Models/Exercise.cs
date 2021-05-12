@@ -5,13 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Lern_API.Models
 {
-    public enum SubjectState
-    {
-        Pending = 0,
-        Approved = 1
-    }
-
-    public class Subject : IModelBase
+    public class Exercise : IModelBase
     {
         [ReadOnly(true), Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
@@ -19,15 +13,17 @@ namespace Lern_API.Models
         public DateTime CreatedAt { get; set; }
         [ReadOnly(true)]
         public DateTime UpdatedAt { get; set; }
-        [ReadOnly(true)]
-        public Guid AuthorId { get; set; }
-        [ReadOnly(true)]
-        public User Author { get; set; }
+        public Guid? ConceptId { get; set; }
+        public Concept Concept { get; set; }
+        public Guid? CourseId { get; set; }
+        public Course Course { get; set; }
         [Required, MinLength(3), MaxLength(50)]
         public string Title { get; set; }
         [Required, MinLength(10), MaxLength(300)]
         public string Description { get; set; }
-        [ReadOnly(true)]
-        public SubjectState State { get; set; }
+        [Required]
+        public string Content { get; set; }
+        [Required]
+        public int Order { get; set; }
     }
 }
