@@ -1,26 +1,31 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Flurl;
 using Lern_API.DataTransferObjects.Requests;
 using Lern_API.DataTransferObjects.Responses;
 using Lern_API.Helpers.JWT;
+using Lern_API.Helpers.Models;
 using Lern_API.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Lern_API.Services
 {
-    public interface IUserService : IService<User, UserRequest>
+    public interface IUserService : IDatabaseService<User, UserRequest>
     {
         Task<LoginResponse> Login(LoginRequest request, CancellationToken token = default);
+        Task ForgottenPassword(string login, string appBaseUrl, CancellationToken token = default);
+        Task<bool> DefineForgottenPassword(string userToken, string password, CancellationToken token = default);
     }
 
-    public class UserService : Service<User, UserRequest>, IUserService
+    public class UserService : DatabaseService<User, UserRequest>, IUserService
     {
-        private readonly LernContext _context;
+        private readonly IMailService _mails;
 
-        public UserService(LernContext context) : base(context)
+        public UserService(LernContext context, IMailService mails) : base(context)
         {
-            _context = context;
+            _mails = mails;
         }
         
         public new async Task<User> Create(UserRequest entity, CancellationToken token = default)
@@ -51,6 +56,46 @@ namespace Lern_API.Services
                 return null;
 
             return new LoginResponse(user, user.GenerateToken());
+        }
+
+        public async Task ForgottenPassword(string login, string appBaseUrl, CancellationToken token = default)
+        {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            var user = await DbSet.FirstOrDefaultAsync(x => x.Nickname == login || x.Email == login, token);
+
+            if (user != null)
+            {
+                await _mails.SendEmailAsync(user, "Account recovery", "RecoverAccount", new
+                {
+                    Username = user.Nickname,
+                    GeneratedLink = Url.Combine(appBaseUrl, user.GenerateForgottenPasswordToken())
+                }, token);
+            }
+            
+            if (stopwatch.ElapsedMilliseconds < 2000)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(2000 - stopwatch.ElapsedMilliseconds), token);
+            }
+        }
+
+        public async Task<bool> DefineForgottenPassword(string userToken, string password, CancellationToken token = default)
+        {
+            var userId = JwtExtensions.GetUserIdFromToken(userToken);
+
+            if (!userId.HasValue)
+                return false;
+
+            var user = await Get(userId.Value, token);
+
+            var userRequest = new UserRequest();
+            userRequest.CloneFrom(user);
+            userRequest.Password = password;
+
+            var result = await Update(userId.Value, userRequest, token);
+
+            return result != null;
         }
     }
 }

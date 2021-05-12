@@ -21,7 +21,7 @@ namespace Lern_API.DataTransferObjects.Requests
     [ExcludeFromCodeCoverage]
     public class AnswerRequestValidator : AbstractValidator<AnswerRequest>
     {
-        public AnswerRequestValidator(IService<Question, QuestionRequest> questionService)
+        public AnswerRequestValidator(IDatabaseService<Question, QuestionRequest> questionService)
         {
             RuleFor(x => x.QuestionId).NotNull().MustExistInDatabase(questionService);
             RuleFor(x => x.Text).NotEmpty().Length(3, 300);

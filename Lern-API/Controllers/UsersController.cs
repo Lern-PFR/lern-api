@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FluentValidation.AspNetCore;
 using Lern_API.DataTransferObjects.Requests;
 using Lern_API.DataTransferObjects.Responses;
+using Lern_API.Helpers.Context;
 using Lern_API.Helpers.JWT;
 using Lern_API.Models;
 using Lern_API.Services;
@@ -123,6 +124,41 @@ namespace Lern_API.Controllers
             return response;
         }
 
+        /// <summary>
+        /// Send an email with a password definition link to the user associated to the given nickname or email address.
+        /// </summary>
+        /// <remarks>
+        /// This route will always take more than 2 seconds to complete, to avoid timing attacks.
+        /// </remarks>
+        /// <param name="login">The nickname or the email address of the user</param>
+        /// <response code="200">This route always sends an empty OK response</response>
+        [HttpGet("/api/ForgottenPassword")]
+        public async Task<IActionResult> ForgottenPassword([FromQuery] string login)
+        {
+            await _users.ForgottenPassword(login, HttpContext.GetBaseUrl(), HttpContext.RequestAborted);
+
+            return Ok();
+        }
+
+        /// <summary>
+        /// Define a new password for the user associated to the given token.
+        /// </summary>
+        /// <remarks>
+        /// To get a valid token, please use the <c>/api/ForgottenPassword</c> route
+        /// </remarks>
+        /// <param name="request">The token sent by email along with the new password</param>
+        /// <returns></returns>
+        [HttpPost("/api/ForgottenPassword")]
+        public async Task<IActionResult> ForgottenPasswordDefinition(ForgottenPasswordDefinitionRequest request)
+        {
+            var result = await _users.DefineForgottenPassword(request.Token, request.Password, HttpContext.RequestAborted);
+
+            if (!result)
+                return BadRequest();
+
+            return Ok();
+        }
+        
         /// <summary>
         /// Returns the currently logged in user
         /// </summary>

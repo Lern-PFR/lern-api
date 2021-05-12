@@ -10,6 +10,7 @@ services:
      - database
     networks:
      - postgres
+     - mailhog
   database:
     image: postgres:12-alpine
     environment:
@@ -24,9 +25,22 @@ services:
     networks:
      - postgres
     restart: unless-stopped
+  mailhog:
+    image: mailhog/mailhog
+    environment:
+      MH_STORAGE: maildir
+    ports:
+     - 1025:1025
+     - 8025:8025
+    volumes:
+     - mailhog:/maildir
+    networks:
+     - mailhog
 
 networks:
   postgres:
+  mailhog:
 
 volumes:
   postgres:
+  mailhog:

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
+using FluentEmail.MailKitSmtp;
 using FluentValidation.AspNetCore;
 using Lern_API.DataTransferObjects.Requests;
 using Lern_API.Helpers;
@@ -17,6 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
@@ -37,6 +39,21 @@ namespace Lern_API
         {
             // Ajout du système de communication avec la base de données
             services.AddDbContext<LernContext>(options => options.UseNpgsql(Configuration.GetConnectionString()));
+
+            services.AddFluentEmail(Configuration.Get<string>("SenderEmail"), Configuration.Get<string>("SenderName"))
+                .AddLiquidRenderer(options =>
+                {
+                    options.FileProvider =
+                        new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Templates"));
+                })
+                .AddMailKitSender(new SmtpClientOptions
+                {
+                    Server = Configuration.Get<string>("SmtpServer"),
+                    Port = Configuration.Get<int>("SmtpPort"),
+                    User = Configuration.Get<string>("SmtpUser"),
+                    RequiresAuthentication = !string.IsNullOrEmpty(Configuration.Get<string>("SmtpUser")),
+                    UseSsl = Configuration.Get<bool>("SmtpUseSsl")
+                });
 
             // Ajout des contrôleurs applicatifs
             services.AddControllers()
@@ -104,7 +121,8 @@ namespace Lern_API
             services.AddCors();
 
             // Ajout des services
-            services.AddScoped(typeof(IService<,>), typeof(Service<,>));
+            services.AddSingleton<IMailService, MailService>();
+            services.AddScoped(typeof(IDatabaseService<,>), typeof(DatabaseService<,>));
             services.AddScoped<IUserService, UserService>();
         }
 

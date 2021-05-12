@@ -23,7 +23,7 @@ namespace Lern_API.DataTransferObjects.Requests
     [ExcludeFromCodeCoverage]
     public class ConceptRequestValidator : AbstractValidator<ConceptRequest>
     {
-        public ConceptRequestValidator(IService<Module, ModuleRequest> moduleService)
+        public ConceptRequestValidator(IDatabaseService<Module, ModuleRequest> moduleService)
         {
             RuleFor(x => x.ModuleId).NotNull().MustExistInDatabase(moduleService);
             RuleFor(x => x.Title).NotNull().Length(3, 50);

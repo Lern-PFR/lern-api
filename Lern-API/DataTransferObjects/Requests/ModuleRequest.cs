@@ -23,7 +23,7 @@ namespace Lern_API.DataTransferObjects.Requests
     [ExcludeFromCodeCoverage]
     public class ModuleRequestValidator : AbstractValidator<ModuleRequest>
     {
-        public ModuleRequestValidator(IService<Subject, SubjectRequest> subjectService)
+        public ModuleRequestValidator(IDatabaseService<Subject, SubjectRequest> subjectService)
         {
             RuleFor(x => x.SubjectId).NotEmpty().MustExistInDatabase(subjectService);
             RuleFor(x => x.Title).NotNull().Length(3, 50);
