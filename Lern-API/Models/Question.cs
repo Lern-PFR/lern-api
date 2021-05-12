@@ -28,7 +28,7 @@ namespace Lern_API.Models
         public QuestionType Type { get; set; }
         [Required, MinLength(3), MaxLength(300)]
         public string Statement { get; set; }
-        [Required, MinLength(10), MaxLength(3000)]
+        [MinLength(10), MaxLength(3000)]
         public string Explanation { get; set; }
         [Required]
         public List<Answer> Answers { get; set; }

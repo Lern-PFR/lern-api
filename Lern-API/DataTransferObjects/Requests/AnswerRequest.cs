@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using FluentValidation;
 using Lern_API.Helpers.Validation;
 using Lern_API.Models;
@@ -18,6 +18,7 @@ namespace Lern_API.DataTransferObjects.Requests
         public bool Valid { get; set; }
     }
     
+    [ExcludeFromCodeCoverage]
     public class AnswerRequestValidator : AbstractValidator<AnswerRequest>
     {
         public AnswerRequestValidator(IService<Question, QuestionRequest> questionService)

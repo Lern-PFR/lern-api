@@ -10,7 +10,7 @@ namespace Lern_API.Helpers.Validation
         public static IRuleBuilderOptions<T, Guid> MustExistInDatabase<T, TEntity, TEntityRequest>(this IRuleBuilder<T, Guid> rule, IService<TEntity, TEntityRequest> service)
             where TEntity : class, IModelBase, new()
         {
-            return rule.MustAsync(async (_, id, token) => await service.Exists(id, token)).WithMessage($"Given {typeof(T).Name} does not exist");
+            return rule.MustAsync(async (_, id, token) => await service.Exists(id, token)).WithMessage($"Provided {typeof(T).Name} does not exist");
         }
 
         public static IRuleBuilderOptions<T, Guid?> MustExistInDatabaseIfNotNull<T, TEntity, TEntityRequest>(this IRuleBuilder<T, Guid?> rule, IService<TEntity, TEntityRequest> service)
@@ -22,7 +22,7 @@ namespace Lern_API.Helpers.Validation
                     return await service.Exists(id.Value, token);
                 
                 return true;
-            }).WithMessage($"Given {typeof(T).Name} does not exist");
+            }).WithMessage($"Provided {typeof(T).Name} does not exist");
         }
     }
 }

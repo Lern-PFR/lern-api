@@ -1,8 +1,6 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using FluentValidation;
-using Lern_API.Models;
 
 namespace Lern_API.DataTransferObjects.Requests
 {
