@@ -76,7 +76,7 @@ namespace Lern_API.Services
             
             if (stopwatch.ElapsedMilliseconds < 2000)
             {
-                await Task.Delay(TimeSpan.FromMilliseconds(2000 - stopwatch.ElapsedMilliseconds), token);
+                await Task.Delay(TimeSpan.FromMilliseconds(2001 - stopwatch.ElapsedMilliseconds), token);
             }
         }
 
