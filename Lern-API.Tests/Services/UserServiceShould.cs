@@ -50,7 +50,7 @@ namespace Lern_API.Tests.Services
             var user = new User
             {
                 Id = Guid.NewGuid(),
-                Email = request.Login,
+                Email = request.Login.ToLowerInvariant(),
                 Password = BCrypt.Net.BCrypt.EnhancedHashPassword(request.Password)
             };
 
