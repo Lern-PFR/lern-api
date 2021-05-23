@@ -15,7 +15,7 @@ namespace Lern_API.Models
         [ReadOnly(true)]
         public DateTime UpdatedAt { get; set; }
         [ReadOnly(true)]
-        public Guid ManagerId { get; set; }
+        public Guid? ManagerId { get; set; }
         [ReadOnly(true)]
         public User Manager { get; set; }
         [Required, MinLength(3), MaxLength(50)]

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Lern_API.Services
 {
-    public interface IService<TEntity, in TDataTransferObject> where TEntity : class, IModelBase, new()
+    public interface IDatabaseService<TEntity, in TDataTransferObject> where TEntity : class, IModelBase, new()
     {
         Task<IEnumerable<TEntity>> GetAll(CancellationToken token = default);
         Task<TEntity> Get(Guid id, CancellationToken token = default);
@@ -20,12 +20,12 @@ namespace Lern_API.Services
         Task<T> ExecuteTransaction<T>(Func<DbSet<TEntity>, T> operations, CancellationToken token = default);
     }
 
-    public class Service<TEntity, TDataTransferObject> : IService<TEntity, TDataTransferObject> where TEntity : class, IModelBase, new()
+    public class DatabaseService<TEntity, TDataTransferObject> : IDatabaseService<TEntity, TDataTransferObject> where TEntity : class, IModelBase, new()
     {
         protected LernContext Context { get; }
         protected DbSet<TEntity> DbSet { get; }
 
-        public Service(LernContext context)
+        public DatabaseService(LernContext context)
         {
             Context = context;
             DbSet = Context.Set<TEntity>();

@@ -25,7 +25,7 @@ namespace Lern_API.DataTransferObjects.Requests
     [ExcludeFromCodeCoverage]
     public class CourseRequestValidator : AbstractValidator<CourseRequest>
     {
-        public CourseRequestValidator(IService<Concept, ConceptRequest> conceptService)
+        public CourseRequestValidator(IDatabaseService<Concept, ConceptRequest> conceptService)
         {
             RuleFor(x => x.ConceptId).NotNull().MustExistInDatabase(conceptService);
             RuleFor(x => x.Title).NotNull().Length(3, 50);

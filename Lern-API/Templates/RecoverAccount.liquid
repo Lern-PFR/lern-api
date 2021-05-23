@@ -1,0 +1,22 @@
+{% layout '_layout' %}
+
+{% section summary %}
+    Vous avez perdu votre mot de passe, {{ Username }} ?
+{% endsection %}
+
+<table class="container paragraph-block" border="0" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+        <td align="center" valign="top">
+            <table class="container" border="0" cellpadding="0" cellspacing="0" width="620" style="width: 620px;">
+                <tr>
+                    <td class="paragraph-block__content" style="padding: 25px 0 18px 0; font-size: 16px; line-height: 27px; color: #969696;" align="left">
+                        Vous avez perdu votre mot de passe, <b>{{ Username }}</b> ?<br />
+                        Pas de panique ! Vous pouvez utiliser <a href="{{ GeneratedLink }}">ce lien</a> dans les 15 prochaines minutes pour en choisir un nouveau.<br />
+                        Si cette demande ne provient pas de vous, vous pouvez ignorer ce message sans vous faire de soucis.<br /><br />
+                        <b>A très vite sur Lern. !</b>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>

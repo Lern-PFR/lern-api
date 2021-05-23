@@ -13,7 +13,7 @@ namespace Lern_API.DataTransferObjects.Requests
     {
         [Required]
         public Guid ExerciseId { get; set; }
-        [Required, EnumDataType(typeof(QuestionType))]
+        [Required]
         public QuestionType Type { get; set; }
         [Required, MinLength(3), MaxLength(300)]
         public string Statement { get; set; }
@@ -26,7 +26,7 @@ namespace Lern_API.DataTransferObjects.Requests
     [ExcludeFromCodeCoverage]
     public class QuestionRequestValidator : AbstractValidator<QuestionRequest>
     {
-        public QuestionRequestValidator(IService<Exercise, ExerciseRequest> exerciseService)
+        public QuestionRequestValidator(IDatabaseService<Exercise, ExerciseRequest> exerciseService)
         {
             RuleFor(x => x.ExerciseId).NotNull().MustExistInDatabase(exerciseService);
             RuleFor(x => x.Statement).NotEmpty().Length(3, 300);

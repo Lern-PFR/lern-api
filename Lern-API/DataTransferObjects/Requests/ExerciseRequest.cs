@@ -25,7 +25,7 @@ namespace Lern_API.DataTransferObjects.Requests
     [ExcludeFromCodeCoverage]
     public class ExerciseRequestValidator : AbstractValidator<ExerciseRequest>
     {
-        public ExerciseRequestValidator(IService<Concept, ConceptRequest> conceptService, IService<Course, CourseRequest> courseService)
+        public ExerciseRequestValidator(IDatabaseService<Concept, ConceptRequest> conceptService, IDatabaseService<Course, CourseRequest> courseService)
         {
             RuleFor(x => x.ConceptId).MustExistInDatabaseIfNotNull(conceptService).NotNull().When(e => e.CourseId == null).WithMessage("ConceptId and CourseId cannot be both null");
             RuleFor(x => x.CourseId).MustExistInDatabaseIfNotNull(courseService).NotNull().When(e => e.ConceptId == null).WithMessage("ConceptId and CourseId cannot be both null");
