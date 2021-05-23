@@ -31,6 +31,7 @@ namespace Lern_API.Services
         public new async Task<User> Create(UserRequest entity, CancellationToken token = default)
         {
             entity.Password = BCrypt.Net.BCrypt.EnhancedHashPassword(entity.Password);
+            entity.Email = entity.Email.ToLowerInvariant();
 
             return await base.Create(entity, token);
         }
@@ -45,12 +46,14 @@ namespace Lern_API.Services
                 entity.Password = storedUser.Password;
             }
 
+            entity.Email = entity.Email.ToLowerInvariant();
+
             return await base.Update(id, entity, token);
         }
 
         public async Task<LoginResponse> Login(LoginRequest request, CancellationToken token = default)
         {
-            var user = await DbSet.FirstOrDefaultAsync(x => x.Nickname == request.Login || x.Email == request.Login, token);
+            var user = await DbSet.FirstOrDefaultAsync(x => x.Nickname == request.Login || x.Email == request.Login.ToLowerInvariant(), token);
 
             if (user == null || !BCrypt.Net.BCrypt.EnhancedVerify(request.Password, user.Password))
                 return null;
@@ -63,7 +66,7 @@ namespace Lern_API.Services
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var user = await DbSet.FirstOrDefaultAsync(x => x.Nickname == login || x.Email == login, token);
+            var user = await DbSet.FirstOrDefaultAsync(x => x.Nickname == login || x.Email == login.ToLowerInvariant(), token);
 
             if (user != null)
             {
