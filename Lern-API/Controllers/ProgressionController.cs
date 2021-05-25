@@ -40,16 +40,16 @@ namespace Lern_API.Controllers
         /// <summary>
         /// Returns the current user's progression within the provided subject
         /// </summary>
-        /// <param name="id">The subject ID to look for</param>
+        /// <param name="subjectId">The subject ID to look for</param>
         /// <returns>The current user's progression within the provided subject</returns>
         /// <response code="200">The current user's progression within the provided subject</response>
         /// <response code="204">If the current user does not have any progression information within the provided subject</response>
         /// <response code="404">If the given subject ID does not exist</response>
         [RequireAuthentication]
-        [HttpGet("{id:guid}")]
-        public async Task<ActionResult<ProgressionResponse>> GetProgression(Guid id)
+        [HttpGet("{subjectId:guid}")]
+        public async Task<ActionResult<ProgressionResponse>> GetProgression(Guid subjectId)
         {
-            var subject = await _subjects.Get(id, HttpContext.RequestAborted);
+            var subject = await _subjects.Get(subjectId, HttpContext.RequestAborted);
 
             if (subject == null)
                 return NotFound();
