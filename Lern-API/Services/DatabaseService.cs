@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Lern_API.Services
 {
-    public interface IDatabaseService<TEntity, in TDataTransferObject> where TEntity : class, IModelBase, new()
+    public interface IDatabaseService<TEntity, in TDataTransferObject> : IAbstractDatabaseService<TEntity> where TEntity : class, IModelBase, new()
     {
         Task<IEnumerable<TEntity>> GetAll(CancellationToken token = default);
         Task<TEntity> Get(Guid id, CancellationToken token = default);
@@ -16,19 +16,12 @@ namespace Lern_API.Services
         Task<TEntity> Update(Guid id, TDataTransferObject entity, CancellationToken token = default);
         Task<bool> Delete(Guid id, CancellationToken token = default);
         Task<bool> Exists(Guid id, CancellationToken token = default);
-        Task<T> ExecuteTransaction<T>(Func<DbSet<TEntity>, Task<T>> operations, CancellationToken token = default);
-        Task<T> ExecuteTransaction<T>(Func<DbSet<TEntity>, T> operations, CancellationToken token = default);
     }
 
-    public class DatabaseService<TEntity, TDataTransferObject> : IDatabaseService<TEntity, TDataTransferObject> where TEntity : class, IModelBase, new()
+    public class DatabaseService<TEntity, TDataTransferObject> : AbstractDatabaseService<TEntity>, IDatabaseService<TEntity, TDataTransferObject> where TEntity : class, IModelBase, new()
     {
-        protected LernContext Context { get; }
-        protected DbSet<TEntity> DbSet { get; }
-
-        public DatabaseService(LernContext context)
+        public DatabaseService(LernContext context) : base(context)
         {
-            Context = context;
-            DbSet = Context.Set<TEntity>();
         }
 
         public virtual async Task<TEntity> Create(TDataTransferObject entity, CancellationToken token = default)
@@ -77,56 +70,6 @@ namespace Lern_API.Services
             var result = await SafeExecute(set => set.Update(entry), token);
 
             return result?.Entity;
-        }
-
-        public async Task<T> ExecuteTransaction<T>(Func<DbSet<TEntity>, Task<T>> operations, CancellationToken token = default)
-        {
-            return await SafeExecute(operations, token);
-        }
-
-        public async Task<T> ExecuteTransaction<T>(Func<DbSet<TEntity>, T> operations, CancellationToken token = default)
-        {
-            return await SafeExecute(operations, token);
-        }
-
-        protected async Task<T> SafeExecute<T>(Func<DbSet<TEntity>, Task<T>> operations, CancellationToken token = default)
-        {
-            await using var transaction = await Context.Database.BeginTransactionAsync(token);
-
-            try
-            {
-                var result = await operations(DbSet);
-
-                await Context.SaveChangesAsync(token);
-                await transaction.CommitAsync(token);
-
-                return result;
-            }
-            catch
-            {
-                await transaction.RollbackAsync(token);
-                return default;
-            }
-        }
-
-        protected async Task<T> SafeExecute<T>(Func<DbSet<TEntity>, T> operations, CancellationToken token = default)
-        {
-            await using var transaction = await Context.Database.BeginTransactionAsync(token);
-
-            try
-            {
-                var result = operations(DbSet);
-
-                await Context.SaveChangesAsync(token);
-                await transaction.CommitAsync(token);
-
-                return result;
-            }
-            catch
-            {
-                await transaction.RollbackAsync(token);
-                return default;
-            }
         }
     }
 }

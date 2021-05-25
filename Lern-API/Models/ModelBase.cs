@@ -2,10 +2,14 @@
 
 namespace Lern_API.Models
 {
-    public interface IModelBase
+    public interface ITimestamp
     {
-        public Guid Id { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+    }
+
+    public interface IModelBase : ITimestamp
+    {
+        public Guid Id { get; set; }
     }
 }

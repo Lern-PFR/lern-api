@@ -124,6 +124,7 @@ namespace Lern_API
             services.AddSingleton<IMailService, MailService>();
             services.AddScoped(typeof(IDatabaseService<,>), typeof(DatabaseService<,>));
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IProgressionService, ProgressionService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

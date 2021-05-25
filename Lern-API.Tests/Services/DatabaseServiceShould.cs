@@ -9,12 +9,11 @@ using Lern_API.Services;
 using Lern_API.Tests.Attributes;
 using Lern_API.Tests.Utils;
 using Microsoft.EntityFrameworkCore;
-using Moq;
 using Xunit;
 
 namespace Lern_API.Tests.Services
 {
-    public class ServiceShould
+    public class DatabaseServiceShould
     {
         [Theory]
         [AutoMoqData]

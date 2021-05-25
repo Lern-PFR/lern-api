@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace Lern_API.Models
 {
-    public class Progression
+    public class Progression : ITimestamp
     {
         [ReadOnly(true)]
         public DateTime CreatedAt { get; set; }

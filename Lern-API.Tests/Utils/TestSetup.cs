@@ -1,4 +1,6 @@
 ﻿using System;
+using FluentAssertions;
+using FluentAssertions.Equivalency;
 using Lern_API.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -41,6 +43,11 @@ namespace Lern_API.Tests.Utils
             context.Database.EnsureCreated();
 
             return context;
+        }
+
+        public static Func<EquivalencyAssertionOptions<T>, EquivalencyAssertionOptions<T>> IgnoreTimestamps<T>() where T : ITimestamp
+        {
+            return config => config.Excluding(x => x.CreatedAt).Excluding(x => x.UpdatedAt);
         }
     }
 }
