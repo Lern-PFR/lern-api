@@ -1,5 +1,4 @@
 ﻿using System;
-using FluentAssertions;
 using FluentAssertions.Equivalency;
 using Lern_API.Models;
 using Microsoft.AspNetCore.Http;

@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lern_API.Models;
 using Microsoft.EntityFrameworkCore;
-using Module = Lern_API.Models.Module;
 
 namespace Lern_API
 {
@@ -35,8 +34,36 @@ namespace Lern_API
             modelBuilder.Entity<User>()
                 .HasIndex(x => x.Email).IsUnique();
 
+            modelBuilder.Entity<Subject>()
+                .HasMany(x => x.Modules)
+                .WithOne().HasForeignKey(x => x.SubjectId)
+                .IsRequired();
+
+            modelBuilder.Entity<Module>()
+                .HasMany(x => x.Concepts)
+                .WithOne().HasForeignKey(x => x.ModuleId)
+                .IsRequired();
+
+            modelBuilder.Entity<Concept>()
+                .HasMany(x => x.Courses)
+                .WithOne().HasForeignKey(x => x.ConceptId)
+                .IsRequired();
+            modelBuilder.Entity<Concept>()
+                .HasMany(x => x.Exercises)
+                .WithOne().HasForeignKey(x => x.ConceptId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
             modelBuilder.Entity<Course>()
                 .HasKey(x => new { x.Id, x.Version });
+            modelBuilder.Entity<Course>()
+                .HasMany(x => x.Exercises)
+                .WithOne().HasForeignKey(x => new { x.CourseId, x.CourseVersion })
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Question>()
+                .HasMany(x => x.Answers)
+                .WithOne().HasForeignKey(x => x.QuestionId)
+                .IsRequired();
 
             modelBuilder.Entity<Result>()
                 .HasKey(x => new { x.QuestionId, x.UserId });
@@ -73,20 +100,21 @@ namespace Lern_API
 
         private void AddTimestamps()
         {
+            var now = DateTime.UtcNow;
+
             var entities = ChangeTracker.Entries()
                 .Where(x => x.State is EntityState.Added or EntityState.Modified);
-
-            foreach (var entity in entities)
+            
+            foreach (var entry in entities)
             {
-                var now = DateTime.UtcNow;
-                var createdAt = entity.Entity.GetType().GetProperty("CreatedAt");
-                var updatedAt = entity.Entity.GetType().GetProperty("UpdatedAt");
+                var createdAt = entry.Entity.GetType().GetProperty("CreatedAt");
+                var updatedAt = entry.Entity.GetType().GetProperty("UpdatedAt");
 
-                if (entity.State == EntityState.Added && createdAt != null)
-                    createdAt.SetValue(entity.Entity, now);
+                if (createdAt != null && entry.State == EntityState.Added)
+                    createdAt.SetValue(entry.Entity, now);
 
                 if (updatedAt != null)
-                    updatedAt.SetValue(entity.Entity, now);
+                    updatedAt.SetValue(entry.Entity, now);
             }
         }
     }

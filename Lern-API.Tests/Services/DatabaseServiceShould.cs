@@ -50,6 +50,31 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
+        public async Task Get_Entity_With_Its_Children(Subject entity, List<Module> children)
+        {
+            entity.Modules.Clear();
+
+            children.ForEach(x =>
+            {
+                x.Concepts.Clear();
+                x.SubjectId = entity.Id;
+            });
+
+            var context = TestSetup.SetupContext();
+            var service = new DatabaseService<Subject, SubjectRequest>(context);
+
+            await context.Modules.AddRangeAsync(children);
+            await context.Subjects.AddAsync(entity);
+            await context.SaveChangesAsync();
+
+            var result = await service.Get(entity.Id);
+
+            result.Should().NotBeNull().And.BeEquivalentTo(entity);
+            result.Modules.Should().BeEquivalentTo(children);
+        }
+
+        [Theory]
+        [AutoMoqData]
         public async Task Create_Entity(UserRequest request)
         {
             var context = TestSetup.SetupContext();

@@ -14,9 +14,8 @@ namespace Lern_API.Models
         [ReadOnly(true)]
         public DateTime UpdatedAt { get; set; }
         public Guid? ConceptId { get; set; }
-        public Concept Concept { get; set; }
         public Guid? CourseId { get; set; }
-        public Course Course { get; set; }
+        public int? CourseVersion { get; set; }
         [Required, MinLength(3), MaxLength(50)]
         public string Title { get; set; }
         [Required, MinLength(10), MaxLength(300)]

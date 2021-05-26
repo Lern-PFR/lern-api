@@ -11,8 +11,6 @@ namespace Lern_API.Models
         public Guid Id { get; set; }
         [ReadOnly(true), Required]
         public Guid QuestionId { get; set; }
-        [ReadOnly(true), Required]
-        public Question Question { get; set; }
         [ReadOnly(true)]
         public DateTime CreatedAt { get; set; }
         [ReadOnly(true)]

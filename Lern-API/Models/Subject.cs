@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -29,5 +30,7 @@ namespace Lern_API.Models
         public string Description { get; set; }
         [ReadOnly(true)]
         public SubjectState State { get; set; }
+        [ReadOnly(true)]
+        public List<Module> Modules { get; set; }
     }
 }
