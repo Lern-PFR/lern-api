@@ -56,7 +56,7 @@ namespace Lern_API.Tests.Utils
 
         public static IHttpContextAccessor SetupSession(this IHttpContextAccessor accessor, User user)
         {
-            accessor.HttpContext.Items.Add("User", user);
+            accessor.HttpContext?.Items.Add("User", user);
             return accessor;
         }
 

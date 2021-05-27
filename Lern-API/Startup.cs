@@ -125,6 +125,7 @@ namespace Lern_API
             services.AddScoped(typeof(IDatabaseService<,>), typeof(DatabaseService<,>));
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IProgressionService, ProgressionService>();
+            services.AddScoped<IAuthorizationService, AuthorizationService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
