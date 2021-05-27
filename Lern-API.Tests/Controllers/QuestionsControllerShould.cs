@@ -18,7 +18,7 @@ namespace Lern_API.Tests.Controllers
     {
         [Theory]
         [AutoMoqData]
-        public async Task Return_Question_Or_404(Mock<IDatabaseService<Question, QuestionRequest>> service, IAuthorizationService authorization, Question question, Guid goodGuid, Guid badGuid)
+        public async Task Return_Question_Or_404(Mock<IQuestionService> service, IAuthorizationService authorization, Question question, Guid goodGuid, Guid badGuid)
         {
             service.Setup(x => x.Get(goodGuid, It.IsAny<CancellationToken>())).ReturnsAsync(question);
             service.Setup(x => x.Get(badGuid, It.IsAny<CancellationToken>())).ReturnsAsync((Question) null);
@@ -35,7 +35,7 @@ namespace Lern_API.Tests.Controllers
 
         [Theory]
         [AutoMoqData]
-        public async Task Create_Question_Or_409(Mock<IDatabaseService<Question, QuestionRequest>> service, IAuthorizationService authorization, QuestionRequest request, Question question, User user)
+        public async Task Create_Question_Or_409(Mock<IQuestionService> service, IAuthorizationService authorization, QuestionRequest request, Question question, User user)
         {
             service.Setup(x => x.Create(request, It.IsAny<CancellationToken>())).ReturnsAsync(question);
             service.Setup(x => x.Create(null, It.IsAny<CancellationToken>())).ReturnsAsync((Question) null);
@@ -52,7 +52,7 @@ namespace Lern_API.Tests.Controllers
 
         [Theory]
         [AutoMoqData]
-        public async Task Update_Question_Or_409(Mock<IDatabaseService<Question, QuestionRequest>> service, Mock<IAuthorizationService> authorization, QuestionRequest validRequest, QuestionRequest invalidRequest, Question valid, Question invalid, User user)
+        public async Task Update_Question_Or_409(Mock<IQuestionService> service, Mock<IAuthorizationService> authorization, QuestionRequest validRequest, QuestionRequest invalidRequest, Question valid, Question invalid, User user)
         {
             authorization.Setup(x => x.HasWriteAccess(user, It.IsAny<It.IsAnyType>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
@@ -74,7 +74,7 @@ namespace Lern_API.Tests.Controllers
 
         [Theory]
         [AutoMoqData]
-        public async Task Update_Question_Or_404(Mock<IDatabaseService<Question, QuestionRequest>> service, Mock<IAuthorizationService> authorization, QuestionRequest validRequest, QuestionRequest invalidRequest, Question valid, Question invalid, User user)
+        public async Task Update_Question_Or_404(Mock<IQuestionService> service, Mock<IAuthorizationService> authorization, QuestionRequest validRequest, QuestionRequest invalidRequest, Question valid, Question invalid, User user)
         {
             authorization.Setup(x => x.HasWriteAccess(user, It.IsAny<It.IsAnyType>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
@@ -97,7 +97,7 @@ namespace Lern_API.Tests.Controllers
 
         [Theory]
         [AutoMoqData]
-        public async Task Update_Question_Or_401(Mock<IDatabaseService<Question, QuestionRequest>> service, Mock<IAuthorizationService> authorization, QuestionRequest validRequest, QuestionRequest invalidRequest, Question valid, Question invalid, User user)
+        public async Task Update_Question_Or_401(Mock<IQuestionService> service, Mock<IAuthorizationService> authorization, QuestionRequest validRequest, QuestionRequest invalidRequest, Question valid, Question invalid, User user)
         {
             authorization.Setup(x => x.HasWriteAccess(user, valid, It.IsAny<CancellationToken>())).ReturnsAsync(true);
             authorization.Setup(x => x.HasWriteAccess(user, invalid, It.IsAny<CancellationToken>())).ReturnsAsync(false);

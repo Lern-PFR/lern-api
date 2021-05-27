@@ -13,10 +13,10 @@ namespace Lern_API.Controllers
     [ApiController]
     public class QuestionsController : ControllerBase
     {
-        private readonly IDatabaseService<Question, QuestionRequest> _questions;
+        private readonly IQuestionService _questions;
         private readonly IAuthorizationService _authorization;
 
-        public QuestionsController(IDatabaseService<Question, QuestionRequest> questions, IAuthorizationService authorization)
+        public QuestionsController(IQuestionService questions, IAuthorizationService authorization)
         {
             _questions = questions;
             _authorization = authorization;
@@ -61,7 +61,8 @@ namespace Lern_API.Controllers
         }
 
         /// <summary>
-        /// Update an existing question
+        /// Update an existing question.
+        /// Answers can be null if you do not want to update it
         /// </summary>
         /// <param name="id">Question Id</param>
         /// <param name="question"></param>

@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Lern_API.Helpers.Models
 {
@@ -8,19 +11,29 @@ namespace Lern_API.Helpers.Models
         {
             foreach (var prop in typeof(TOrigin).GetProperties())
             {
-                #if DEBUG
+                if (IsList(prop.PropertyType))
+                    continue;
 
                 var destProp = model.GetType().GetProperty(prop.Name);
 
-                if (destProp != null && destProp.GetType() != prop.GetType())
-                {
-                    throw new ArgumentException($"Cannot clone model : cloning origin ({typeof(TOrigin)}) is not compatible with destination ({typeof(TModel)})", prop.Name);
-                }
-                
-                #endif
+                if (destProp == null || destProp.PropertyType != prop.PropertyType)
+                    continue;
 
-                typeof(TModel).GetProperty(prop.Name)?.SetValue(model, prop.GetValue(origin));
+                destProp.SetValue(model, prop.GetValue(origin));
             }
+        }
+
+        /// <summary>
+        /// Indicates whether or not the specified type is a list.
+        /// </summary>
+        /// <param name="type">The type to query</param>
+        /// <returns>True if the type is a list, otherwise false</returns>
+        private static bool IsList(Type type)
+        {
+            if (type == null)
+                return false;
+
+            return typeof(IList).IsAssignableFrom(type) || type.GetInterfaces().Any(it => it.IsGenericType && typeof(IList<>) == it.GetGenericTypeDefinition());
         }
     }
 }

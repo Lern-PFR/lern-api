@@ -20,7 +20,7 @@ namespace Lern_API.DataTransferObjects.Requests
         [MinLength(10), MaxLength(3000)]
         public string Explanation { get; set; }
         [Required]
-        public List<Answer> Answers { get; set; }
+        public List<AnswerRequest> Answers { get; set; }
     }
     
     [ExcludeFromCodeCoverage]
