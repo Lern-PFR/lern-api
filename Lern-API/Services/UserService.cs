@@ -8,6 +8,7 @@ using Lern_API.DataTransferObjects.Responses;
 using Lern_API.Helpers.JWT;
 using Lern_API.Helpers.Models;
 using Lern_API.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Lern_API.Services
@@ -23,7 +24,7 @@ namespace Lern_API.Services
     {
         private readonly IMailService _mails;
 
-        public UserService(LernContext context, IMailService mails) : base(context)
+        public UserService(LernContext context, IHttpContextAccessor httpContextAccessor, IMailService mails) : base(context, httpContextAccessor)
         {
             _mails = mails;
         }

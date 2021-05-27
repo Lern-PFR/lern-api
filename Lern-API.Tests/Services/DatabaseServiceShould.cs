@@ -20,7 +20,7 @@ namespace Lern_API.Tests.Services
         public async Task Get_All_Entities(List<User> entities)
         {
             var context = TestSetup.SetupContext();
-            var service = new DatabaseService<User, UserRequest>(context);
+            var service = new DatabaseService<User, UserRequest>(context, TestSetup.SetupHttpContext());
 
             await context.Users.AddRangeAsync(entities);
             await context.SaveChangesAsync();
@@ -35,7 +35,7 @@ namespace Lern_API.Tests.Services
         public async Task Get_Single_Entity_Or_Null(List<User> entities, User target)
         {
             var context = TestSetup.SetupContext();
-            var service = new DatabaseService<User, UserRequest>(context);
+            var service = new DatabaseService<User, UserRequest>(context, TestSetup.SetupHttpContext());
 
             await context.Users.AddRangeAsync(entities);
             await context.Users.AddAsync(target);
@@ -61,7 +61,7 @@ namespace Lern_API.Tests.Services
             });
 
             var context = TestSetup.SetupContext();
-            var service = new DatabaseService<Subject, SubjectRequest>(context);
+            var service = new DatabaseService<Subject, SubjectRequest>(context, TestSetup.SetupHttpContext());
 
             await context.Modules.AddRangeAsync(children);
             await context.Subjects.AddAsync(entity);
@@ -78,7 +78,7 @@ namespace Lern_API.Tests.Services
         public async Task Create_Entity(UserRequest request)
         {
             var context = TestSetup.SetupContext();
-            var service = new DatabaseService<User, UserRequest>(context);
+            var service = new DatabaseService<User, UserRequest>(context, TestSetup.SetupHttpContext());
 
             var result = await service.Create(request);
 
@@ -91,7 +91,7 @@ namespace Lern_API.Tests.Services
         public async Task Update_Entity(User entity, UserRequest request)
         {
             var context = TestSetup.SetupContext();
-            var service = new DatabaseService<User, UserRequest>(context);
+            var service = new DatabaseService<User, UserRequest>(context, TestSetup.SetupHttpContext());
 
             await context.Users.AddAsync(entity);
             await context.SaveChangesAsync();
@@ -107,7 +107,7 @@ namespace Lern_API.Tests.Services
         public async Task Delete_Entity(List<User> entities, User target)
         {
             var context = TestSetup.SetupContext();
-            var service = new DatabaseService<User, UserRequest>(context);
+            var service = new DatabaseService<User, UserRequest>(context, TestSetup.SetupHttpContext());
 
             await context.Users.AddRangeAsync(entities);
             await context.Users.AddAsync(target);
@@ -124,7 +124,7 @@ namespace Lern_API.Tests.Services
         public async Task Return_False_On_Invalid_Delete(List<User> entities)
         {
             var context = TestSetup.SetupContext();
-            var service = new DatabaseService<User, UserRequest>(context);
+            var service = new DatabaseService<User, UserRequest>(context, TestSetup.SetupHttpContext());
 
             await context.Users.AddRangeAsync(entities);
             await context.SaveChangesAsync();
@@ -139,7 +139,7 @@ namespace Lern_API.Tests.Services
         public async Task Check_If_Entity_Exists(List<User> entities, User target)
         {
             var context = TestSetup.SetupContext();
-            var service = new DatabaseService<User, UserRequest>(context);
+            var service = new DatabaseService<User, UserRequest>(context, TestSetup.SetupHttpContext());
 
             await context.Users.AddRangeAsync(entities);
             await context.Users.AddAsync(target);
@@ -157,7 +157,7 @@ namespace Lern_API.Tests.Services
         public async Task Execute_Custom_Async_Transactions(User entity)
         {
             var context = TestSetup.SetupContext();
-            var service = new DatabaseService<User, UserRequest>(context);
+            var service = new DatabaseService<User, UserRequest>(context, TestSetup.SetupHttpContext());
 
             var result = await service.ExecuteTransaction(async set => await set.AddAsync(entity));
 
@@ -170,7 +170,7 @@ namespace Lern_API.Tests.Services
         public async Task Execute_Custom_Transactions(User entity)
         {
             var context = TestSetup.SetupContext();
-            var service = new DatabaseService<User, UserRequest>(context);
+            var service = new DatabaseService<User, UserRequest>(context, TestSetup.SetupHttpContext());
 
             var result = await service.ExecuteTransaction(set => set.Add(entity));
 
@@ -182,7 +182,7 @@ namespace Lern_API.Tests.Services
         public async Task Return_Null_On_Failed_Transaction()
         {
             var context = TestSetup.SetupContext();
-            var service = new DatabaseService<User, UserRequest>(context);
+            var service = new DatabaseService<User, UserRequest>(context, TestSetup.SetupHttpContext());
 
             var result = await service.ExecuteTransaction(set =>
             {
@@ -200,7 +200,7 @@ namespace Lern_API.Tests.Services
         public async Task Return_Null_On_Failed_Async_Transaction()
         {
             var context = TestSetup.SetupContext();
-            var service = new DatabaseService<User, UserRequest>(context);
+            var service = new DatabaseService<User, UserRequest>(context, TestSetup.SetupHttpContext());
 
             var result = await service.ExecuteTransaction(async set =>
             {

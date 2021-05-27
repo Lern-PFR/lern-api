@@ -25,12 +25,6 @@ namespace Lern_API.Tests.Utils
             return controller;
         }
 
-        public static T SetupSession<T>(this T controller, User user) where T : ControllerBase
-        {
-            controller.ControllerContext.HttpContext.Items.Add("User", user);
-            return controller;
-        }
-
         public static LernContext SetupContext()
         {
             var options = new DbContextOptionsBuilder<LernContext>()
@@ -42,6 +36,28 @@ namespace Lern_API.Tests.Utils
             context.Database.EnsureCreated();
 
             return context;
+        }
+
+        public static IHttpContextAccessor SetupHttpContext()
+        {
+            var accessor = new HttpContextAccessor
+            {
+                HttpContext = new DefaultHttpContext()
+            };
+
+            return accessor;
+        }
+
+        public static T SetupSession<T>(this T controller, User user) where T : ControllerBase
+        {
+            controller.ControllerContext.HttpContext.Items.Add("User", user);
+            return controller;
+        }
+
+        public static IHttpContextAccessor SetupSession(this IHttpContextAccessor accessor, User user)
+        {
+            accessor.HttpContext.Items.Add("User", user);
+            return accessor;
         }
 
         public static Func<EquivalencyAssertionOptions<T>, EquivalencyAssertionOptions<T>> IgnoreTimestamps<T>() where T : ITimestamp
