@@ -34,7 +34,7 @@ namespace Lern_API.Tests.Services
             await context.Users.AddAsync(user);
             await context.SaveChangesAsync();
 
-            var service = new UserService(context, mailService);
+            var service = new UserService(context, TestSetup.SetupHttpContext(), mailService);
             var result = await service.Login(request);
 
             result.Should().NotBeNull();
@@ -57,7 +57,7 @@ namespace Lern_API.Tests.Services
             await context.Users.AddAsync(user);
             await context.SaveChangesAsync();
 
-            var service = new UserService(context, mailService);
+            var service = new UserService(context, TestSetup.SetupHttpContext(), mailService);
             var result = await service.Login(request);
 
             result.Should().NotBeNull();
@@ -81,7 +81,7 @@ namespace Lern_API.Tests.Services
             await context.Users.AddAsync(user);
             await context.SaveChangesAsync();
 
-            var service = new UserService(context, mailService);
+            var service = new UserService(context, TestSetup.SetupHttpContext(), mailService);
             var result = await service.Login(request);
 
             result.Should().BeNull();
@@ -104,7 +104,7 @@ namespace Lern_API.Tests.Services
             await context.Users.AddAsync(user);
             await context.SaveChangesAsync();
 
-            var service = new UserService(context, mailService);
+            var service = new UserService(context, TestSetup.SetupHttpContext(), mailService);
             var result = await service.Login(request);
 
             result.Should().BeNull();
@@ -118,7 +118,7 @@ namespace Lern_API.Tests.Services
 
             var context = TestSetup.SetupContext();
 
-            var service = new UserService(context, mailService);
+            var service = new UserService(context, TestSetup.SetupHttpContext(), mailService);
             var result = await service.Create(request);
 
             result.Should().NotBeNull();
@@ -137,7 +137,7 @@ namespace Lern_API.Tests.Services
             await context.Users.AddAsync(user);
             await context.SaveChangesAsync();
 
-            var service = new UserService(context, mailService);
+            var service = new UserService(context, TestSetup.SetupHttpContext(), mailService);
             var result = await service.Update(id, request);
 
             result.Should().NotBeNull();
@@ -157,7 +157,7 @@ namespace Lern_API.Tests.Services
             await context.Users.AddAsync(user);
             await context.SaveChangesAsync();
 
-            var service = new UserService(context, mailService);
+            var service = new UserService(context, TestSetup.SetupHttpContext(), mailService);
             var result = await service.Update(id, request);
 
             result.Should().NotBeNull();
@@ -175,7 +175,7 @@ namespace Lern_API.Tests.Services
             await context.Users.AddAsync(user);
             await context.SaveChangesAsync();
 
-            var service = new UserService(context, mailService.Object);
+            var service = new UserService(context, TestSetup.SetupHttpContext(), mailService.Object);
             await service.ForgottenPassword(user.Nickname, url.AbsolutePath);
             
             mailService.VerifyAll();
@@ -192,7 +192,7 @@ namespace Lern_API.Tests.Services
             await context.Users.AddAsync(user);
             await context.SaveChangesAsync();
 
-            var service = new UserService(context, mailService.Object);
+            var service = new UserService(context, TestSetup.SetupHttpContext(), mailService.Object);
             await service.ForgottenPassword(user.Email, url.AbsolutePath);
             
             mailService.VerifyAll();
@@ -207,7 +207,7 @@ namespace Lern_API.Tests.Services
             await context.Users.AddAsync(user);
             await context.SaveChangesAsync();
 
-            var service = new UserService(context, mailService);
+            var service = new UserService(context, TestSetup.SetupHttpContext(), mailService);
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -226,7 +226,7 @@ namespace Lern_API.Tests.Services
             await context.Users.AddAsync(user);
             await context.SaveChangesAsync();
 
-            var service = new UserService(context, mailService);
+            var service = new UserService(context, TestSetup.SetupHttpContext(), mailService);
 
             var token = user.GenerateForgottenPasswordToken();
 
@@ -251,7 +251,7 @@ namespace Lern_API.Tests.Services
             await context.Users.AddAsync(user);
             await context.SaveChangesAsync();
 
-            var service = new UserService(context, mailService);
+            var service = new UserService(context, TestSetup.SetupHttpContext(), mailService);
 
             var token = invalidUser.GenerateForgottenPasswordToken();
 

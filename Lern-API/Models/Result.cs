@@ -3,8 +3,12 @@ using System.ComponentModel;
 
 namespace Lern_API.Models
 {
-    public class Result
+    public class Result : ITimestamp
     {
+        [ReadOnly(true)]
+        public DateTime CreatedAt { get; set; }
+        [ReadOnly(true)]
+        public DateTime UpdatedAt { get; set; }
         [ReadOnly(true)]
         public Guid QuestionId { get; set; }
         [ReadOnly(true)]

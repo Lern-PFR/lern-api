@@ -60,8 +60,8 @@ namespace Lern_API.Controllers
         /// Create a new user
         /// </summary>
         /// <param name="user"></param>
-        /// <returns>User Id associated to the new user</returns>
-        /// <response code="200">Id associated to the new user</response>
+        /// <returns>The new user</returns>
+        /// <response code="200">The new user</response>
         /// <response code="409">If given name or email already exists</response>
         [HttpPost]
         public async Task<ActionResult<User>> CreateUser(UserRequest user)

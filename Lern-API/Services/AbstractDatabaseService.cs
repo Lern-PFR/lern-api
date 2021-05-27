@@ -45,7 +45,9 @@ namespace Lern_API.Services
 
                 return result;
             }
-            catch
+#pragma warning disable CS0168 // La variable est déclarée mais jamais utilisée
+            catch (Exception _)
+#pragma warning restore CS0168 // La variable est déclarée mais jamais utilisée
             {
                 await transaction.RollbackAsync(token);
                 return default;
@@ -65,7 +67,9 @@ namespace Lern_API.Services
 
                 return result;
             }
+#pragma warning disable CS0168 // La variable est déclarée mais jamais utilisée
             catch (Exception _)
+#pragma warning restore CS0168 // La variable est déclarée mais jamais utilisée
             {
                 await transaction.RollbackAsync(token);
                 return default;

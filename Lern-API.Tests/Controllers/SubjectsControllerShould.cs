@@ -46,5 +46,90 @@ namespace Lern_API.Tests.Controllers
             invalidResult.Value.Should().BeNull();
             invalidResult.Result.Should().BeOfType<NotFoundResult>();
         }
+
+        [Theory]
+        [AutoMoqData]
+        public async Task Create_Subject_Or_409(Mock<IDatabaseService<Subject, SubjectRequest>> service, SubjectRequest request, Subject subject, User user)
+        {
+            service.Setup(x => x.Create(request, It.IsAny<CancellationToken>())).ReturnsAsync(subject);
+            service.Setup(x => x.Create(null, It.IsAny<CancellationToken>())).ReturnsAsync((Subject) null);
+
+            var controller = TestSetup.SetupController<SubjectsController>(service.Object).SetupSession(user);
+
+            var goodResult = await controller.Create(request);
+            var invalidResult = await controller.Create(null);
+
+            goodResult.Value.Should().NotBeNull();
+            invalidResult.Value.Should().BeNull();
+            invalidResult.Result.Should().BeOfType<ConflictResult>();
+        }
+
+        [Theory]
+        [AutoMoqData]
+        public async Task Update_Subject_Or_409(Mock<IDatabaseService<Subject, SubjectRequest>> service, SubjectRequest validRequest, SubjectRequest invalidRequest, Subject valid, Subject invalid, User user)
+        {
+            user.Admin = true;
+            
+            service.Setup(x => x.Exists(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
+            service.Setup(x => x.Get(valid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(valid);
+            service.Setup(x => x.Get(invalid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(invalid);
+            service.Setup(x => x.Update(valid.Id, validRequest, It.IsAny<CancellationToken>())).ReturnsAsync(valid);
+            service.Setup(x => x.Update(invalid.Id, invalidRequest, It.IsAny<CancellationToken>())).ReturnsAsync((Subject) null);
+
+            var controller = TestSetup.SetupController<SubjectsController>(service.Object).SetupSession(user);
+
+            var goodResult = await controller.Update(valid.Id, validRequest);
+            var invalidResult = await controller.Update(invalid.Id, invalidRequest);
+
+            goodResult.Value.Should().BeEquivalentTo(valid);
+            invalidResult.Value.Should().BeNull();
+            invalidResult.Result.Should().BeOfType<ConflictResult>();
+        }
+
+        [Theory]
+        [AutoMoqData]
+        public async Task Update_Subject_Or_404(Mock<IDatabaseService<Subject, SubjectRequest>> service, SubjectRequest validRequest, SubjectRequest invalidRequest, Subject valid, Subject invalid, User user)
+        {
+            user.Admin = true;
+            
+            service.Setup(x => x.Exists(valid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+            service.Setup(x => x.Exists(invalid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+            service.Setup(x => x.Get(valid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(valid);
+            service.Setup(x => x.Get(invalid.Id, It.IsAny<CancellationToken>())).ReturnsAsync((Subject) null);
+            service.Setup(x => x.Update(valid.Id, validRequest, It.IsAny<CancellationToken>())).ReturnsAsync(valid);
+            service.Setup(x => x.Update(invalid.Id, invalidRequest, It.IsAny<CancellationToken>())).ReturnsAsync((Subject) null);
+
+            var controller = TestSetup.SetupController<SubjectsController>(service.Object).SetupSession(user);
+
+            var goodResult = await controller.Update(valid.Id, validRequest);
+            var invalidResult = await controller.Update(invalid.Id, invalidRequest);
+
+            goodResult.Value.Should().BeEquivalentTo(valid);
+            invalidResult.Value.Should().BeNull();
+            invalidResult.Result.Should().BeOfType<NotFoundResult>();
+        }
+
+        [Theory]
+        [AutoMoqData]
+        public async Task Update_User_Or_401(Mock<IDatabaseService<Subject, SubjectRequest>> service, SubjectRequest validRequest, SubjectRequest invalidRequest, Subject valid, Subject invalid, User user)
+        {
+            user.Admin = false;
+            valid.AuthorId = user.Id;
+            
+            service.Setup(x => x.Exists(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
+            service.Setup(x => x.Get(valid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(valid);
+            service.Setup(x => x.Get(invalid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(invalid);
+            service.Setup(x => x.Update(valid.Id, validRequest, It.IsAny<CancellationToken>())).ReturnsAsync(valid);
+            service.Setup(x => x.Update(invalid.Id, invalidRequest, It.IsAny<CancellationToken>())).ReturnsAsync(invalid);
+
+            var controller = TestSetup.SetupController<SubjectsController>(service.Object).SetupSession(user);
+
+            var goodResult = await controller.Update(valid.Id, validRequest);
+            var invalidResult = await controller.Update(invalid.Id, invalidRequest);
+
+            goodResult.Value.Should().BeEquivalentTo(valid);
+            invalidResult.Value.Should().BeNull();
+            invalidResult.Result.Should().BeOfType<UnauthorizedResult>();
+        }
     }
 }
