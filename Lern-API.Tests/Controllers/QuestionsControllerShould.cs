@@ -14,33 +14,33 @@ using Xunit;
 
 namespace Lern_API.Tests.Controllers
 {
-    public class ExercisesControllerShould
+    public class QuestionsControllerShould
     {
         [Theory]
         [AutoMoqData]
-        public async Task Return_Exercise_Or_404(Mock<IDatabaseService<Exercise, ExerciseRequest>> service, IAuthorizationService authorization, Exercise exercise, Guid goodGuid, Guid badGuid)
+        public async Task Return_Question_Or_404(Mock<IDatabaseService<Question, QuestionRequest>> service, IAuthorizationService authorization, Question question, Guid goodGuid, Guid badGuid)
         {
-            service.Setup(x => x.Get(goodGuid, It.IsAny<CancellationToken>())).ReturnsAsync(exercise);
-            service.Setup(x => x.Get(badGuid, It.IsAny<CancellationToken>())).ReturnsAsync((Exercise) null);
+            service.Setup(x => x.Get(goodGuid, It.IsAny<CancellationToken>())).ReturnsAsync(question);
+            service.Setup(x => x.Get(badGuid, It.IsAny<CancellationToken>())).ReturnsAsync((Question) null);
 
-            var controller = TestSetup.SetupController<ExercisesController>(service.Object, authorization);
+            var controller = TestSetup.SetupController<QuestionsController>(service.Object, authorization);
 
             var result = await controller.Get(goodGuid);
             var invalidResult = await controller.Get(badGuid);
 
-            result.Value.Should().NotBeNull().And.BeEquivalentTo(exercise, TestSetup.IgnoreTimestamps<Exercise>());
+            result.Value.Should().NotBeNull().And.BeEquivalentTo(question, TestSetup.IgnoreTimestamps<Question>());
             invalidResult.Value.Should().BeNull();
             invalidResult.Result.Should().BeOfType<NotFoundResult>();
         }
 
         [Theory]
         [AutoMoqData]
-        public async Task Create_Exercise_Or_409(Mock<IDatabaseService<Exercise, ExerciseRequest>> service, IAuthorizationService authorization, ExerciseRequest request, Exercise exercise, User user)
+        public async Task Create_Question_Or_409(Mock<IDatabaseService<Question, QuestionRequest>> service, IAuthorizationService authorization, QuestionRequest request, Question question, User user)
         {
-            service.Setup(x => x.Create(request, It.IsAny<CancellationToken>())).ReturnsAsync(exercise);
-            service.Setup(x => x.Create(null, It.IsAny<CancellationToken>())).ReturnsAsync((Exercise) null);
+            service.Setup(x => x.Create(request, It.IsAny<CancellationToken>())).ReturnsAsync(question);
+            service.Setup(x => x.Create(null, It.IsAny<CancellationToken>())).ReturnsAsync((Question) null);
 
-            var controller = TestSetup.SetupController<ExercisesController>(service.Object, authorization).SetupSession(user);
+            var controller = TestSetup.SetupController<QuestionsController>(service.Object, authorization).SetupSession(user);
 
             var goodResult = await controller.Create(request);
             var invalidResult = await controller.Create(null);
@@ -52,7 +52,7 @@ namespace Lern_API.Tests.Controllers
 
         [Theory]
         [AutoMoqData]
-        public async Task Update_Exercise_Or_409(Mock<IDatabaseService<Exercise, ExerciseRequest>> service, Mock<IAuthorizationService> authorization, ExerciseRequest validRequest, ExerciseRequest invalidRequest, Exercise valid, Exercise invalid, User user)
+        public async Task Update_Question_Or_409(Mock<IDatabaseService<Question, QuestionRequest>> service, Mock<IAuthorizationService> authorization, QuestionRequest validRequest, QuestionRequest invalidRequest, Question valid, Question invalid, User user)
         {
             authorization.Setup(x => x.HasWriteAccess(user, It.IsAny<It.IsAnyType>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
@@ -60,9 +60,9 @@ namespace Lern_API.Tests.Controllers
             service.Setup(x => x.Get(valid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(valid);
             service.Setup(x => x.Get(invalid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(invalid);
             service.Setup(x => x.Update(valid.Id, validRequest, It.IsAny<CancellationToken>())).ReturnsAsync(valid);
-            service.Setup(x => x.Update(invalid.Id, invalidRequest, It.IsAny<CancellationToken>())).ReturnsAsync((Exercise) null);
+            service.Setup(x => x.Update(invalid.Id, invalidRequest, It.IsAny<CancellationToken>())).ReturnsAsync((Question) null);
 
-            var controller = TestSetup.SetupController<ExercisesController>(service.Object, authorization.Object).SetupSession(user);
+            var controller = TestSetup.SetupController<QuestionsController>(service.Object, authorization.Object).SetupSession(user);
 
             var goodResult = await controller.Update(valid.Id, validRequest);
             var invalidResult = await controller.Update(invalid.Id, invalidRequest);
@@ -74,18 +74,18 @@ namespace Lern_API.Tests.Controllers
 
         [Theory]
         [AutoMoqData]
-        public async Task Update_Exercise_Or_404(Mock<IDatabaseService<Exercise, ExerciseRequest>> service, Mock<IAuthorizationService> authorization, ExerciseRequest validRequest, ExerciseRequest invalidRequest, Exercise valid, Exercise invalid, User user)
+        public async Task Update_Question_Or_404(Mock<IDatabaseService<Question, QuestionRequest>> service, Mock<IAuthorizationService> authorization, QuestionRequest validRequest, QuestionRequest invalidRequest, Question valid, Question invalid, User user)
         {
             authorization.Setup(x => x.HasWriteAccess(user, It.IsAny<It.IsAnyType>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
             service.Setup(x => x.Exists(valid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(true);
             service.Setup(x => x.Exists(invalid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(false);
             service.Setup(x => x.Get(valid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(valid);
-            service.Setup(x => x.Get(invalid.Id, It.IsAny<CancellationToken>())).ReturnsAsync((Exercise) null);
+            service.Setup(x => x.Get(invalid.Id, It.IsAny<CancellationToken>())).ReturnsAsync((Question) null);
             service.Setup(x => x.Update(valid.Id, validRequest, It.IsAny<CancellationToken>())).ReturnsAsync(valid);
-            service.Setup(x => x.Update(invalid.Id, invalidRequest, It.IsAny<CancellationToken>())).ReturnsAsync((Exercise) null);
+            service.Setup(x => x.Update(invalid.Id, invalidRequest, It.IsAny<CancellationToken>())).ReturnsAsync((Question) null);
 
-            var controller = TestSetup.SetupController<ExercisesController>(service.Object, authorization.Object).SetupSession(user);
+            var controller = TestSetup.SetupController<QuestionsController>(service.Object, authorization.Object).SetupSession(user);
 
             var goodResult = await controller.Update(valid.Id, validRequest);
             var invalidResult = await controller.Update(invalid.Id, invalidRequest);
@@ -97,7 +97,7 @@ namespace Lern_API.Tests.Controllers
 
         [Theory]
         [AutoMoqData]
-        public async Task Update_Exercise_Or_401(Mock<IDatabaseService<Exercise, ExerciseRequest>> service, Mock<IAuthorizationService> authorization, ExerciseRequest validRequest, ExerciseRequest invalidRequest, Exercise valid, Exercise invalid, User user)
+        public async Task Update_Question_Or_401(Mock<IDatabaseService<Question, QuestionRequest>> service, Mock<IAuthorizationService> authorization, QuestionRequest validRequest, QuestionRequest invalidRequest, Question valid, Question invalid, User user)
         {
             authorization.Setup(x => x.HasWriteAccess(user, valid, It.IsAny<CancellationToken>())).ReturnsAsync(true);
             authorization.Setup(x => x.HasWriteAccess(user, invalid, It.IsAny<CancellationToken>())).ReturnsAsync(false);
@@ -108,7 +108,7 @@ namespace Lern_API.Tests.Controllers
             service.Setup(x => x.Update(valid.Id, validRequest, It.IsAny<CancellationToken>())).ReturnsAsync(valid);
             service.Setup(x => x.Update(invalid.Id, invalidRequest, It.IsAny<CancellationToken>())).ReturnsAsync(invalid);
 
-            var controller = TestSetup.SetupController<ExercisesController>(service.Object, authorization.Object).SetupSession(user);
+            var controller = TestSetup.SetupController<QuestionsController>(service.Object, authorization.Object).SetupSession(user);
 
             var goodResult = await controller.Update(valid.Id, validRequest);
             var invalidResult = await controller.Update(invalid.Id, invalidRequest);

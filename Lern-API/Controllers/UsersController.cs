@@ -18,10 +18,12 @@ namespace Lern_API.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _users;
+        private readonly IAuthorizationService _authorization;
 
-        public UsersController(IUserService users)
+        public UsersController(IUserService users, IAuthorizationService authorization)
         {
             _users = users;
+            _authorization = authorization;
         }
 
         /// <summary>
@@ -89,15 +91,14 @@ namespace Lern_API.Controllers
         public async Task<ActionResult<User>> UpdateUser(Guid id, [CustomizeValidator(RuleSet = "Update")] UserRequest user)
         {
             var currentUser = HttpContext.GetUser();
+            var targetUser = await _users.Get(id, HttpContext.RequestAborted);
 
-            if (currentUser.Id != id && !currentUser.Admin)
-                return Unauthorized();
-
-            var exists = await _users.Exists(id, HttpContext.RequestAborted);
-
-            if (!exists)
+            if (targetUser == null)
                 return NotFound();
 
+            if (!await _authorization.HasWriteAccess(currentUser, targetUser, HttpContext.RequestAborted))
+                return Unauthorized();
+            
             var newUser = await _users.Update(id, user, HttpContext.RequestAborted);
 
             if (newUser == null)
