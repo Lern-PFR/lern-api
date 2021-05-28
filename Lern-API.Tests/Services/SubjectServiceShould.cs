@@ -1,7 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Lern_API.DataTransferObjects.Requests;
 using Lern_API.Models;
 using Lern_API.Services;
 using Lern_API.Tests.Attributes;
@@ -12,6 +12,48 @@ namespace Lern_API.Tests.Services
 {
     public class SubjectServiceShould
     {
+        [Theory]
+        [AutoMoqData]
+        public async Task Get_All_Valid_Subjects(List<Subject> subjects)
+        {
+            var context = TestSetup.SetupContext();
+
+            await context.Subjects.AddRangeAsync(subjects);
+            await context.SaveChangesAsync();
+
+            var service = new SubjectService(context, TestSetup.SetupHttpContext());
+            var result = await service.GetAll();
+
+            result.Should().BeEquivalentTo(subjects.Where(x => x.Modules.Any()));
+        }
+
+        [Theory]
+        [AutoMoqData]
+        public async Task Get_All_Subjects_From_User(User user, List<Subject> subjects)
+        {
+            var context = TestSetup.SetupContext();
+            var httpContext = TestSetup.SetupHttpContext().SetupSession(user);
+
+            subjects = subjects.Select((subject, i) =>
+            {
+                if (i % 2 == 0)
+                    return subject;
+
+                subject.AuthorId = user.Id;
+                subject.Author = user;
+                return subject;
+            }).ToList();
+
+            await context.Users.AddAsync(user);
+            await context.Subjects.AddRangeAsync(subjects);
+            await context.SaveChangesAsync();
+
+            var service = new SubjectService(context, httpContext);
+            var result = await service.GetMine();
+
+            result.Should().BeEquivalentTo(subjects.Where(x => x.AuthorId == user.Id));
+        }
+
         [Theory]
         [AutoMoqData]
         public async Task Remove_Subject_And_Its_Children(Subject subject)
@@ -29,7 +71,7 @@ namespace Lern_API.Tests.Services
             context.Questions.AsEnumerable().Should().NotBeEmpty();
             context.Answers.AsEnumerable().Should().NotBeEmpty();
 
-            var service = new DatabaseService<Subject, SubjectRequest>(context, TestSetup.SetupHttpContext());
+            var service = new SubjectService(context, TestSetup.SetupHttpContext());
             var result = await service.Delete(subject.Id);
 
             result.Should().BeTrue();
@@ -83,7 +125,7 @@ namespace Lern_API.Tests.Services
             context.Progressions.AsEnumerable().Should().NotBeEmpty();
             context.Results.AsEnumerable().Should().NotBeEmpty();
 
-            var service = new DatabaseService<Subject, SubjectRequest>(context, TestSetup.SetupHttpContext());
+            var service = new SubjectService(context, TestSetup.SetupHttpContext());
             var deleteResult = await service.Delete(subject.Id);
 
             deleteResult.Should().BeTrue();

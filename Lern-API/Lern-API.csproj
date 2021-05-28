@@ -26,8 +26,8 @@
     <PackageReference Include="CancellationTokenAnalyzers" Version="1.0.1" />
     <PackageReference Include="FluentEmail.Liquid" Version="3.0.0" />
     <PackageReference Include="FluentEmail.MailKit" Version="3.0.0" />
-    <PackageReference Include="FluentValidation" Version="10.1.0" />
-    <PackageReference Include="FluentValidation.AspNetCore" Version="10.1.0" />
+    <PackageReference Include="FluentValidation" Version="10.2.0" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="10.2.0" />
     <PackageReference Include="Flurl" Version="3.0.2" />
     <PackageReference Include="log4net" Version="2.0.12" />
     <PackageReference Include="MailKit" Version="2.12.0" />

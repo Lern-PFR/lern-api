@@ -124,6 +124,7 @@ namespace Lern_API
             services.AddSingleton<IMailService, MailService>();
             services.AddScoped(typeof(IDatabaseService<,>), typeof(DatabaseService<,>));
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ISubjectService, SubjectService>();
             services.AddScoped<IQuestionService, QuestionService>();
             services.AddScoped<IProgressionService, ProgressionService>();
             services.AddScoped<IAuthorizationService, AuthorizationService>();

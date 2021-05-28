@@ -22,11 +22,11 @@ namespace Lern_API.Services
 
     public class DatabaseService<TEntity, TDataTransferObject> : AbstractDatabaseService<TEntity>, IDatabaseService<TEntity, TDataTransferObject> where TEntity : class, IModelBase, new()
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        protected IHttpContextAccessor HttpContextAccessor { get; }
 
         public DatabaseService(LernContext context, IHttpContextAccessor httpContextAccessor) : base(context)
         {
-            _httpContextAccessor = httpContextAccessor;
+            HttpContextAccessor = httpContextAccessor;
         }
 
         public virtual async Task<TEntity> Create(TDataTransferObject entity, CancellationToken token = default)
@@ -38,7 +38,7 @@ namespace Lern_API.Services
 
             if (authorId != null && authorId.PropertyType == typeof(Guid))
             {
-                authorId.SetValue(final, _httpContextAccessor.HttpContext.GetUser().Id);
+                authorId.SetValue(final, HttpContextAccessor.HttpContext.GetUser().Id);
             }
 
             var entityEntry = await SafeExecute(async set => await set.AddAsync(final, token), token);
