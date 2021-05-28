@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using FluentValidation.AspNetCore;
 using Lern_API.DataTransferObjects.Requests;
 using Lern_API.Helpers.JWT;
 using Lern_API.Models;
@@ -13,10 +14,12 @@ namespace Lern_API.Controllers
     public class ModulesController : ControllerBase
     {
         private readonly IDatabaseService<Module, ModuleRequest> _modules;
+        private readonly IAuthorizationService _authorization;
 
-        public ModulesController(IDatabaseService<Module, ModuleRequest> modules)
+        public ModulesController(IDatabaseService<Module, ModuleRequest> modules, IAuthorizationService authorization)
         {
             _modules = modules;
+            _authorization = authorization;
         }
 
         /// <summary>
@@ -36,6 +39,55 @@ namespace Lern_API.Controllers
                 return NotFound();
 
             return module;
+        }
+
+        /// <summary>
+        /// Create a new module
+        /// </summary>
+        /// <param name="module"></param>
+        /// <returns>The new module</returns>
+        /// <response code="200">The new module</response>
+        /// <response code="409">If there has been a problem while manipulating the provided data</response>
+        [RequireAuthentication]
+        [HttpPost]
+        public async Task<ActionResult<Module>> Create(ModuleRequest module)
+        {
+            var result = await _modules.Create(module, HttpContext.RequestAborted);
+
+            if (result == null)
+                return Conflict();
+
+            return result;
+        }
+
+        /// <summary>
+        /// Update an existing module
+        /// </summary>
+        /// <param name="id">Module Id</param>
+        /// <param name="module"></param>
+        /// <returns>Updated module</returns>
+        /// <response code="200">Updated module with the new values</response>
+        /// <response code="401">If you do not have the right to update this module</response>
+        /// <response code="404">If given module could not be found</response>
+        [RequireAuthentication]
+        [HttpPut("{id:guid}")]
+        public async Task<ActionResult<Module>> Update(Guid id, [CustomizeValidator(RuleSet = "Update")] ModuleRequest module)
+        {
+            var currentUser = HttpContext.GetUser();
+            var currentModule = await _modules.Get(id, HttpContext.RequestAborted);
+            
+            if (currentModule == null)
+                return NotFound();
+
+            if (!await _authorization.HasWriteAccess(currentUser, currentModule, HttpContext.RequestAborted))
+                return Unauthorized();
+
+            var result = await _modules.Update(id, module, HttpContext.RequestAborted);
+
+            if (result == null)
+                return Conflict();
+
+            return result;
         }
     }
 }

@@ -15,10 +15,12 @@ namespace Lern_API.Controllers
     public class SubjectsController : ControllerBase
     {
         private readonly IDatabaseService<Subject, SubjectRequest> _subjects;
+        private readonly IAuthorizationService _authorization;
 
-        public SubjectsController(IDatabaseService<Subject, SubjectRequest> subjects)
+        public SubjectsController(IDatabaseService<Subject, SubjectRequest> subjects, IAuthorizationService authorization)
         {
             _subjects = subjects;
+            _authorization = authorization;
         }
 
         /// <summary>
@@ -89,7 +91,7 @@ namespace Lern_API.Controllers
             if (currentSubject == null)
                 return NotFound();
 
-            if (currentSubject.AuthorId != currentUser.Id && !currentUser.Admin)
+            if (!await _authorization.HasWriteAccess(currentUser, currentSubject, HttpContext.RequestAborted))
                 return Unauthorized();
 
             var result = await _subjects.Update(id, subject, HttpContext.RequestAborted);

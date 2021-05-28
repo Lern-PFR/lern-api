@@ -22,7 +22,7 @@ namespace Lern_API.Helpers.Validation
                     return await service.Exists(id.Value, token);
                 
                 return true;
-            }).WithMessage($"Provided {typeof(T).Name} does not exist");
+            }).WithMessage($"Provided {typeof(TEntity).Name} does not exist");
         }
     }
 }
