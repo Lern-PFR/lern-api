@@ -40,7 +40,7 @@ namespace Lern_API.Controllers
         /// </summary>
         /// <returns>A list of all subjects created by the current user</returns>
         [RequireAuthentication]
-        [HttpGet]
+        [HttpGet("mine")]
         public async Task<IEnumerable<Subject>> GetMine()
         {
             return await _subjects.GetMine(HttpContext.RequestAborted);
