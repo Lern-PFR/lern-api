@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Lern_API.Controllers;
 using Lern_API.DataTransferObjects.Requests;
+using Lern_API.DataTransferObjects.Responses;
 using Lern_API.Models;
 using Lern_API.Services;
 using Lern_API.Tests.Attributes;
@@ -112,6 +113,77 @@ namespace Lern_API.Tests.Controllers
 
             var goodResult = await controller.Update(valid.Id, validRequest);
             var invalidResult = await controller.Update(invalid.Id, invalidRequest);
+
+            goodResult.Value.Should().BeEquivalentTo(valid);
+            invalidResult.Value.Should().BeNull();
+            invalidResult.Result.Should().BeOfType<UnauthorizedResult>();
+        }
+
+        [Theory]
+        [AutoMoqData]
+        public async Task Delete_Module_Or_500(Mock<IDatabaseService<Module, ModuleRequest>> service, Mock<IAuthorizationService> authorization, Module valid, Module invalid, User user)
+        {
+            authorization.Setup(x => x.HasAuthorship(user, It.IsAny<It.IsAnyType>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
+
+            service.Setup(x => x.Exists(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
+            service.Setup(x => x.Get(valid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(valid);
+            service.Setup(x => x.Get(invalid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(invalid);
+            service.Setup(x => x.Delete(valid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+            service.Setup(x => x.Delete(invalid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+
+            var controller = TestSetup.SetupController<ModulesController>(service.Object, authorization.Object).SetupSession(user);
+
+            var goodResult = await controller.Delete(valid.Id);
+            var invalidResult = await controller.Delete(invalid.Id);
+
+            goodResult.Value.Should().BeEquivalentTo(valid);
+            invalidResult.Result.Should().BeOfType<ObjectResult>();
+
+            var objectResult = (ObjectResult) invalidResult.Result;
+            objectResult.StatusCode.Should().Be(500);
+            objectResult.Value.Should().BeOfType<ErrorResponse>();
+        }
+
+        [Theory]
+        [AutoMoqData]
+        public async Task Delete_Module_Or_404(Mock<IDatabaseService<Module, ModuleRequest>> service, Mock<IAuthorizationService> authorization, Module valid, Module invalid, User user)
+        {
+            authorization.Setup(x => x.HasAuthorship(user, It.IsAny<It.IsAnyType>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
+
+            service.Setup(x => x.Exists(valid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+            service.Setup(x => x.Exists(invalid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+            service.Setup(x => x.Get(valid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(valid);
+            service.Setup(x => x.Get(invalid.Id, It.IsAny<CancellationToken>())).ReturnsAsync((Module) null);
+            service.Setup(x => x.Delete(valid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+            service.Setup(x => x.Delete(invalid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+
+            var controller = TestSetup.SetupController<ModulesController>(service.Object, authorization.Object).SetupSession(user);
+
+            var goodResult = await controller.Delete(valid.Id);
+            var invalidResult = await controller.Delete(invalid.Id);
+
+            goodResult.Value.Should().BeEquivalentTo(valid);
+            invalidResult.Value.Should().BeNull();
+            invalidResult.Result.Should().BeOfType<NotFoundResult>();
+        }
+
+        [Theory]
+        [AutoMoqData]
+        public async Task Delete_Module_Or_401(Mock<IDatabaseService<Module, ModuleRequest>> service, Mock<IAuthorizationService> authorization, Module valid, Module invalid, User user)
+        {
+            authorization.Setup(x => x.HasAuthorship(user, valid, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+            authorization.Setup(x => x.HasAuthorship(user, invalid, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+
+            service.Setup(x => x.Exists(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
+            service.Setup(x => x.Get(valid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(valid);
+            service.Setup(x => x.Get(invalid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(invalid);
+            service.Setup(x => x.Delete(valid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+            service.Setup(x => x.Delete(invalid.Id, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+
+            var controller = TestSetup.SetupController<ModulesController>(service.Object, authorization.Object).SetupSession(user);
+
+            var goodResult = await controller.Delete(valid.Id);
+            var invalidResult = await controller.Delete(invalid.Id);
 
             goodResult.Value.Should().BeEquivalentTo(valid);
             invalidResult.Value.Should().BeNull();

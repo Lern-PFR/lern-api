@@ -9,6 +9,7 @@ namespace Lern_API.Services
     public interface IAuthorizationService
     {
         Task<bool> HasWriteAccess<T>(User user, T entity, CancellationToken token = default);
+        Task<bool> HasAuthorship<T>(User user, T entity, CancellationToken token = default);
     }
 
     public class AuthorizationService : IAuthorizationService
@@ -39,6 +40,9 @@ namespace Lern_API.Services
         
         public async Task<bool> HasWriteAccess<T>(User user, T entity, CancellationToken token = default)
         {
+            if (user == null)
+                return false;
+
             if (user.Admin)
                 return true;
 
@@ -54,6 +58,12 @@ namespace Lern_API.Services
                 Question question => await HasWriteAccess(user, await _exercises.Get(question.ExerciseId, token), token),
                 _ => throw new InvalidOperationException($"The provided entity ({entity.GetType().FullName}) cannot be checked for write access")
             };
+        }
+
+        public async Task<bool> HasAuthorship<T>(User user, T entity, CancellationToken token = default)
+        {
+            // Temporary measure, to be able to handle Authorship separately from write access in the future
+            return await HasWriteAccess(user, entity, token);
         }
     }
 }

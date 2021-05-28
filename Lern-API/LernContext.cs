@@ -60,6 +60,11 @@ namespace Lern_API
                 .WithOne().HasForeignKey(x => new { x.CourseId, x.CourseVersion })
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<Exercise>()
+                .HasMany(x => x.Questions)
+                .WithOne().HasForeignKey(x => x.ExerciseId)
+                .IsRequired();
+
             modelBuilder.Entity<Question>()
                 .HasMany(x => x.Answers)
                 .WithOne().HasForeignKey(x => x.QuestionId)

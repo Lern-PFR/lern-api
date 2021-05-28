@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Lern_API.DataTransferObjects.Requests;
-using Lern_API.Helpers.JWT;
 using Lern_API.Helpers.Models;
 using Lern_API.Models;
 using Microsoft.AspNetCore.Http;
