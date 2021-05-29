@@ -14,17 +14,60 @@ namespace Lern_API.Tests.Services
     {
         [Theory]
         [AutoMoqData]
-        public async Task Get_All_Valid_Subjects(List<Subject> subjects)
+        public async Task Get_All_Subjects_With_A_Module(List<Subject> subjects, List<Subject> invalidSubjects)
         {
+            invalidSubjects.ForEach(x => x.Modules.Clear());
+
             var context = TestSetup.SetupContext();
 
             await context.Subjects.AddRangeAsync(subjects);
+            await context.Subjects.AddRangeAsync(invalidSubjects);
             await context.SaveChangesAsync();
 
             var service = new SubjectService(context, TestSetup.SetupHttpContext());
             var result = await service.GetAll();
 
-            result.Should().BeEquivalentTo(subjects.Where(x => x.Modules.Any()));
+            result.Should().BeEquivalentTo(subjects).And.NotBeEquivalentTo(invalidSubjects);
+        }
+
+        [Theory]
+        [AutoMoqData]
+        public async Task Get_All_Subjects_With_A_Concept(List<Subject> subjects, List<Subject> invalidSubjects)
+        {
+            invalidSubjects.ForEach(x => x.Modules.ForEach(y => y.Concepts.Clear()));
+
+            var context = TestSetup.SetupContext();
+
+            await context.Subjects.AddRangeAsync(subjects);
+            await context.Subjects.AddRangeAsync(invalidSubjects);
+            await context.SaveChangesAsync();
+
+            var service = new SubjectService(context, TestSetup.SetupHttpContext());
+            var result = await service.GetAll();
+
+            result.Should().BeEquivalentTo(subjects).And.NotBeEquivalentTo(invalidSubjects);
+        }
+
+        [Theory]
+        [AutoMoqData]
+        public async Task Get_All_Subjects_With_A_Course_And_Exercise(List<Subject> subjects, List<Subject> invalidSubjects)
+        {
+            invalidSubjects.ForEach(x => x.Modules.ForEach(y => y.Concepts.ForEach(concept =>
+            {
+                concept.Courses.Clear();
+                concept.Exercises.Clear();
+            })));
+
+            var context = TestSetup.SetupContext();
+
+            await context.Subjects.AddRangeAsync(subjects);
+            await context.Subjects.AddRangeAsync(invalidSubjects);
+            await context.SaveChangesAsync();
+
+            var service = new SubjectService(context, TestSetup.SetupHttpContext());
+            var result = await service.GetAll();
+
+            result.Should().BeEquivalentTo(subjects).And.NotBeEquivalentTo(invalidSubjects);
         }
 
         [Theory]

@@ -23,7 +23,13 @@ namespace Lern_API.Services
 
         public new async Task<IEnumerable<Subject>> GetAll(CancellationToken token = default)
         {
-            return await DbSet.Where(x => x.Modules.Any()).ToListAsync(token);
+            return await DbSet
+                .Include(subject => subject.Modules.Where(module => module.Concepts.Any()))
+                .ThenInclude(module => module.Concepts.Where(concept => concept.Courses.Any() && concept.Exercises.Any()))
+                .Where(subject =>
+                    subject.Modules.Any(module =>
+                        module.Concepts.Any(concept => concept.Courses.Any() && concept.Exercises.Any())
+                )).ToListAsync(token);
         }
 
         public async Task<IEnumerable<Subject>> GetMine(CancellationToken token = default)
