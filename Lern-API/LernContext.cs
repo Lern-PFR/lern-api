@@ -67,6 +67,15 @@ namespace Lern_API
 
             modelBuilder.Entity<Result>()
                 .HasKey(x => new { x.QuestionId, x.UserId });
+            modelBuilder.Entity<Result>()
+                .HasOne(x => x.Answer)
+                .WithMany().IsRequired();
+            modelBuilder.Entity<Result>()
+                .HasOne(x => x.Question)
+                .WithMany().IsRequired();
+            modelBuilder.Entity<Result>()
+                .HasOne(x => x.User)
+                .WithMany().IsRequired();
 
             modelBuilder.Entity<Progression>()
                 .HasKey(x => new { x.UserId, x.SubjectId });
