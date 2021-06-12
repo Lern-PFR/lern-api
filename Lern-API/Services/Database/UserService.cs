@@ -11,7 +11,7 @@ using Lern_API.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
-namespace Lern_API.Services
+namespace Lern_API.Services.Database
 {
     public interface IUserService : IDatabaseService<User, UserRequest>
     {
@@ -29,7 +29,7 @@ namespace Lern_API.Services
             _mails = mails;
         }
         
-        public new async Task<User> Create(UserRequest entity, CancellationToken token = default)
+        public override async Task<User> Create(UserRequest entity, CancellationToken token = default)
         {
             entity.Password = BCrypt.Net.BCrypt.EnhancedHashPassword(entity.Password);
             entity.Email = entity.Email.ToLowerInvariant();
@@ -37,7 +37,7 @@ namespace Lern_API.Services
             return await base.Create(entity, token);
         }
 
-        public new async Task<User> Update(Guid id, UserRequest entity, CancellationToken token = default)
+        public override async Task<User> Update(Guid id, UserRequest entity, CancellationToken token = default)
         {
             if (entity.Password != null)
                 entity.Password = BCrypt.Net.BCrypt.EnhancedHashPassword(entity.Password);

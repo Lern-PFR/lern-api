@@ -6,6 +6,7 @@ using Lern_API.DataTransferObjects.Responses;
 using Lern_API.Helpers.JWT;
 using Lern_API.Models;
 using Lern_API.Services;
+using Lern_API.Services.Database;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Lern_API.Controllers
@@ -14,10 +15,10 @@ namespace Lern_API.Controllers
     [ApiController]
     public class ConceptsController : ControllerBase
     {
-        private readonly IDatabaseService<Concept, ConceptRequest> _concepts;
+        private readonly IConceptService _concepts;
         private readonly IAuthorizationService _authorization;
 
-        public ConceptsController(IDatabaseService<Concept, ConceptRequest> concepts, IAuthorizationService authorization)
+        public ConceptsController(IConceptService concepts, IAuthorizationService authorization)
         {
             _concepts = concepts;
             _authorization = authorization;

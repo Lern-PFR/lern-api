@@ -6,6 +6,7 @@ using Lern_API.DataTransferObjects.Responses;
 using Lern_API.Helpers.JWT;
 using Lern_API.Models;
 using Lern_API.Services;
+using Lern_API.Services.Database;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Lern_API.Controllers
@@ -14,10 +15,10 @@ namespace Lern_API.Controllers
     [ApiController]
     public class ExercisesController : ControllerBase
     {
-        private readonly IDatabaseService<Exercise, ExerciseRequest> _exercises;
+        private readonly IExerciseService _exercises;
         private readonly IAuthorizationService _authorization;
 
-        public ExercisesController(IDatabaseService<Exercise, ExerciseRequest> exercises, IAuthorizationService authorization)
+        public ExercisesController(IExerciseService exercises, IAuthorizationService authorization)
         {
             _exercises = exercises;
             _authorization = authorization;

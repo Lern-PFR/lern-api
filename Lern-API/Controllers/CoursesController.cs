@@ -6,6 +6,7 @@ using Lern_API.DataTransferObjects.Responses;
 using Lern_API.Helpers.JWT;
 using Lern_API.Models;
 using Lern_API.Services;
+using Lern_API.Services.Database;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Lern_API.Controllers
@@ -14,10 +15,10 @@ namespace Lern_API.Controllers
     [ApiController]
     public class CoursesController : ControllerBase
     {
-        private readonly IDatabaseService<Course, CourseRequest> _courses;
+        private readonly ICourseService _courses;
         private readonly IAuthorizationService _authorization;
 
-        public CoursesController(IDatabaseService<Course, CourseRequest> courses, IAuthorizationService authorization)
+        public CoursesController(ICourseService courses, IAuthorizationService authorization)
         {
             _courses = courses;
             _authorization = authorization;

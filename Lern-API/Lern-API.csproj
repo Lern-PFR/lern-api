@@ -26,14 +26,14 @@
     <PackageReference Include="CancellationTokenAnalyzers" Version="1.0.1" />
     <PackageReference Include="FluentEmail.Liquid" Version="3.0.0" />
     <PackageReference Include="FluentEmail.MailKit" Version="3.0.0" />
-    <PackageReference Include="FluentValidation" Version="10.2.0" />
-    <PackageReference Include="FluentValidation.AspNetCore" Version="10.2.0" />
+    <PackageReference Include="FluentValidation" Version="10.2.3" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="10.2.3" />
     <PackageReference Include="Flurl" Version="3.0.2" />
     <PackageReference Include="log4net" Version="2.0.12" />
-    <PackageReference Include="MailKit" Version="2.12.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.6" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.6" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.6">
+    <PackageReference Include="MailKit" Version="2.13.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.7">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -41,7 +41,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.8" />
     <PackageReference Include="Npgsql" Version="5.0.5" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.6" />
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="8.23.0.32424">
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="8.24.0.32949">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
