@@ -8,7 +8,7 @@ using Lern_API.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
-namespace Lern_API.Services
+namespace Lern_API.Services.Database
 {
     public interface IDatabaseService<TEntity, in TDataTransferObject> : IAbstractDatabaseService<TEntity> where TEntity : class, IModelBase, new()
     {
@@ -22,11 +22,11 @@ namespace Lern_API.Services
 
     public class DatabaseService<TEntity, TDataTransferObject> : AbstractDatabaseService<TEntity>, IDatabaseService<TEntity, TDataTransferObject> where TEntity : class, IModelBase, new()
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        protected IHttpContextAccessor HttpContextAccessor { get; }
 
         public DatabaseService(LernContext context, IHttpContextAccessor httpContextAccessor) : base(context)
         {
-            _httpContextAccessor = httpContextAccessor;
+            HttpContextAccessor = httpContextAccessor;
         }
 
         public virtual async Task<TEntity> Create(TDataTransferObject entity, CancellationToken token = default)
@@ -38,7 +38,7 @@ namespace Lern_API.Services
 
             if (authorId != null && authorId.PropertyType == typeof(Guid))
             {
-                authorId.SetValue(final, _httpContextAccessor.HttpContext.GetUser().Id);
+                authorId.SetValue(final, HttpContextAccessor.HttpContext.GetUser().Id);
             }
 
             var entityEntry = await SafeExecute(async set => await set.AddAsync(final, token), token);
@@ -65,12 +65,12 @@ namespace Lern_API.Services
 
         public virtual async Task<TEntity> Get(Guid id, CancellationToken token = default)
         {
-            return await DbSet.FindAsync(new object[] { id }, token);
+            return await WithDefaultIncludes(DbSet).FirstOrDefaultAsync(x => x.Id == id, token);
         }
 
         public virtual async Task<IEnumerable<TEntity>> GetAll(CancellationToken token = default)
         {
-            return await DbSet.ToListAsync(token);
+            return await WithDefaultIncludes(DbSet).ToListAsync(token);
         }
 
         public virtual async Task<TEntity> Update(Guid id, TDataTransferObject entity, CancellationToken token = default)

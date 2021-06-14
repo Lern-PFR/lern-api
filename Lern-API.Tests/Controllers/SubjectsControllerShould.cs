@@ -8,6 +8,7 @@ using Lern_API.DataTransferObjects.Requests;
 using Lern_API.DataTransferObjects.Responses;
 using Lern_API.Models;
 using Lern_API.Services;
+using Lern_API.Services.Database;
 using Lern_API.Tests.Attributes;
 using Lern_API.Tests.Utils;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +21,7 @@ namespace Lern_API.Tests.Controllers
     {
         [Theory]
         [AutoMoqData]
-        public async Task Return_All_Subjects(Mock<IDatabaseService<Subject, SubjectRequest>> service, IAuthorizationService authorization, List<Subject> subjects)
+        public async Task Return_All_Subjects(Mock<ISubjectService> service, IAuthorizationService authorization, List<Subject> subjects)
         {
             service.Setup(x => x.GetAll(It.IsAny<CancellationToken>())).ReturnsAsync(subjects);
 
@@ -33,7 +34,20 @@ namespace Lern_API.Tests.Controllers
 
         [Theory]
         [AutoMoqData]
-        public async Task Return_Subject_Or_404(Mock<IDatabaseService<Subject, SubjectRequest>> service, IAuthorizationService authorization, Subject subject, Guid goodGuid, Guid badGuid)
+        public async Task Return_All_Subjects_From_User(Mock<ISubjectService> service, IAuthorizationService authorization, List<Subject> subjects)
+        {
+            service.Setup(x => x.GetMine(It.IsAny<CancellationToken>())).ReturnsAsync(subjects);
+
+            var controller = TestSetup.SetupController<SubjectsController>(service.Object, authorization);
+
+            var result = await controller.GetMine();
+            
+            result.Should().NotBeNull().And.BeEquivalentTo(subjects, TestSetup.IgnoreTimestamps<Subject>());
+        }
+
+        [Theory]
+        [AutoMoqData]
+        public async Task Return_Subject_Or_404(Mock<ISubjectService> service, IAuthorizationService authorization, Subject subject, Guid goodGuid, Guid badGuid)
         {
             service.Setup(x => x.Get(goodGuid, It.IsAny<CancellationToken>())).ReturnsAsync(subject);
             service.Setup(x => x.Get(badGuid, It.IsAny<CancellationToken>())).ReturnsAsync((Subject) null);
@@ -50,7 +64,7 @@ namespace Lern_API.Tests.Controllers
 
         [Theory]
         [AutoMoqData]
-        public async Task Create_Subject_Or_409(Mock<IDatabaseService<Subject, SubjectRequest>> service, IAuthorizationService authorization, SubjectRequest request, Subject subject, User user)
+        public async Task Create_Subject_Or_409(Mock<ISubjectService> service, IAuthorizationService authorization, SubjectRequest request, Subject subject, User user)
         {
             service.Setup(x => x.Create(request, It.IsAny<CancellationToken>())).ReturnsAsync(subject);
             service.Setup(x => x.Create(null, It.IsAny<CancellationToken>())).ReturnsAsync((Subject) null);
@@ -67,7 +81,7 @@ namespace Lern_API.Tests.Controllers
 
         [Theory]
         [AutoMoqData]
-        public async Task Update_Subject_Or_409(Mock<IDatabaseService<Subject, SubjectRequest>> service, Mock<IAuthorizationService> authorization, SubjectRequest validRequest, SubjectRequest invalidRequest, Subject valid, Subject invalid, User user)
+        public async Task Update_Subject_Or_409(Mock<ISubjectService> service, Mock<IAuthorizationService> authorization, SubjectRequest validRequest, SubjectRequest invalidRequest, Subject valid, Subject invalid, User user)
         {
             authorization.Setup(x => x.HasWriteAccess(user, It.IsAny<It.IsAnyType>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
@@ -89,7 +103,7 @@ namespace Lern_API.Tests.Controllers
 
         [Theory]
         [AutoMoqData]
-        public async Task Update_Subject_Or_404(Mock<IDatabaseService<Subject, SubjectRequest>> service, Mock<IAuthorizationService> authorization, SubjectRequest validRequest, SubjectRequest invalidRequest, Subject valid, Subject invalid, User user)
+        public async Task Update_Subject_Or_404(Mock<ISubjectService> service, Mock<IAuthorizationService> authorization, SubjectRequest validRequest, SubjectRequest invalidRequest, Subject valid, Subject invalid, User user)
         {
             authorization.Setup(x => x.HasWriteAccess(user, It.IsAny<It.IsAnyType>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
@@ -112,7 +126,7 @@ namespace Lern_API.Tests.Controllers
 
         [Theory]
         [AutoMoqData]
-        public async Task Update_Subject_Or_401(Mock<IDatabaseService<Subject, SubjectRequest>> service, Mock<IAuthorizationService> authorization, SubjectRequest validRequest, SubjectRequest invalidRequest, Subject valid, Subject invalid, User user)
+        public async Task Update_Subject_Or_401(Mock<ISubjectService> service, Mock<IAuthorizationService> authorization, SubjectRequest validRequest, SubjectRequest invalidRequest, Subject valid, Subject invalid, User user)
         {
             authorization.Setup(x => x.HasWriteAccess(user, valid, It.IsAny<CancellationToken>())).ReturnsAsync(true);
             authorization.Setup(x => x.HasWriteAccess(user, invalid, It.IsAny<CancellationToken>())).ReturnsAsync(false);
@@ -135,7 +149,7 @@ namespace Lern_API.Tests.Controllers
 
         [Theory]
         [AutoMoqData]
-        public async Task Delete_Subject_Or_500(Mock<IDatabaseService<Subject, SubjectRequest>> service, Mock<IAuthorizationService> authorization, Subject valid, Subject invalid, User user)
+        public async Task Delete_Subject_Or_500(Mock<ISubjectService> service, Mock<IAuthorizationService> authorization, Subject valid, Subject invalid, User user)
         {
             authorization.Setup(x => x.HasAuthorship(user, It.IsAny<It.IsAnyType>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
@@ -160,7 +174,7 @@ namespace Lern_API.Tests.Controllers
 
         [Theory]
         [AutoMoqData]
-        public async Task Delete_Subject_Or_404(Mock<IDatabaseService<Subject, SubjectRequest>> service, Mock<IAuthorizationService> authorization, Subject valid, Subject invalid, User user)
+        public async Task Delete_Subject_Or_404(Mock<ISubjectService> service, Mock<IAuthorizationService> authorization, Subject valid, Subject invalid, User user)
         {
             authorization.Setup(x => x.HasAuthorship(user, It.IsAny<It.IsAnyType>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
@@ -183,7 +197,7 @@ namespace Lern_API.Tests.Controllers
 
         [Theory]
         [AutoMoqData]
-        public async Task Delete_Subject_Or_401(Mock<IDatabaseService<Subject, SubjectRequest>> service, Mock<IAuthorizationService> authorization, Subject valid, Subject invalid, User user)
+        public async Task Delete_Subject_Or_401(Mock<ISubjectService> service, Mock<IAuthorizationService> authorization, Subject valid, Subject invalid, User user)
         {
             authorization.Setup(x => x.HasAuthorship(user, valid, It.IsAny<CancellationToken>())).ReturnsAsync(true);
             authorization.Setup(x => x.HasAuthorship(user, invalid, It.IsAny<CancellationToken>())).ReturnsAsync(false);

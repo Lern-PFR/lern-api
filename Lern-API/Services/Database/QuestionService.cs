@@ -7,8 +7,9 @@ using Lern_API.DataTransferObjects.Requests;
 using Lern_API.Helpers.Models;
 using Lern_API.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
-namespace Lern_API.Services
+namespace Lern_API.Services.Database
 {
     public interface IQuestionService : IDatabaseService<Question, QuestionRequest>
     {
@@ -21,7 +22,13 @@ namespace Lern_API.Services
         {
         }
 
-        public new async Task<Question> Create(QuestionRequest entity, CancellationToken token = default)
+        protected override IQueryable<Question> WithDefaultIncludes(DbSet<Question> set)
+        {
+            return base.WithDefaultIncludes(set)
+                .Include(question => question.Answers);
+        }
+
+        public override async Task<Question> Create(QuestionRequest entity, CancellationToken token = default)
         {
             var final = new Question();
             final.CloneFrom(entity);
@@ -38,7 +45,7 @@ namespace Lern_API.Services
             return entityEntry?.Entity;
         }
 
-        public new async Task<Question> Update(Guid id, QuestionRequest entity, CancellationToken token = default)
+        public override async Task<Question> Update(Guid id, QuestionRequest entity, CancellationToken token = default)
         {
             var storedQuestion = await Get(id, token);
             storedQuestion.CloneFrom(entity);

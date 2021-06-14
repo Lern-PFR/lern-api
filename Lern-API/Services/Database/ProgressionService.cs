@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Lern_API.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Lern_API.Services
+namespace Lern_API.Services.Database
 {
     public interface IProgressionService : IAbstractDatabaseService<Progression>
     {
@@ -20,6 +20,14 @@ namespace Lern_API.Services
     {
         public ProgressionService(LernContext context) : base(context)
         {
+        }
+
+        protected override IQueryable<Progression> WithDefaultIncludes(DbSet<Progression> set)
+        {
+            return base.WithDefaultIncludes(set)
+                .Include(progression => progression.Concept)
+                .Include(progression => progression.Subject)
+                .Include(progression => progression.User);
         }
 
         public virtual async Task<Progression> Create(User user, Subject subject, Concept concept, CancellationToken token = default)
@@ -43,12 +51,12 @@ namespace Lern_API.Services
 
         public virtual async Task<Progression> Get(User user, Subject subject, CancellationToken token = default)
         {
-            return await DbSet.FirstOrDefaultAsync(x => x.UserId == user.Id && x.SubjectId == subject.Id, token);
+            return await WithDefaultIncludes(DbSet).FirstOrDefaultAsync(x => x.UserId == user.Id && x.SubjectId == subject.Id, token);
         }
 
         public virtual async Task<IEnumerable<Progression>> GetAll(User user, CancellationToken token = default)
         {
-            return await DbSet.Where(x => x.UserId == user.Id).ToListAsync(token);
+            return await WithDefaultIncludes(DbSet).Where(x => x.UserId == user.Id).ToListAsync(token);
         }
 
         public virtual async Task<Progression> Update(User user, Subject subject, Concept concept, CancellationToken token = default)

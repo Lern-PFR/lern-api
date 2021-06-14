@@ -11,6 +11,7 @@ using Lern_API.Helpers;
 using Lern_API.Helpers.JWT;
 using Lern_API.Helpers.Swagger;
 using Lern_API.Services;
+using Lern_API.Services.Database;
 using Lern_API.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -38,7 +39,7 @@ namespace Lern_API
         public void ConfigureServices(IServiceCollection services)
         {
             // Ajout du système de communication avec la base de données
-            services.AddDbContext<LernContext>(options => options.UseNpgsql(Configuration.GetConnectionString()));
+            services.AddDbContext<LernContext>(options => options.UseNpgsql(Configuration.GetConnectionString(), o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
 
             services.AddFluentEmail(Configuration.Get<string>("SenderEmail"), Configuration.Get<string>("SenderName"))
                 .AddLiquidRenderer(options =>
@@ -124,6 +125,12 @@ namespace Lern_API
             services.AddSingleton<IMailService, MailService>();
             services.AddScoped(typeof(IDatabaseService<,>), typeof(DatabaseService<,>));
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ISubjectService, SubjectService>();
+            services.AddScoped<IModuleService, ModuleService>();
+            services.AddScoped<IConceptService, ConceptService>();
+            services.AddScoped<IExerciseService, ExerciseService>();
+            services.AddScoped<ISubjectService, SubjectService>();
+            services.AddScoped<ICourseService, CourseService>();
             services.AddScoped<IQuestionService, QuestionService>();
             services.AddScoped<IProgressionService, ProgressionService>();
             services.AddScoped<IAuthorizationService, AuthorizationService>();

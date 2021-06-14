@@ -7,6 +7,7 @@ using Lern_API.DataTransferObjects.Responses;
 using Lern_API.Helpers.JWT;
 using Lern_API.Models;
 using Lern_API.Services;
+using Lern_API.Services.Database;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Lern_API.Controllers
@@ -15,10 +16,10 @@ namespace Lern_API.Controllers
     [ApiController]
     public class SubjectsController : ControllerBase
     {
-        private readonly IDatabaseService<Subject, SubjectRequest> _subjects;
+        private readonly ISubjectService _subjects;
         private readonly IAuthorizationService _authorization;
 
-        public SubjectsController(IDatabaseService<Subject, SubjectRequest> subjects, IAuthorizationService authorization)
+        public SubjectsController(ISubjectService subjects, IAuthorizationService authorization)
         {
             _subjects = subjects;
             _authorization = authorization;
@@ -33,6 +34,17 @@ namespace Lern_API.Controllers
         public async Task<IEnumerable<Subject>> GetAll()
         {
             return await _subjects.GetAll(HttpContext.RequestAborted);
+        }
+
+        /// <summary>
+        /// Returns all subjects created by the current user
+        /// </summary>
+        /// <returns>A list of all subjects created by the current user</returns>
+        [RequireAuthentication]
+        [HttpGet("mine")]
+        public async Task<IEnumerable<Subject>> GetMine()
+        {
+            return await _subjects.GetMine(HttpContext.RequestAborted);
         }
 
         /// <summary>
