@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentValidation.AspNetCore;
 using Lern_API.DataTransferObjects.Requests;
+using Lern_API.DataTransferObjects.Responses;
 using Lern_API.Helpers.JWT;
 using Lern_API.Models;
 using Lern_API.Services;
@@ -100,6 +101,36 @@ namespace Lern_API.Controllers
                 return Conflict();
 
             return result;
+        }
+
+        /// <summary>
+        /// Delete an existing subject and all of its children
+        /// </summary>
+        /// <param name="id">Subject Id</param>
+        /// <returns>Deleted subject</returns>
+        /// <response code="200">Deleted subject</response>
+        /// <response code="401">If you do not have the right to delete this subject</response>
+        /// <response code="404">If given subject could not be found</response>
+        /// <response code="500">If an error occured while trying to delete this subject</response>
+        [RequireAuthentication]
+        [HttpDelete("{id:guid}")]
+        public async Task<ActionResult<Subject>> Delete(Guid id)
+        {
+            var currentUser = HttpContext.GetUser();
+            var currentSubject = await _subjects.Get(id, HttpContext.RequestAborted);
+
+            if (currentSubject == null)
+                return NotFound();
+
+            if (!await _authorization.HasAuthorship(currentUser, currentSubject, HttpContext.RequestAborted))
+                return Unauthorized();
+
+            var result = await _subjects.Delete(id, HttpContext.RequestAborted);
+
+            if (!result)
+                return StatusCode(500, new ErrorResponse("An internal error occured while trying to delete this entity. Please contact an administrator if this is not intended."));
+
+            return currentSubject;
         }
     }
 }

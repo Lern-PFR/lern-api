@@ -23,8 +23,6 @@ namespace Lern_API.Models
         [Required]
         public Guid ExerciseId { get; set; }
         [Required]
-        public Exercise Exercise { get; set; }
-        [Required]
         public QuestionType Type { get; set; }
         [Required, MinLength(3), MaxLength(300)]
         public string Statement { get; set; }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -24,5 +25,7 @@ namespace Lern_API.Models
         public string Content { get; set; }
         [Required]
         public int Order { get; set; }
+        [ReadOnly(true)]
+        public List<Question> Questions { get; set; }
     }
 }
