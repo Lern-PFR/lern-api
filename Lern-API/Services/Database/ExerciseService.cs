@@ -33,6 +33,9 @@ namespace Lern_API.Services.Database
         public override async Task<Exercise> Get(Guid id, CancellationToken token = default)
         {
             var entity = await base.Get(id, token);
+            
+            if (entity == null)
+                return null;
 
             var canEdit = await _authorizationService.HasWriteAccess(HttpContextAccessor.HttpContext.GetUser(), entity, token);
 
@@ -43,6 +46,7 @@ namespace Lern_API.Services.Database
                 .Include(exercise =>
                     exercise.Questions.Where(question => question.Answers.Any(answer => answer.Valid)))
                 .ThenInclude(question => question.Answers)
+                .Where(exercise => exercise.Questions.Any() && exercise.Questions.All(question => question.Answers.Any(answer => answer.Valid)))
                 .FirstOrDefaultAsync(exercise => exercise.Id == id, token);
         }
     }

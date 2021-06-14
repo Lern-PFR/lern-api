@@ -44,6 +44,9 @@ namespace Lern_API.Services.Database
         public override async Task<Subject> Get(Guid id, CancellationToken token = default)
         {
             var entity = await base.Get(id, token);
+            
+            if (entity == null)
+                return null;
 
             var canEdit = await _authorizationService.HasWriteAccess(HttpContextAccessor.HttpContext.GetUser(), entity, token);
 
@@ -53,23 +56,23 @@ namespace Lern_API.Services.Database
             return await DbSet
                 .Include(subject => subject.Modules.Where(module => module.Concepts.Any()))
                 .ThenInclude(module =>
-                    module.Concepts.Where(concept => concept.Courses.Any() && concept.Exercises.Any()))
+                    module.Concepts.Where(concept => concept.Courses.Any() && concept.Exercises.Any(exercise => exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid)))))
                 .ThenInclude(concept => concept.Courses)
                 .ThenInclude(course => course.Exercises.Where(exercise => exercise.Questions.Any()))
                 .ThenInclude(exercise =>
                     exercise.Questions.Where(question => question.Answers.Any(answer => answer.Valid)))
                 .Include(subject => subject.Modules.Where(module => module.Concepts.Any()))
                 .ThenInclude(module =>
-                    module.Concepts.Where(concept => concept.Courses.Any() && concept.Exercises.Any()))
+                    module.Concepts.Where(concept => concept.Courses.Any() && concept.Exercises.Any(exercise => exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid)))))
                 .ThenInclude(concept => concept.Exercises.Where(exercise => exercise.Questions.Any()))
                 .ThenInclude(exercise =>
                     exercise.Questions.Where(question => question.Answers.Any(answer => answer.Valid)))
                 .ThenInclude(question => question.Answers)
                 .Where(subject =>
-                    subject.Modules.Any(module =>
-                        module.Concepts.Any(concept => concept.Courses.Any() && concept.Exercises.Any(exercise =>
-                            exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid))
-                        ))
+                    subject.Modules.Any() && subject.Modules.All(module =>
+                        module.Concepts.Any() && module.Concepts.All(concept => concept.Courses.Any() && concept.Exercises.Any() && concept.Exercises.All(exercise =>
+                            exercise.Questions.Any() && exercise.Questions.All(question => question.Answers.Any(answer => answer.Valid))
+                    ))
                 )).FirstOrDefaultAsync(subject => subject.Id == id, token);
         }
 
@@ -77,19 +80,20 @@ namespace Lern_API.Services.Database
         {
             return await DbSet
                 .Include(subject => subject.Modules.Where(module => module.Concepts.Any()))
-                .ThenInclude(module => module.Concepts.Where(concept => concept.Courses.Any() && concept.Exercises.Any()))
+                .ThenInclude(module => module.Concepts.Where(concept => concept.Courses.Any() && concept.Exercises.Any(exercise => exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid)))))
                 .ThenInclude(concept => concept.Courses)
-                .ThenInclude(course => course.Exercises.Where(exercise => exercise.Questions.Any()))
+                .ThenInclude(course => course.Exercises.Where(exercise => exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid))))
                 .ThenInclude(exercise => exercise.Questions.Where(question => question.Answers.Any(answer => answer.Valid)))
+                .ThenInclude(question => question.Answers)
                 .Include(subject => subject.Modules.Where(module => module.Concepts.Any()))
-                .ThenInclude(module => module.Concepts.Where(concept => concept.Courses.Any() && concept.Exercises.Any()))
+                .ThenInclude(module => module.Concepts.Where(concept => concept.Courses.Any() && concept.Exercises.Any(exercise => exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid)))))
                 .ThenInclude(concept => concept.Exercises.Where(exercise => exercise.Questions.Any()))
                 .ThenInclude(exercise => exercise.Questions.Where(question => question.Answers.Any(answer => answer.Valid)))
                 .ThenInclude(question => question.Answers)
                 .Where(subject =>
-                    subject.Modules.Any(module =>
-                        module.Concepts.Any(concept => concept.Courses.Any() && concept.Exercises.Any(exercise =>
-                            exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid))
+                    subject.Modules.Any() && subject.Modules.All(module =>
+                        module.Concepts.Any() && module.Concepts.All(concept => concept.Courses.Any() && concept.Exercises.Any() && concept.Exercises.All(exercise =>
+                            exercise.Questions.Any() && exercise.Questions.All(question => question.Answers.Any(answer => answer.Valid))
                     ))
                 )).ToListAsync(token);
         }

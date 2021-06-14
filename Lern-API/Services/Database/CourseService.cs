@@ -15,7 +15,6 @@ namespace Lern_API.Services.Database
     public interface ICourseService : IDatabaseService<Course, CourseRequest>
     {
         Task<Course> GetExact(Guid id, int version, CancellationToken token = default);
-        Task<Course> GetMine(Guid id, CancellationToken token = default);
     }
 
     public class CourseService : DatabaseService<Course, CourseRequest>, ICourseService
@@ -41,6 +40,9 @@ namespace Lern_API.Services.Database
 
             var entity = await set.FirstOrDefaultAsync(x => x.Id == id && x.Version == set.Where(course => course.Id == id).Max(course => course.Version), token);
 
+            if (entity == null)
+                return null;
+
             var canEdit = await _authorizationService.HasWriteAccess(HttpContextAccessor.HttpContext.GetUser(), entity, token);
 
             if (canEdit)
@@ -51,6 +53,8 @@ namespace Lern_API.Services.Database
                     course.Exercises.Where(exercise => exercise.Questions.Any()))
                 .ThenInclude(exercise =>
                     exercise.Questions.Where(question => question.Answers.Any(answer => answer.Valid)))
+                .ThenInclude(question => question.Answers)
+                .Where(course => course.Exercises.Any() && course.Exercises.All(exercise => exercise.Questions.Any() && exercise.Questions.All(question => question.Answers.Any(answer => answer.Valid))))
                 .FirstOrDefaultAsync(course => course.Id == id && course.Version == entity.Version, token);
         }
 
@@ -128,18 +132,6 @@ namespace Lern_API.Services.Database
         public async Task<Course> GetExact(Guid id, int version, CancellationToken token = default)
         {
             return await WithDefaultIncludes(DbSet).FirstOrDefaultAsync(x => x.Id == id && x.Version == version, token);
-        }
-
-        public async Task<Course> GetMine(Guid id, CancellationToken token = default)
-        {
-            var set = DbSet.Include(course => course.Exercises.Where(exercise => exercise.Questions.Any()))
-                .ThenInclude(exercise =>
-                    exercise.Questions.Where(question => question.Answers.Any(answer => answer.Valid)))
-                .Where(course => course.Exercises.Any(exercise =>
-                    exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid))));
-
-            return await set
-                .FirstOrDefaultAsync(x => x.Id == id && x.Version == set.Where(course => course.Id == id).Max(course => course.Version), token);
         }
     }
 }
