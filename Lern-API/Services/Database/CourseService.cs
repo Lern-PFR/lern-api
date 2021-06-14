@@ -54,7 +54,7 @@ namespace Lern_API.Services.Database
                 .ThenInclude(exercise =>
                     exercise.Questions.Where(question => question.Answers.Any(answer => answer.Valid)))
                 .ThenInclude(question => question.Answers)
-                .Where(course => course.Exercises.Any() && course.Exercises.All(exercise => exercise.Questions.Any() && exercise.Questions.All(question => question.Answers.Any(answer => answer.Valid))))
+                .Where(course => course.Exercises.All(exercise => exercise.Questions.Any() && exercise.Questions.All(question => question.Answers.Any(answer => answer.Valid))))
                 .FirstOrDefaultAsync(course => course.Id == id && course.Version == entity.Version, token);
         }
 
