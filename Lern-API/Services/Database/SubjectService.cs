@@ -30,6 +30,7 @@ namespace Lern_API.Services.Database
         protected override IQueryable<Subject> WithDefaultIncludes(DbSet<Subject> set)
         {
             return base.WithDefaultIncludes(set)
+                .Include(subject => subject.Author)
                 .Include(subject => subject.Modules)
                 .ThenInclude(module => module.Concepts)
                 .ThenInclude(concept => concept.Courses)
@@ -93,6 +94,7 @@ namespace Lern_API.Services.Database
         public IQueryable<Subject> GetAvailable()
         {
             return DbSet
+                .Include(subject => subject.Author)
                 .Include(subject => subject.Modules.Where(module => module.Concepts.Any()))
                 .ThenInclude(module => module.Concepts.Where(concept => concept.Courses.Any() && concept.Exercises.Any(exercise => exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid)))))
                 .ThenInclude(concept => concept.Courses)

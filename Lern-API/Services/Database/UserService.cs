@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl;
@@ -28,7 +29,13 @@ namespace Lern_API.Services.Database
         {
             _mails = mails;
         }
-        
+
+        protected override IQueryable<User> WithDefaultIncludes(DbSet<User> set)
+        {
+            return base.WithDefaultIncludes(set)
+                .Include(user => user.Manager);
+        }
+
         public override async Task<User> Create(UserRequest entity, CancellationToken token = default)
         {
             entity.Password = BCrypt.Net.BCrypt.EnhancedHashPassword(entity.Password);
@@ -54,7 +61,7 @@ namespace Lern_API.Services.Database
 
         public async Task<LoginResponse> Login(LoginRequest request, CancellationToken token = default)
         {
-            var user = await DbSet.FirstOrDefaultAsync(x => x.Nickname == request.Login || x.Email == request.Login.ToLowerInvariant(), token);
+            var user = await WithDefaultIncludes(DbSet).FirstOrDefaultAsync(x => x.Nickname == request.Login || x.Email == request.Login.ToLowerInvariant(), token);
 
             if (user == null || !BCrypt.Net.BCrypt.EnhancedVerify(request.Password, user.Password))
                 return null;
@@ -67,7 +74,7 @@ namespace Lern_API.Services.Database
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var user = await DbSet.FirstOrDefaultAsync(x => x.Nickname == login || x.Email == login.ToLowerInvariant(), token);
+            var user = await WithDefaultIncludes(DbSet).FirstOrDefaultAsync(x => x.Nickname == login || x.Email == login.ToLowerInvariant(), token);
 
             if (user != null)
             {
