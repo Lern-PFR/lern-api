@@ -29,7 +29,7 @@ namespace Lern_API.Tests.Controllers
 
             var result = await controller.GetAll();
             
-            result.Should().NotBeNull().And.BeEquivalentTo(subjects, TestSetup.IgnoreTimestamps<Subject>());
+            result.Available.Should().NotBeNull().And.BeEquivalentTo(subjects, TestSetup.IgnoreTimestamps<Subject>());
         }
 
         [Theory]
