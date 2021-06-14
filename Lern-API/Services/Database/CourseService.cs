@@ -20,10 +20,12 @@ namespace Lern_API.Services.Database
     public class CourseService : DatabaseService<Course, CourseRequest>, ICourseService
     {
         private readonly IAuthorizationService _authorizationService;
+        private readonly ISubjectService _subjectService;
 
-        public CourseService(LernContext context, IHttpContextAccessor httpContextAccessor, IAuthorizationService authorizationService) : base(context, httpContextAccessor)
+        public CourseService(LernContext context, IHttpContextAccessor httpContextAccessor, IAuthorizationService authorizationService, ISubjectService subjectService) : base(context, httpContextAccessor)
         {
             _authorizationService = authorizationService;
+            _subjectService = subjectService;
         }
 
         protected override IQueryable<Course> WithDefaultIncludes(DbSet<Course> set)
@@ -56,6 +58,19 @@ namespace Lern_API.Services.Database
                 .ThenInclude(question => question.Answers)
                 .Where(course => course.Exercises.All(exercise => exercise.Questions.Any() && exercise.Questions.All(question => question.Answers.Any(answer => answer.Valid))))
                 .FirstOrDefaultAsync(course => course.Id == id && course.Version == entity.Version, token);
+        }
+
+        public override async Task<Course> Create(CourseRequest entity, CancellationToken token = default)
+        {
+            var result = await base.Create(entity, token);
+
+            if (result == null)
+                return null;
+
+            var subject = await Context.Subjects.FirstOrDefaultAsync(x => x.Modules.Any(module => module.Concepts.Any(concept => concept.Id == result.ConceptId)), token);
+            await _subjectService.UpdateState(subject?.Id ?? default, token);
+
+            return result;
         }
 
         public override async Task<Course> Update(Guid id, CourseRequest entity, CancellationToken token = default)
@@ -101,7 +116,7 @@ namespace Lern_API.Services.Database
                             var newAnswer = new Answer();
                             newAnswer.CloneFrom(answer);
 
-                            newAnswer.Id = default;
+                            newAnswer.Id = Guid.NewGuid();
                             newAnswer.QuestionId = default;
 
                             newQuestion.Answers.Add(newAnswer);
@@ -115,18 +130,28 @@ namespace Lern_API.Services.Database
 
                 return await set.AddAsync(newVersion, token);
             }, token);
+            
+            if (result?.Entity == null)
+                return null;
 
-            return result?.Entity;
+            var subject = await Context.Subjects.FirstOrDefaultAsync(x => x.Modules.Any(module => module.Concepts.Any(concept => concept.Id == result.Entity.ConceptId)), token);
+            await _subjectService.UpdateState(subject?.Id ?? default, token);
+
+            return result.Entity;
         }
 
         public override async Task<bool> Delete(Guid id, CancellationToken token = default)
         {
-            var exists = await Exists(id, token);
+            var entity = await Get(id, token);
+            var result = await SafeExecute(set => set.RemoveRange(set.Where(x => x.Id == id)), token);
 
-            if (!exists)
+            if (!result)
                 return false;
 
-            return await SafeExecute(set => set.RemoveRange(set.Where(x => x.Id == id)), token);
+            var subject = await Context.Subjects.FirstOrDefaultAsync(x => x.Modules.Any(module => module.Concepts.Any(concept => concept.Id == entity.ConceptId)), token);
+            await _subjectService.UpdateState(subject?.Id ?? default, token);
+
+            return true;
         }
 
         public async Task<Course> GetExact(Guid id, int version, CancellationToken token = default)

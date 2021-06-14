@@ -9,7 +9,8 @@ namespace Lern_API.Models
     public enum SubjectState
     {
         Pending = 0,
-        Approved = 1
+        Approved = 1,
+        Invalid = 2
     }
 
     public class Subject : IModelBase

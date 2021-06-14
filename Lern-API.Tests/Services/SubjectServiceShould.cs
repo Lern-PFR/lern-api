@@ -233,5 +233,29 @@ namespace Lern_API.Tests.Services
             context.Progressions.AsEnumerable().Should().BeEmpty();
             context.Results.AsEnumerable().Should().BeEmpty();
         }
+
+        [Theory]
+        [AutoMoqData]
+        public async Task Update_Subject_State(IAuthorizationService authorizationService, Subject subject, Subject invalidSubject)
+        {
+            subject.Modules.First().Concepts.First().Exercises.First().Questions.First().Answers.First().Valid = true;
+
+            invalidSubject.Modules.First().Concepts.First().Exercises.First().Questions.First().Answers.ForEach(x => x.Valid = false);
+            invalidSubject.Modules.First().Concepts.First().Courses.Clear();
+
+            var context = TestSetup.SetupContext();
+            var httpContext = TestSetup.SetupHttpContext();
+
+            await context.Subjects.AddAsync(subject);
+            await context.Subjects.AddAsync(invalidSubject);
+            await context.SaveChangesAsync();
+
+            var service = new SubjectService(context, httpContext, authorizationService);
+            var result = await service.UpdateState(subject.Id);
+            var invalidResult = await service.UpdateState(invalidSubject.Id);
+
+            result.State.Should().Be(SubjectState.Approved);
+            invalidResult.State.Should().Be(SubjectState.Invalid);
+        }
     }
 }

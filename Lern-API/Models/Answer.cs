@@ -7,8 +7,8 @@ namespace Lern_API.Models
 {
     public class Answer : IModelBase
     {
-        [ReadOnly(true), Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid Id { get; set; }
+        [ReadOnly(true), Key]
+        public Guid Id { get; set; } = Guid.NewGuid();
         [ReadOnly(true), Required]
         public Guid QuestionId { get; set; }
         [ReadOnly(true)]

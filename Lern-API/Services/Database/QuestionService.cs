@@ -18,8 +18,11 @@ namespace Lern_API.Services.Database
 
     public class QuestionService : DatabaseService<Question, QuestionRequest>, IQuestionService
     {
-        public QuestionService(LernContext context, IHttpContextAccessor httpContextAccessor) : base(context, httpContextAccessor)
+        private readonly ISubjectService _subjectService;
+
+        public QuestionService(LernContext context, IHttpContextAccessor httpContextAccessor, ISubjectService subjectService) : base(context, httpContextAccessor)
         {
+            _subjectService = subjectService;
         }
 
         protected override IQueryable<Question> WithDefaultIncludes(DbSet<Question> set)
@@ -40,9 +43,20 @@ namespace Lern_API.Services.Database
                 return answer;
             }).ToList();
 
-            var entityEntry = await SafeExecute(async set => await set.AddAsync(final, token), token);
+            var result = await SafeExecute(async set => await set.AddAsync(final, token), token);
 
-            return entityEntry?.Entity;
+            if (result?.Entity == null)
+                return null;
+
+            var subject = await Context.Subjects.FirstOrDefaultAsync(x =>
+                    x.Modules.Any(module => module.Concepts.Any(concept => concept.Exercises.Any(exercise => exercise.Id == result.Entity.ExerciseId)) ||
+                                            module.Concepts.Any(concept => concept.Courses.Any(course => course.Exercises.Any(exercise => exercise.Id == result.Entity.ExerciseId)))),
+                token
+            );
+
+            await _subjectService.UpdateState(subject?.Id ?? default, token);
+
+            return result.Entity;
         }
 
         public override async Task<Question> Update(Guid id, QuestionRequest entity, CancellationToken token = default)
@@ -56,19 +70,10 @@ namespace Lern_API.Services.Database
 
                 foreach (var answer in entity.Answers)
                 {
-                    var existingAnswer = storedQuestion.Answers.FirstOrDefault(x => x.Id == answer.Id);
-
-                    if (existingAnswer != null)
-                    {
-                        existingAnswer.CloneFrom(answer);
-                        newAnswers.Add(existingAnswer);
-                    }
-                    else
-                    {
-                        var newAnswer = new Answer();
-                        newAnswer.CloneFrom(answer);
-                        newAnswers.Add(newAnswer);
-                    }
+                    var newAnswer = new Answer();
+                    newAnswer.CloneFrom(answer);
+                    newAnswer.Id = Guid.NewGuid();
+                    newAnswers.Add(newAnswer);
                 }
 
                 storedQuestion.Answers.Clear();
@@ -77,7 +82,37 @@ namespace Lern_API.Services.Database
 
             var result = await SafeExecute(set => set.Update(storedQuestion), token);
 
-            return result?.Entity;
+            if (result?.Entity == null)
+                return null;
+
+            var subject = await Context.Subjects.FirstOrDefaultAsync(x =>
+                    x.Modules.Any(module => module.Concepts.Any(concept => concept.Exercises.Any(exercise => exercise.Id == result.Entity.ExerciseId)) ||
+                                            module.Concepts.Any(concept => concept.Courses.Any(course => course.Exercises.Any(exercise => exercise.Id == result.Entity.ExerciseId)))),
+                token
+            );
+
+            await _subjectService.UpdateState(subject?.Id ?? default, token);
+
+            return result.Entity;
+        }
+
+        public override async Task<bool> Delete(Guid id, CancellationToken token = default)
+        {
+            var entity = await base.Get(id, token);
+            var result = await base.Delete(id, token);
+
+            if (!result)
+                return false;
+
+            var subject = await Context.Subjects.FirstOrDefaultAsync(x =>
+                x.Modules.Any(module => module.Concepts.Any(concept => concept.Exercises.Any(exercise => exercise.Id == entity.ExerciseId)) ||
+                                        module.Concepts.Any(concept => concept.Courses.Any(course => course.Exercises.Any(exercise => exercise.Id == entity.ExerciseId)))),
+                token
+            );
+
+            await _subjectService.UpdateState(subject?.Id ?? default, token);
+
+            return true;
         }
     }
 }

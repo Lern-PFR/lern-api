@@ -70,6 +70,9 @@ namespace Lern_API
                 .WithOne().HasForeignKey(x => x.QuestionId)
                 .IsRequired();
 
+            modelBuilder.Entity<Answer>()
+                .Property(answer => answer.Id).ValueGeneratedNever();
+
             modelBuilder.Entity<Result>()
                 .HasKey(x => new { x.QuestionId, x.UserId });
             modelBuilder.Entity<Result>()

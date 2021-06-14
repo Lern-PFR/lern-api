@@ -1,7 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Lern_API.DataTransferObjects.Requests;
 using Lern_API.Models;
 using Lern_API.Services;
 using Lern_API.Services.Database;
@@ -16,7 +18,7 @@ namespace Lern_API.Tests.Services
     {
         [Theory]
         [AutoMoqData]
-        public async Task Get_Entire_Module_With_Write_Access(Mock<IAuthorizationService> authorizationService, Module module, User user)
+        public async Task Get_Entire_Module_With_Write_Access(Mock<IAuthorizationService> authorizationService, ISubjectService subjectService, Module module, User user)
         {
             authorizationService.Setup(x => x.HasWriteAccess(user, module, It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
@@ -26,10 +28,10 @@ namespace Lern_API.Tests.Services
             var httpContext = TestSetup.SetupHttpContext().SetupSession(user);
 
             await context.Users.AddAsync(user);
-            await context.Modules.AddRangeAsync(module);
+            await context.Modules.AddAsync(module);
             await context.SaveChangesAsync();
 
-            var service = new ModuleService(context, httpContext, authorizationService.Object);
+            var service = new ModuleService(context, httpContext, authorizationService.Object, subjectService);
             var result = await service.Get(module.Id);
 
             result.Should().BeEquivalentTo(module);
@@ -37,7 +39,7 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Get_Module_With_A_Course_And_An_Exercise(Mock<IAuthorizationService> authorizationService, Module module, Module invalidModule, User user)
+        public async Task Get_Module_With_A_Course_And_An_Exercise(Mock<IAuthorizationService> authorizationService, ISubjectService subjectService, Module module, Module invalidModule, User user)
         {
             authorizationService.Setup(x => x.HasWriteAccess(user, It.IsAny<Module>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
@@ -53,12 +55,63 @@ namespace Lern_API.Tests.Services
             await context.Modules.AddAsync(invalidModule);
             await context.SaveChangesAsync();
 
-            var service = new ModuleService(context, httpContext, authorizationService.Object);
+            var service = new ModuleService(context, httpContext, authorizationService.Object, subjectService);
             var result = await service.Get(module.Id);
             var invalidResult = await service.Get(invalidModule.Id);
 
             result.Should().NotBeNull().And.BeEquivalentTo(module);
             invalidResult.Should().BeNull();
+        }
+
+        [Theory]
+        [AutoMoqData]
+        public async Task Update_Subject_State_On_Update(Mock<IAuthorizationService> authorizationService, Mock<ISubjectService> subjectService, Module module, ModuleRequest request)
+        {
+            subjectService.Setup(x => x.UpdateState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
+            
+            var context = TestSetup.SetupContext();
+            var httpContext = TestSetup.SetupHttpContext();
+            
+            await context.Modules.AddAsync(module);
+            await context.SaveChangesAsync();
+
+            var service = new ModuleService(context, httpContext, authorizationService.Object, subjectService.Object);
+            await service.Update(module.Id, request);
+
+            subjectService.VerifyAll();
+        }
+
+        [Theory]
+        [AutoMoqData]
+        public async Task Update_Subject_State_On_Create(Mock<IAuthorizationService> authorizationService, Mock<ISubjectService> subjectService, ModuleRequest request)
+        {
+            subjectService.Setup(x => x.UpdateState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
+            
+            var context = TestSetup.SetupContext();
+            var httpContext = TestSetup.SetupHttpContext();
+            
+            var service = new ModuleService(context, httpContext, authorizationService.Object, subjectService.Object);
+            await service.Create(request);
+
+            subjectService.VerifyAll();
+        }
+
+        [Theory]
+        [AutoMoqData]
+        public async Task Update_Subject_State_On_Delete(Mock<IAuthorizationService> authorizationService, Mock<ISubjectService> subjectService, Module module)
+        {
+            subjectService.Setup(x => x.UpdateState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
+            
+            var context = TestSetup.SetupContext();
+            var httpContext = TestSetup.SetupHttpContext();
+
+            await context.Modules.AddAsync(module);
+            await context.SaveChangesAsync();
+
+            var service = new ModuleService(context, httpContext, authorizationService.Object, subjectService.Object);
+            await service.Delete(module.Id);
+
+            subjectService.VerifyAll();
         }
     }
 }

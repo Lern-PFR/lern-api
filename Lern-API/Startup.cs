@@ -39,7 +39,10 @@ namespace Lern_API
         public void ConfigureServices(IServiceCollection services)
         {
             // Ajout du système de communication avec la base de données
-            services.AddDbContext<LernContext>(options => options.UseNpgsql(Configuration.GetConnectionString(), o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
+            services.AddDbContext<LernContext>(options =>
+            {
+                options.UseNpgsql(Configuration.GetConnectionString(), o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+            });
 
             services.AddFluentEmail(Configuration.Get<string>("SenderEmail"), Configuration.Get<string>("SenderName"))
                 .AddLiquidRenderer(options =>
@@ -140,7 +143,7 @@ namespace Lern_API
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory, LernContext context)
         {
             loggerFactory.AddLog4Net();
-
+            
             Retry.Do(() => context.Database.Migrate(), TimeSpan.FromSeconds(3), 20);
 
             if (env.IsDevelopment())
