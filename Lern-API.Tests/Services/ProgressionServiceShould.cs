@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Lern_API.Models;
-using Lern_API.Services;
 using Lern_API.Services.Database;
 using Lern_API.Tests.Attributes;
 using Lern_API.Tests.Utils;
@@ -91,7 +90,7 @@ namespace Lern_API.Tests.Services
 
             var storedResult = context.Progressions.FirstOrDefault();
 
-            result.Should().NotBeNull().And.BeEquivalentTo(progression, TestSetup.IgnoreTimestamps<Progression>());
+            result.Should().BeTrue();
             storedResult.Should().NotBeNull().And.BeEquivalentTo(progression, TestSetup.IgnoreTimestamps<Progression>());
         }
 
@@ -132,7 +131,7 @@ namespace Lern_API.Tests.Services
 
             var storedResult = context.Progressions.FirstOrDefault();
 
-            result.Should().NotBeNull().And.BeEquivalentTo(expected, TestSetup.IgnoreTimestamps<Progression>());
+            result.Should().BeTrue();
             storedResult.Should().NotBeNull().And.BeEquivalentTo(expected, TestSetup.IgnoreTimestamps<Progression>());
         }
 

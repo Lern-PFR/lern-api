@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace Lern_API.Models
 {
@@ -23,5 +24,9 @@ namespace Lern_API.Models
         public Concept Concept { get; set; }
         [ReadOnly(true)]
         public bool Suspended { get; set; }
+        [ReadOnly(true)]
+        public bool Completed { get; set; }
+        [ReadOnly(true), Range(0, 100)]
+        public double Completion { get; set; }
     }
 }

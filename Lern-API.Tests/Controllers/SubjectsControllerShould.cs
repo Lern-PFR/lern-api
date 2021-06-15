@@ -23,7 +23,7 @@ namespace Lern_API.Tests.Controllers
         [AutoMoqData]
         public async Task Return_All_Subjects(Mock<ISubjectService> service, IAuthorizationService authorization, List<Subject> subjects)
         {
-            service.Setup(x => x.GetAll(It.IsAny<CancellationToken>())).ReturnsAsync(subjects);
+            service.Setup(x => x.GetAvailable(It.IsAny<CancellationToken>())).ReturnsAsync(subjects);
 
             var controller = TestSetup.SetupController<SubjectsController>(service.Object, authorization);
 

@@ -35,8 +35,8 @@ namespace Lern_API.Controllers
         {
             return new(
                 await _subjects.GetMine(HttpContext.RequestAborted),
-                new List<Subject>(),
-                await _subjects.GetAll(HttpContext.RequestAborted)
+                await _subjects.GetActives(HttpContext.RequestAborted),
+                await _subjects.GetAvailable(HttpContext.RequestAborted)
             );
         }
 
