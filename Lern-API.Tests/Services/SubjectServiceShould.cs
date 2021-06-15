@@ -75,7 +75,7 @@ namespace Lern_API.Tests.Services
             await context.SaveChangesAsync();
 
             var service = new SubjectService(context, TestSetup.SetupHttpContext(), authorizationService, progressionService);
-            var result = await service.GetAll();
+            var result = await service.GetAvailable();
 
             result.Should().BeEquivalentTo(subjects).And.NotBeEquivalentTo(invalidSubjects);
         }
