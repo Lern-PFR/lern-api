@@ -11,6 +11,8 @@ namespace Lern_API.Services.Database
         Task<T> ExecuteTransaction<T>(Func<DbSet<TEntity>, Task<T>> operations, CancellationToken token = default);
         Task<T> ExecuteTransaction<T>(Func<DbSet<TEntity>, T> operations, CancellationToken token = default);
         Task<bool> ExecuteTransaction(Action<DbSet<TEntity>> operations, CancellationToken token = default);
+        Task<T> ExecuteQuery<T>(Func<IQueryable<TEntity>, Task<T>> query, CancellationToken token = default);
+        T ExecuteQuery<T>(Func<IQueryable<TEntity>, T> query, CancellationToken token = default);
     }
 
     public abstract class AbstractDatabaseService<TEntity> : IAbstractDatabaseService<TEntity> where TEntity : class
@@ -44,6 +46,33 @@ namespace Lern_API.Services.Database
             return await SafeExecute(operations, token);
         }
 
+        public async Task<T> ExecuteQuery<T>(Func<IQueryable<TEntity>, Task<T>> query, CancellationToken token = default)
+        {
+            try
+            {
+                return await query(WithDefaultIncludes(DbSet));
+            }
+#pragma warning disable CS0168 // La variable est déclarée mais jamais utilisée
+            catch (Exception _)
+#pragma warning restore CS0168 // La variable est déclarée mais jamais utilisée
+            {
+                return default;
+            }
+        }
+
+        public T ExecuteQuery<T>(Func<IQueryable<TEntity>, T> query, CancellationToken token = default)
+        {
+            try
+            {
+                return query(WithDefaultIncludes(DbSet));
+            }
+#pragma warning disable CS0168 // La variable est déclarée mais jamais utilisée
+            catch (Exception _)
+#pragma warning restore CS0168 // La variable est déclarée mais jamais utilisée
+            {
+                return default;
+            }
+        }
         protected async Task<T> SafeExecute<T>(Func<DbSet<TEntity>, Task<T>> operations, CancellationToken token = default)
         {
             await using var transaction = await Context.Database.BeginTransactionAsync(token);
@@ -95,6 +124,29 @@ namespace Lern_API.Services.Database
             try
             {
                 operations(DbSet);
+
+                await Context.SaveChangesAsync(token);
+                await transaction.CommitAsync(token);
+
+                return true;
+            }
+#pragma warning disable CS0168 // La variable est déclarée mais jamais utilisée
+            catch (Exception _)
+#pragma warning restore CS0168 // La variable est déclarée mais jamais utilisée
+            {
+                await transaction.RollbackAsync(token);
+
+                return false;
+            }
+        }
+
+        protected async Task<bool> SafeExecute(Func<DbSet<TEntity>, Task> operations, CancellationToken token = default)
+        {
+            await using var transaction = await Context.Database.BeginTransactionAsync(token);
+
+            try
+            {
+                await operations(DbSet);
 
                 await Context.SaveChangesAsync(token);
                 await transaction.CommitAsync(token);
