@@ -11,8 +11,8 @@ namespace Lern_API.Services.Database
     {
         Task<IEnumerable<Progression>> GetAll(User user, CancellationToken token = default);
         Task<Progression> Get(User user, Subject subject, CancellationToken token = default);
-        Task<Progression> Create(User user, Subject subject, Concept concept, CancellationToken token = default);
-        Task<Progression> Update(User user, Subject subject, Concept concept, CancellationToken token = default);
+        Task<bool> Create(User user, Subject subject, Concept concept, CancellationToken token = default);
+        Task<bool> Update(User user, Subject subject, Concept concept, CancellationToken token = default);
         Task<bool> Exists(User user, Subject subject, CancellationToken token = default);
     }
 
@@ -30,7 +30,7 @@ namespace Lern_API.Services.Database
                 .Include(progression => progression.User);
         }
 
-        public virtual async Task<Progression> Create(User user, Subject subject, Concept concept, CancellationToken token = default)
+        public virtual async Task<bool> Create(User user, Subject subject, Concept concept, CancellationToken token = default)
         {
             var final = new Progression
             {
@@ -41,7 +41,7 @@ namespace Lern_API.Services.Database
 
             var entityEntry = await SafeExecute(async set => await set.AddAsync(final, token), token);
 
-            return entityEntry?.Entity;
+            return entityEntry?.Entity != null;
         }
 
         public virtual async Task<bool> Exists(User user, Subject subject, CancellationToken token = default)
@@ -59,16 +59,26 @@ namespace Lern_API.Services.Database
             return await WithDefaultIncludes(DbSet).Where(x => x.UserId == user.Id).ToListAsync(token);
         }
 
-        public virtual async Task<Progression> Update(User user, Subject subject, Concept concept, CancellationToken token = default)
+        public virtual async Task<bool> Update(User user, Subject subject, Concept concept, CancellationToken token = default)
         {
             var entry = await Get(user, subject, token);
 
-            entry.ConceptId = concept.Id;
-            entry.Concept = concept;
+            bool result;
 
-            var result = await SafeExecute(set => set.Update(entry), token);
+            if (entry == null)
+            {
+                result = await Create(user, subject, concept, token);
+            }
+            else
+            {
+                result = await SafeExecute(_ =>
+                {
+                    entry.ConceptId = concept.Id;
+                    entry.Concept = concept;
+                }, token);
+            }
 
-            return result?.Entity;
+            return result;
         }
     }
 }

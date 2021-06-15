@@ -14,17 +14,49 @@ namespace Lern_API.Services.Database
     public interface ISubjectService : IDatabaseService<Subject, SubjectRequest>
     {
         Task<IEnumerable<Subject>> GetMine(CancellationToken token = default);
-        IQueryable<Subject> GetAvailable();
+        Task<IEnumerable<Subject>> GetAvailable(CancellationToken token = default);
+        Task<IEnumerable<Subject>> GetActives(CancellationToken token = default);
         Task<Subject> UpdateState(Guid id, CancellationToken token = default);
     }
 
     public class SubjectService : DatabaseService<Subject, SubjectRequest>, ISubjectService
     {
         private readonly IAuthorizationService _authorizationService;
+        private readonly IProgressionService _progressionService;
 
-        public SubjectService(LernContext context, IHttpContextAccessor httpContextAccessor, IAuthorizationService authorizationService) : base(context, httpContextAccessor)
+        private IQueryable<Subject> AvailableSubjects => DbSet
+            .Include(subject => subject.Author)
+            .Include(subject => subject.Modules.Where(module => module.Concepts.Any()))
+            .ThenInclude(module => module.Concepts.Where(concept =>
+                concept.Courses.Any() && concept.Exercises.Any(exercise =>
+                    exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid)))))
+            .ThenInclude(concept => concept.Courses)
+            .ThenInclude(course => course.Exercises.Where(exercise =>
+                exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid))))
+            .ThenInclude(exercise => exercise.Questions.Where(question => question.Answers.Any(answer => answer.Valid)))
+            .ThenInclude(question => question.Answers)
+            .Include(subject => subject.Modules.Where(module => module.Concepts.Any()))
+            .ThenInclude(module => module.Concepts.Where(concept =>
+                concept.Courses.Any() && concept.Exercises.Any(exercise =>
+                    exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid)))))
+            .ThenInclude(concept => concept.Exercises.Where(exercise => exercise.Questions.Any()))
+            .ThenInclude(exercise => exercise.Questions.Where(question => question.Answers.Any(answer => answer.Valid)))
+            .ThenInclude(question => question.Answers)
+            .Where(subject =>
+                subject.Modules.Any() && subject.Modules.All(module =>
+                    module.Concepts.Any() && module.Concepts.All(concept => concept.Courses.Any() &&
+                                                                            concept.Exercises.Any() &&
+                                                                            concept.Exercises.All(exercise =>
+                                                                                exercise.Questions.Any() &&
+                                                                                exercise.Questions.All(question =>
+                                                                                    question.Answers.Any(answer =>
+                                                                                        answer.Valid))
+                                                                            ))));
+
+        public SubjectService(LernContext context, IHttpContextAccessor httpContextAccessor, IAuthorizationService authorizationService, IProgressionService progressionService) : base(context, httpContextAccessor)
         {
             _authorizationService = authorizationService;
+            _progressionService = progressionService;
         }
 
         protected override IQueryable<Subject> WithDefaultIncludes(DbSet<Subject> set)
@@ -56,7 +88,7 @@ namespace Lern_API.Services.Database
             if (canEdit)
                 return entity;
 
-            return await GetAvailable().FirstOrDefaultAsync(subject => subject.Id == id, token);
+            return await AvailableSubjects.FirstOrDefaultAsync(subject => subject.Id == id, token);
         }
 
         public override async Task<Subject> Create(SubjectRequest entity, CancellationToken token = default)
@@ -79,11 +111,6 @@ namespace Lern_API.Services.Database
             return await UpdateState(result.Id, token);
         }
 
-        public override async Task<IEnumerable<Subject>> GetAll(CancellationToken token = default)
-        {
-            return await GetAvailable().ToListAsync(token);
-        }
-
         public async Task<IEnumerable<Subject>> GetMine(CancellationToken token = default)
         {
             var currentUser = HttpContextAccessor.HttpContext.GetUser();
@@ -91,27 +118,16 @@ namespace Lern_API.Services.Database
             return await WithDefaultIncludes(DbSet).Where(x => x.AuthorId == currentUser.Id).ToListAsync(token);
         }
 
-        public IQueryable<Subject> GetAvailable()
+        public async Task<IEnumerable<Subject>> GetAvailable(CancellationToken token = default)
         {
-            return DbSet
-                .Include(subject => subject.Author)
-                .Include(subject => subject.Modules.Where(module => module.Concepts.Any()))
-                .ThenInclude(module => module.Concepts.Where(concept => concept.Courses.Any() && concept.Exercises.Any(exercise => exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid)))))
-                .ThenInclude(concept => concept.Courses)
-                .ThenInclude(course => course.Exercises.Where(exercise => exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid))))
-                .ThenInclude(exercise => exercise.Questions.Where(question => question.Answers.Any(answer => answer.Valid)))
-                .ThenInclude(question => question.Answers)
-                .Include(subject => subject.Modules.Where(module => module.Concepts.Any()))
-                .ThenInclude(module => module.Concepts.Where(concept => concept.Courses.Any() && concept.Exercises.Any(exercise => exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid)))))
-                .ThenInclude(concept => concept.Exercises.Where(exercise => exercise.Questions.Any()))
-                .ThenInclude(exercise => exercise.Questions.Where(question => question.Answers.Any(answer => answer.Valid)))
-                .ThenInclude(question => question.Answers)
-                .Where(subject =>
-                    subject.Modules.Any() && subject.Modules.All(module =>
-                        module.Concepts.Any() && module.Concepts.All(concept => concept.Courses.Any() && concept.Exercises.Any() && concept.Exercises.All(exercise =>
-                            exercise.Questions.Any() && exercise.Questions.All(question => question.Answers.Any(answer => answer.Valid))
-                    ))
-                ));
+            return await AvailableSubjects.ToListAsync(token);
+        }
+
+        public async Task<IEnumerable<Subject>> GetActives(CancellationToken token = default)
+        {
+            var progressions = await _progressionService.GetAll(HttpContextAccessor.HttpContext.GetUser(), token);
+
+            return progressions.Where(progression => !progression.Suspended).Select(progression => progression.Subject);
         }
         
         public async Task<Subject> UpdateState(Guid id, CancellationToken token = default)
@@ -123,7 +139,7 @@ namespace Lern_API.Services.Database
 
             return await SafeExecute(_ =>
             {
-                subject.State = GetAvailable().Any(x => x.Id == id)
+                subject.State = AvailableSubjects.Any(x => x.Id == id)
                         ? SubjectState.Approved
                         : SubjectState.Invalid;
 
