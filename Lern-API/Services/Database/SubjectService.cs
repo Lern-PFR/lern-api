@@ -16,47 +16,19 @@ namespace Lern_API.Services.Database
         Task<IEnumerable<Subject>> GetMine(CancellationToken token = default);
         Task<IEnumerable<Subject>> GetAvailable(CancellationToken token = default);
         Task<IEnumerable<Subject>> GetActives(CancellationToken token = default);
-        Task<Subject> UpdateState(Guid id, CancellationToken token = default);
     }
 
     public class SubjectService : DatabaseService<Subject, SubjectRequest>, ISubjectService
     {
         private readonly IAuthorizationService _authorizationService;
         private readonly IProgressionService _progressionService;
+        private readonly IStateService _stateService;
 
-        private IQueryable<Subject> AvailableSubjects => DbSet
-            .Include(subject => subject.Author)
-            .Include(subject => subject.Modules.Where(module => module.Concepts.Any()))
-            .ThenInclude(module => module.Concepts.Where(concept =>
-                concept.Courses.Any() && concept.Exercises.Any(exercise =>
-                    exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid)))))
-            .ThenInclude(concept => concept.Courses)
-            .ThenInclude(course => course.Exercises.Where(exercise =>
-                exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid))))
-            .ThenInclude(exercise => exercise.Questions.Where(question => question.Answers.Any(answer => answer.Valid)))
-            .ThenInclude(question => question.Answers)
-            .Include(subject => subject.Modules.Where(module => module.Concepts.Any()))
-            .ThenInclude(module => module.Concepts.Where(concept =>
-                concept.Courses.Any() && concept.Exercises.Any(exercise =>
-                    exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid)))))
-            .ThenInclude(concept => concept.Exercises.Where(exercise => exercise.Questions.Any()))
-            .ThenInclude(exercise => exercise.Questions.Where(question => question.Answers.Any(answer => answer.Valid)))
-            .ThenInclude(question => question.Answers)
-            .Where(subject =>
-                subject.Modules.Any() && subject.Modules.All(module =>
-                    module.Concepts.Any() && module.Concepts.All(concept => concept.Courses.Any() &&
-                                                                            concept.Exercises.Any() &&
-                                                                            concept.Exercises.All(exercise =>
-                                                                                exercise.Questions.Any() &&
-                                                                                exercise.Questions.All(question =>
-                                                                                    question.Answers.Any(answer =>
-                                                                                        answer.Valid))
-                                                                            ))));
-
-        public SubjectService(LernContext context, IHttpContextAccessor httpContextAccessor, IAuthorizationService authorizationService, IProgressionService progressionService) : base(context, httpContextAccessor)
+        public SubjectService(LernContext context, IHttpContextAccessor httpContextAccessor, IAuthorizationService authorizationService, IProgressionService progressionService, IStateService stateService) : base(context, httpContextAccessor)
         {
             _authorizationService = authorizationService;
             _progressionService = progressionService;
+            _stateService = stateService;
         }
 
         protected override IQueryable<Subject> WithDefaultIncludes(DbSet<Subject> set)
@@ -88,7 +60,7 @@ namespace Lern_API.Services.Database
             if (canEdit)
                 return entity;
 
-            return await AvailableSubjects.FirstOrDefaultAsync(subject => subject.Id == id, token);
+            return await _stateService.AvailableSubjects.FirstOrDefaultAsync(subject => subject.Id == id, token);
         }
 
         public override async Task<Subject> Create(SubjectRequest entity, CancellationToken token = default)
@@ -98,7 +70,7 @@ namespace Lern_API.Services.Database
             if (result == null)
                 return null;
 
-            return await UpdateState(result.Id, token);
+            return await _stateService.UpdateSubjectState(result.Id, token);
         }
 
         public override async Task<Subject> Update(Guid id, SubjectRequest entity, CancellationToken token = default)
@@ -108,7 +80,7 @@ namespace Lern_API.Services.Database
             if (result == null)
                 return null;
 
-            return await UpdateState(result.Id, token);
+            return await _stateService.UpdateSubjectState(result.Id, token);
         }
 
         public async Task<IEnumerable<Subject>> GetMine(CancellationToken token = default)
@@ -120,31 +92,16 @@ namespace Lern_API.Services.Database
 
         public async Task<IEnumerable<Subject>> GetAvailable(CancellationToken token = default)
         {
-            return await AvailableSubjects.ToListAsync(token);
+            var currentUser = HttpContextAccessor.HttpContext.GetUser();
+
+            return await _stateService.AvailableSubjects.Where(subject => subject.AuthorId != currentUser.Id).ToListAsync(token);
         }
 
         public async Task<IEnumerable<Subject>> GetActives(CancellationToken token = default)
         {
             var progressions = await _progressionService.GetAll(HttpContextAccessor.HttpContext.GetUser(), token);
 
-            return progressions.Where(progression => !progression.Suspended).Select(progression => progression.Subject);
-        }
-        
-        public async Task<Subject> UpdateState(Guid id, CancellationToken token = default)
-        {
-            var subject = await base.Get(id, token);
-
-            if (subject == null)
-                return null;
-
-            return await SafeExecute(_ =>
-            {
-                subject.State = AvailableSubjects.Any(x => x.Id == id)
-                        ? SubjectState.Approved
-                        : SubjectState.Invalid;
-
-                return subject;
-            }, token);
+            return _stateService.AvailableSubjects.AsEnumerable().Where(x => progressions.Where(progression => !progression.Suspended).Any(progression => progression.SubjectId == x.Id));
         }
     }
 }

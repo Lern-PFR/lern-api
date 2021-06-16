@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Lern_API.Filters;
 using Lern_API.Models;
 using Lern_API.Services;
 using Lern_API.Services.Database;
@@ -17,7 +18,7 @@ namespace Lern_API.Tests.Services
     {
         [Theory]
         [AutoMoqData]
-        public async Task Get_Entire_Subject_With_Write_Access(Mock<IAuthorizationService> authorizationService, IProgressionService progressionService, Subject subject, User user)
+        public async Task Get_Entire_Subject_With_Write_Access(Mock<IAuthorizationService> authorizationService, IProgressionService progressionService, IStateService stateService, Subject subject, User user)
         {
             authorizationService.Setup(x => x.HasWriteAccess(user, subject, It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
@@ -30,7 +31,7 @@ namespace Lern_API.Tests.Services
             await context.Subjects.AddRangeAsync(subject);
             await context.SaveChangesAsync();
 
-            var service = new SubjectService(context, httpContext, authorizationService.Object, progressionService);
+            var service = new SubjectService(context, httpContext, authorizationService.Object, progressionService, stateService);
             var result = await service.Get(subject.Id);
 
             result.Should().BeEquivalentTo(subject);
@@ -38,23 +39,25 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Get_Subject_With_A_Course_And_An_Exercise(Mock<IAuthorizationService> authorizationService, IProgressionService progressionService, Subject subject, Subject invalidSubject, User user)
+        public async Task Get_Subject_With_A_Course_And_An_Exercise(Mock<IAuthorizationService> authorizationService, IProgressionService progressionService, Mock<IStateService> stateService, Subject subject, Subject invalidSubject, User user)
         {
+            var context = TestSetup.SetupContext();
+
             authorizationService.Setup(x => x.HasWriteAccess(user, It.IsAny<Subject>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
+            stateService.Setup(x => x.AvailableSubjects).Returns(SubjectsFilters.ValidSubjects(context.Subjects));
 
             subject.Modules.First().Concepts.First().Exercises.First().Questions.First().Answers.First().Valid = true;
 
             invalidSubject.Modules.First().Concepts.First().Exercises.First().Questions.First().Answers.ForEach(x => x.Valid = false);
             invalidSubject.Modules.First().Concepts.First().Courses.Clear();
-
-            var context = TestSetup.SetupContext();
+            
             var httpContext = TestSetup.SetupHttpContext().SetupSession(user);
 
             await context.Subjects.AddAsync(subject);
             await context.Subjects.AddAsync(invalidSubject);
             await context.SaveChangesAsync();
 
-            var service = new SubjectService(context, httpContext, authorizationService.Object, progressionService);
+            var service = new SubjectService(context, httpContext, authorizationService.Object, progressionService, stateService.Object);
             var result = await service.Get(subject.Id);
             var invalidResult = await service.Get(invalidSubject.Id);
 
@@ -64,17 +67,20 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Get_All_Subjects_With_A_Module(IAuthorizationService authorizationService, IProgressionService progressionService, List<Subject> subjects, List<Subject> invalidSubjects)
+        public async Task Get_All_Subjects_With_A_Module(IAuthorizationService authorizationService, IProgressionService progressionService, Mock<IStateService> stateService, List<Subject> subjects, List<Subject> invalidSubjects, User user)
         {
             invalidSubjects.ForEach(x => x.Modules.Clear());
 
             var context = TestSetup.SetupContext();
+            var httpContext = TestSetup.SetupHttpContext().SetupSession(user);
+
+            stateService.Setup(x => x.AvailableSubjects).Returns(SubjectsFilters.ValidSubjects(context.Subjects));
 
             await context.Subjects.AddRangeAsync(subjects);
             await context.Subjects.AddRangeAsync(invalidSubjects);
             await context.SaveChangesAsync();
 
-            var service = new SubjectService(context, TestSetup.SetupHttpContext(), authorizationService, progressionService);
+            var service = new SubjectService(context, httpContext, authorizationService, progressionService, stateService.Object);
             var result = await service.GetAvailable();
 
             result.Should().BeEquivalentTo(subjects).And.NotBeEquivalentTo(invalidSubjects);
@@ -82,17 +88,20 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Get_All_Subjects_With_A_Concept(IAuthorizationService authorizationService, IProgressionService progressionService, List<Subject> subjects, List<Subject> invalidSubjects)
+        public async Task Get_All_Subjects_With_A_Concept(IAuthorizationService authorizationService, IProgressionService progressionService, Mock<IStateService> stateService, List<Subject> subjects, List<Subject> invalidSubjects, User user)
         {
             invalidSubjects.ForEach(x => x.Modules.ForEach(y => y.Concepts.Clear()));
 
             var context = TestSetup.SetupContext();
+            var httpContext = TestSetup.SetupHttpContext().SetupSession(user);
+
+            stateService.Setup(x => x.AvailableSubjects).Returns(SubjectsFilters.ValidSubjects(context.Subjects));
 
             await context.Subjects.AddRangeAsync(subjects);
             await context.Subjects.AddRangeAsync(invalidSubjects);
             await context.SaveChangesAsync();
 
-            var service = new SubjectService(context, TestSetup.SetupHttpContext(), authorizationService, progressionService);
+            var service = new SubjectService(context, httpContext, authorizationService, progressionService, stateService.Object);
             var result = await service.GetAvailable();
 
             result.Should().BeEquivalentTo(subjects).And.NotBeEquivalentTo(invalidSubjects);
@@ -100,7 +109,7 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Get_All_Subjects_With_A_Course_And_Exercise(IAuthorizationService authorizationService, IProgressionService progressionService, List<Subject> subjects, List<Subject> invalidSubjects)
+        public async Task Get_All_Subjects_With_A_Course_And_Exercise(IAuthorizationService authorizationService, IProgressionService progressionService, Mock<IStateService> stateService, List<Subject> subjects, List<Subject> invalidSubjects, User user)
         {
             invalidSubjects.ForEach(x => x.Modules.ForEach(y => y.Concepts.ForEach(concept =>
             {
@@ -109,12 +118,15 @@ namespace Lern_API.Tests.Services
             })));
 
             var context = TestSetup.SetupContext();
+            var httpContext = TestSetup.SetupHttpContext().SetupSession(user);
+
+            stateService.Setup(x => x.AvailableSubjects).Returns(SubjectsFilters.ValidSubjects(context.Subjects));
 
             await context.Subjects.AddRangeAsync(subjects);
             await context.Subjects.AddRangeAsync(invalidSubjects);
             await context.SaveChangesAsync();
 
-            var service = new SubjectService(context, TestSetup.SetupHttpContext(), authorizationService, progressionService);
+            var service = new SubjectService(context, httpContext, authorizationService, progressionService, stateService.Object);
             var result = await service.GetAvailable();
 
             result.Should().BeEquivalentTo(subjects).And.NotBeEquivalentTo(invalidSubjects);
@@ -122,9 +134,12 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Get_All_Subjects_From_User(IAuthorizationService authorizationService, IProgressionService progressionService, User user, List<Subject> subjects)
+        public async Task Get_All_Subjects_From_User(IAuthorizationService authorizationService, IProgressionService progressionService, Mock<IStateService> stateService, User user, List<Subject> subjects)
         {
             var context = TestSetup.SetupContext();
+
+            stateService.Setup(x => x.AvailableSubjects).Returns(SubjectsFilters.ValidSubjects(context.Subjects));
+
             var httpContext = TestSetup.SetupHttpContext().SetupSession(user);
 
             subjects = subjects.Select((subject, i) =>
@@ -141,7 +156,7 @@ namespace Lern_API.Tests.Services
             await context.Subjects.AddRangeAsync(subjects);
             await context.SaveChangesAsync();
 
-            var service = new SubjectService(context, httpContext, authorizationService, progressionService);
+            var service = new SubjectService(context, httpContext, authorizationService, progressionService, stateService.Object);
             var result = await service.GetMine();
 
             result.Should().BeEquivalentTo(subjects.Where(x => x.AuthorId == user.Id));
@@ -149,9 +164,12 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Remove_Subject_And_Its_Children(IAuthorizationService authorizationService, IProgressionService progressionService, Subject subject)
+        public async Task Remove_Subject_And_Its_Children(IAuthorizationService authorizationService, IProgressionService progressionService, Mock<IStateService> stateService, Subject subject, User user)
         {
             var context = TestSetup.SetupContext();
+            var httpContext = TestSetup.SetupHttpContext().SetupSession(user);
+
+            stateService.Setup(x => x.AvailableSubjects).Returns(SubjectsFilters.ValidSubjects(context.Subjects));
 
             await context.Subjects.AddAsync(subject);
             await context.SaveChangesAsync();
@@ -164,7 +182,7 @@ namespace Lern_API.Tests.Services
             context.Questions.AsEnumerable().Should().NotBeEmpty();
             context.Answers.AsEnumerable().Should().NotBeEmpty();
 
-            var service = new SubjectService(context, TestSetup.SetupHttpContext(), authorizationService, progressionService);
+            var service = new SubjectService(context, httpContext, authorizationService, progressionService, stateService.Object);
             var result = await service.Delete(subject.Id);
 
             result.Should().BeTrue();
@@ -180,7 +198,7 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Remove_Subject_And_Related_Entities(IAuthorizationService authorizationService, IProgressionService progressionService, User user, Subject subject, Result result, Progression progression)
+        public async Task Remove_Subject_And_Related_Entities(IAuthorizationService authorizationService, IProgressionService progressionService, Mock<IStateService> stateService, User user, Subject subject, Result result, Progression progression)
         {
             var concept = subject.Modules.First().Concepts.First();
             var question = concept.Exercises.First().Questions.First();
@@ -201,6 +219,9 @@ namespace Lern_API.Tests.Services
             progression.Concept = concept;
 
             var context = TestSetup.SetupContext();
+            var httpContext = TestSetup.SetupHttpContext().SetupSession(user);
+
+            stateService.Setup(x => x.AvailableSubjects).Returns(SubjectsFilters.ValidSubjects(context.Subjects));
 
             await context.Users.AddAsync(user);
             await context.Subjects.AddAsync(subject);
@@ -218,7 +239,7 @@ namespace Lern_API.Tests.Services
             context.Progressions.AsEnumerable().Should().NotBeEmpty();
             context.Results.AsEnumerable().Should().NotBeEmpty();
 
-            var service = new SubjectService(context, TestSetup.SetupHttpContext(), authorizationService, progressionService);
+            var service = new SubjectService(context, httpContext, authorizationService, progressionService, stateService.Object);
             var deleteResult = await service.Delete(subject.Id);
 
             deleteResult.Should().BeTrue();
@@ -232,30 +253,6 @@ namespace Lern_API.Tests.Services
             context.Answers.AsEnumerable().Should().BeEmpty();
             context.Progressions.AsEnumerable().Should().BeEmpty();
             context.Results.AsEnumerable().Should().BeEmpty();
-        }
-
-        [Theory]
-        [AutoMoqData]
-        public async Task Update_Subject_State(IAuthorizationService authorizationService, IProgressionService progressionService, Subject subject, Subject invalidSubject)
-        {
-            subject.Modules.First().Concepts.First().Exercises.First().Questions.First().Answers.First().Valid = true;
-
-            invalidSubject.Modules.First().Concepts.First().Exercises.First().Questions.First().Answers.ForEach(x => x.Valid = false);
-            invalidSubject.Modules.First().Concepts.First().Courses.Clear();
-
-            var context = TestSetup.SetupContext();
-            var httpContext = TestSetup.SetupHttpContext();
-
-            await context.Subjects.AddAsync(subject);
-            await context.Subjects.AddAsync(invalidSubject);
-            await context.SaveChangesAsync();
-
-            var service = new SubjectService(context, httpContext, authorizationService, progressionService);
-            var result = await service.UpdateState(subject.Id);
-            var invalidResult = await service.UpdateState(invalidSubject.Id);
-
-            result.State.Should().Be(SubjectState.Approved);
-            invalidResult.State.Should().Be(SubjectState.Invalid);
         }
     }
 }

@@ -18,11 +18,11 @@ namespace Lern_API.Services.Database
 
     public class QuestionService : DatabaseService<Question, QuestionRequest>, IQuestionService
     {
-        private readonly ISubjectService _subjectService;
+        private readonly IStateService _stateService;
 
-        public QuestionService(LernContext context, IHttpContextAccessor httpContextAccessor, ISubjectService subjectService) : base(context, httpContextAccessor)
+        public QuestionService(LernContext context, IHttpContextAccessor httpContextAccessor, IStateService stateService) : base(context, httpContextAccessor)
         {
-            _subjectService = subjectService;
+            _stateService = stateService;
         }
 
         protected override IQueryable<Question> WithDefaultIncludes(DbSet<Question> set)
@@ -54,7 +54,7 @@ namespace Lern_API.Services.Database
                 token
             );
 
-            await _subjectService.UpdateState(subject?.Id ?? default, token);
+            await _stateService.UpdateSubjectState(subject?.Id ?? default, token);
 
             return result.Entity;
         }
@@ -91,7 +91,7 @@ namespace Lern_API.Services.Database
                 token
             );
 
-            await _subjectService.UpdateState(subject?.Id ?? default, token);
+            await _stateService.UpdateSubjectState(subject?.Id ?? default, token);
 
             return result.Entity;
         }
@@ -110,7 +110,7 @@ namespace Lern_API.Services.Database
                 token
             );
 
-            await _subjectService.UpdateState(subject?.Id ?? default, token);
+            await _stateService.UpdateSubjectState(subject?.Id ?? default, token);
 
             return true;
         }

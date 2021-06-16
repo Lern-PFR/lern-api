@@ -30,7 +30,7 @@ namespace Lern_API.Services.Database
                 .Include(progression => progression.User);
         }
 
-        public virtual async Task<bool> Create(User user, Subject subject, Concept concept, CancellationToken token = default)
+        public async Task<bool> Create(User user, Subject subject, Concept concept, CancellationToken token = default)
         {
             var final = new Progression
             {
@@ -44,22 +44,22 @@ namespace Lern_API.Services.Database
             return entityEntry?.Entity != null;
         }
 
-        public virtual async Task<bool> Exists(User user, Subject subject, CancellationToken token = default)
+        public async Task<bool> Exists(User user, Subject subject, CancellationToken token = default)
         {
             return await DbSet.AnyAsync(x => x.UserId == user.Id && x.SubjectId == subject.Id, token);
         }
 
-        public virtual async Task<Progression> Get(User user, Subject subject, CancellationToken token = default)
+        public async Task<Progression> Get(User user, Subject subject, CancellationToken token = default)
         {
             return await WithDefaultIncludes(DbSet).FirstOrDefaultAsync(x => x.UserId == user.Id && x.SubjectId == subject.Id, token);
         }
 
-        public virtual async Task<IEnumerable<Progression>> GetAll(User user, CancellationToken token = default)
+        public async Task<IEnumerable<Progression>> GetAll(User user, CancellationToken token = default)
         {
             return await WithDefaultIncludes(DbSet).Where(x => x.UserId == user.Id).ToListAsync(token);
         }
 
-        public virtual async Task<bool> Update(User user, Subject subject, Concept concept, CancellationToken token = default)
+        public async Task<bool> Update(User user, Subject subject, Concept concept, CancellationToken token = default)
         {
             var entry = await Get(user, subject, token);
 

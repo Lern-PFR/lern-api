@@ -20,12 +20,12 @@ namespace Lern_API.Services.Database
     public class CourseService : DatabaseService<Course, CourseRequest>, ICourseService
     {
         private readonly IAuthorizationService _authorizationService;
-        private readonly ISubjectService _subjectService;
+        private readonly IStateService _stateService;
 
-        public CourseService(LernContext context, IHttpContextAccessor httpContextAccessor, IAuthorizationService authorizationService, ISubjectService subjectService) : base(context, httpContextAccessor)
+        public CourseService(LernContext context, IHttpContextAccessor httpContextAccessor, IAuthorizationService authorizationService, IStateService stateService) : base(context, httpContextAccessor)
         {
             _authorizationService = authorizationService;
-            _subjectService = subjectService;
+            _stateService = stateService;
         }
 
         protected override IQueryable<Course> WithDefaultIncludes(DbSet<Course> set)
@@ -68,7 +68,7 @@ namespace Lern_API.Services.Database
                 return null;
 
             var subject = await Context.Subjects.FirstOrDefaultAsync(x => x.Modules.Any(module => module.Concepts.Any(concept => concept.Id == result.ConceptId)), token);
-            await _subjectService.UpdateState(subject?.Id ?? default, token);
+            await _stateService.UpdateSubjectState(subject?.Id ?? default, token);
 
             return result;
         }
@@ -135,7 +135,7 @@ namespace Lern_API.Services.Database
                 return null;
 
             var subject = await Context.Subjects.FirstOrDefaultAsync(x => x.Modules.Any(module => module.Concepts.Any(concept => concept.Id == result.Entity.ConceptId)), token);
-            await _subjectService.UpdateState(subject?.Id ?? default, token);
+            await _stateService.UpdateSubjectState(subject?.Id ?? default, token);
 
             return result.Entity;
         }
@@ -149,7 +149,7 @@ namespace Lern_API.Services.Database
                 return false;
 
             var subject = await Context.Subjects.FirstOrDefaultAsync(x => x.Modules.Any(module => module.Concepts.Any(concept => concept.Id == entity.ConceptId)), token);
-            await _subjectService.UpdateState(subject?.Id ?? default, token);
+            await _stateService.UpdateSubjectState(subject?.Id ?? default, token);
 
             return true;
         }

@@ -6,6 +6,7 @@ using FluentAssertions;
 using Lern_API.DataTransferObjects.Requests;
 using Lern_API.Helpers.Models;
 using Lern_API.Models;
+using Lern_API.Services;
 using Lern_API.Services.Database;
 using Lern_API.Tests.Attributes;
 using Lern_API.Tests.Utils;
@@ -18,10 +19,10 @@ namespace Lern_API.Tests.Services
     {
         [Theory]
         [AutoMoqData]
-        public async Task Create_Answers(ISubjectService subjectService, QuestionRequest request)
+        public async Task Create_Answers(IStateService stateService, QuestionRequest request)
         {
             var context = TestSetup.SetupContext();
-            var service = new QuestionService(context, TestSetup.SetupHttpContext(), subjectService);
+            var service = new QuestionService(context, TestSetup.SetupHttpContext(), stateService);
 
             var result = await service.Create(request);
 
@@ -31,10 +32,10 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Delete_Answers(ISubjectService subjectService, Question entity, QuestionRequest request)
+        public async Task Delete_Answers(IStateService stateService, Question entity, QuestionRequest request)
         {
             var context = TestSetup.SetupContext();
-            var service = new QuestionService(context, TestSetup.SetupHttpContext(), subjectService);
+            var service = new QuestionService(context, TestSetup.SetupHttpContext(), stateService);
 
             await context.Questions.AddAsync(entity);
             await context.SaveChangesAsync();
@@ -48,10 +49,10 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Update_Answers(ISubjectService subjectService, Question entity, QuestionRequest request, Answer answer, AnswerRequest answerRequest)
+        public async Task Update_Answers(IStateService stateService, Question entity, QuestionRequest request, Answer answer, AnswerRequest answerRequest)
         {
             var context = TestSetup.SetupContext();
-            var service = new QuestionService(context, TestSetup.SetupHttpContext(), subjectService);
+            var service = new QuestionService(context, TestSetup.SetupHttpContext(), stateService);
             
             answer.QuestionId = entity.Id;
 
@@ -76,9 +77,9 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Update_Subject_State_On_Update(Mock<ISubjectService> subjectService, Question question, QuestionRequest request)
+        public async Task Update_Subject_State_On_Update(Mock<IStateService> stateService, Question question, QuestionRequest request)
         {
-            subjectService.Setup(x => x.UpdateState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
+            stateService.Setup(x => x.UpdateSubjectState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
             
             var context = TestSetup.SetupContext();
             var httpContext = TestSetup.SetupHttpContext();
@@ -86,32 +87,32 @@ namespace Lern_API.Tests.Services
             await context.Questions.AddAsync(question);
             await context.SaveChangesAsync();
 
-            var service = new QuestionService(context, httpContext, subjectService.Object);
+            var service = new QuestionService(context, httpContext, stateService.Object);
             await service.Update(question.Id, request);
 
-            subjectService.VerifyAll();
+            stateService.VerifyAll();
         }
 
         [Theory]
         [AutoMoqData]
-        public async Task Update_Subject_State_On_Create(Mock<ISubjectService> subjectService, QuestionRequest request)
+        public async Task Update_Subject_State_On_Create(Mock<IStateService> stateService, QuestionRequest request)
         {
-            subjectService.Setup(x => x.UpdateState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
+            stateService.Setup(x => x.UpdateSubjectState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
             
             var context = TestSetup.SetupContext();
             var httpContext = TestSetup.SetupHttpContext();
             
-            var service = new QuestionService(context, httpContext, subjectService.Object);
+            var service = new QuestionService(context, httpContext, stateService.Object);
             await service.Create(request);
 
-            subjectService.VerifyAll();
+            stateService.VerifyAll();
         }
 
         [Theory]
         [AutoMoqData]
-        public async Task Update_Subject_State_On_Delete(Mock<ISubjectService> subjectService, Question question)
+        public async Task Update_Subject_State_On_Delete(Mock<IStateService> stateService, Question question)
         {
-            subjectService.Setup(x => x.UpdateState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
+            stateService.Setup(x => x.UpdateSubjectState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
             
             var context = TestSetup.SetupContext();
             var httpContext = TestSetup.SetupHttpContext();
@@ -119,10 +120,10 @@ namespace Lern_API.Tests.Services
             await context.Questions.AddAsync(question);
             await context.SaveChangesAsync();
 
-            var service = new QuestionService(context, httpContext, subjectService.Object);
+            var service = new QuestionService(context, httpContext, stateService.Object);
             await service.Delete(question.Id);
 
-            subjectService.VerifyAll();
+            stateService.VerifyAll();
         }
     }
 }

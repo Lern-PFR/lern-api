@@ -17,12 +17,12 @@ namespace Lern_API.Services.Database
     public class ModuleService : DatabaseService<Module, ModuleRequest>, IModuleService
     {
         private readonly IAuthorizationService _authorizationService;
-        private readonly ISubjectService _subjectService;
+        private readonly IStateService _stateService;
 
-        public ModuleService(LernContext context, IHttpContextAccessor httpContextAccessor, IAuthorizationService authorizationService, ISubjectService subjectService) : base(context, httpContextAccessor)
+        public ModuleService(LernContext context, IHttpContextAccessor httpContextAccessor, IAuthorizationService authorizationService, IStateService stateService) : base(context, httpContextAccessor)
         {
             _authorizationService = authorizationService;
-            _subjectService = subjectService;
+            _stateService = stateService;
         }
 
         protected override IQueryable<Module> WithDefaultIncludes(DbSet<Module> set)
@@ -79,7 +79,7 @@ namespace Lern_API.Services.Database
             if (result == null)
                 return null;
 
-            await _subjectService.UpdateState(result.SubjectId, token);
+            await _stateService.UpdateSubjectState(result.SubjectId, token);
 
             return result;
         }
@@ -92,7 +92,7 @@ namespace Lern_API.Services.Database
             if (!result)
                 return false;
 
-            await _subjectService.UpdateState(entity.SubjectId, token);
+            await _stateService.UpdateSubjectState(entity.SubjectId, token);
 
             return true;
         }
@@ -104,7 +104,7 @@ namespace Lern_API.Services.Database
             if (result == null)
                 return null;
 
-            await _subjectService.UpdateState(result.SubjectId, token);
+            await _stateService.UpdateSubjectState(result.SubjectId, token);
 
             return result;
         }

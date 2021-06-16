@@ -18,7 +18,7 @@ namespace Lern_API.Tests.Services
     {
         [Theory]
         [AutoMoqData]
-        public async Task Get_Entire_Exercise_With_Write_Access(Mock<IAuthorizationService> authorizationService, ISubjectService subjectService, Exercise exercise, User user)
+        public async Task Get_Entire_Exercise_With_Write_Access(Mock<IAuthorizationService> authorizationService, IStateService stateService, Exercise exercise, User user)
         {
             authorizationService.Setup(x => x.HasWriteAccess(user, exercise, It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
@@ -31,7 +31,7 @@ namespace Lern_API.Tests.Services
             await context.Exercises.AddRangeAsync(exercise);
             await context.SaveChangesAsync();
 
-            var service = new ExerciseService(context, httpContext, authorizationService.Object, subjectService);
+            var service = new ExerciseService(context, httpContext, authorizationService.Object, stateService);
             var result = await service.Get(exercise.Id);
 
             result.Should().BeEquivalentTo(exercise);
@@ -39,7 +39,7 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Get_Exercise_With_A_Valid_Question(Mock<IAuthorizationService> authorizationService, ISubjectService subjectService, Exercise exercise, Exercise invalidExercise, User user)
+        public async Task Get_Exercise_With_A_Valid_Question(Mock<IAuthorizationService> authorizationService, IStateService stateService, Exercise exercise, Exercise invalidExercise, User user)
         {
             authorizationService.Setup(x => x.HasWriteAccess(user, It.IsAny<Exercise>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
             
@@ -52,7 +52,7 @@ namespace Lern_API.Tests.Services
             await context.Exercises.AddAsync(invalidExercise);
             await context.SaveChangesAsync();
 
-            var service = new ExerciseService(context, httpContext, authorizationService.Object, subjectService);
+            var service = new ExerciseService(context, httpContext, authorizationService.Object, stateService);
             var result = await service.Get(exercise.Id);
             var invalidResult = await service.Get(invalidExercise.Id);
 
@@ -62,9 +62,9 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Update_Subject_State_On_Update(Mock<IAuthorizationService> authorizationService, Mock<ISubjectService> subjectService, Exercise exercise, ExerciseRequest request)
+        public async Task Update_Subject_State_On_Update(Mock<IAuthorizationService> authorizationService, Mock<IStateService> stateService, Exercise exercise, ExerciseRequest request)
         {
-            subjectService.Setup(x => x.UpdateState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
+            stateService.Setup(x => x.UpdateSubjectState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
             
             var context = TestSetup.SetupContext();
             var httpContext = TestSetup.SetupHttpContext();
@@ -72,32 +72,32 @@ namespace Lern_API.Tests.Services
             await context.Exercises.AddAsync(exercise);
             await context.SaveChangesAsync();
 
-            var service = new ExerciseService(context, httpContext, authorizationService.Object, subjectService.Object);
+            var service = new ExerciseService(context, httpContext, authorizationService.Object, stateService.Object);
             await service.Update(exercise.Id, request);
 
-            subjectService.VerifyAll();
+            stateService.VerifyAll();
         }
 
         [Theory]
         [AutoMoqData]
-        public async Task Update_Subject_State_On_Create(Mock<IAuthorizationService> authorizationService, Mock<ISubjectService> subjectService, ExerciseRequest request)
+        public async Task Update_Subject_State_On_Create(Mock<IAuthorizationService> authorizationService, Mock<IStateService> stateService, ExerciseRequest request)
         {
-            subjectService.Setup(x => x.UpdateState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
+            stateService.Setup(x => x.UpdateSubjectState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
             
             var context = TestSetup.SetupContext();
             var httpContext = TestSetup.SetupHttpContext();
             
-            var service = new ExerciseService(context, httpContext, authorizationService.Object, subjectService.Object);
+            var service = new ExerciseService(context, httpContext, authorizationService.Object, stateService.Object);
             await service.Create(request);
 
-            subjectService.VerifyAll();
+            stateService.VerifyAll();
         }
 
         [Theory]
         [AutoMoqData]
-        public async Task Update_Subject_State_On_Delete(Mock<IAuthorizationService> authorizationService, Mock<ISubjectService> subjectService, Exercise exercise)
+        public async Task Update_Subject_State_On_Delete(Mock<IAuthorizationService> authorizationService, Mock<IStateService> stateService, Exercise exercise)
         {
-            subjectService.Setup(x => x.UpdateState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
+            stateService.Setup(x => x.UpdateSubjectState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
             
             var context = TestSetup.SetupContext();
             var httpContext = TestSetup.SetupHttpContext();
@@ -105,10 +105,10 @@ namespace Lern_API.Tests.Services
             await context.Exercises.AddAsync(exercise);
             await context.SaveChangesAsync();
 
-            var service = new ExerciseService(context, httpContext, authorizationService.Object, subjectService.Object);
+            var service = new ExerciseService(context, httpContext, authorizationService.Object, stateService.Object);
             await service.Delete(exercise.Id);
 
-            subjectService.VerifyAll();
+            stateService.VerifyAll();
         }
     }
 }

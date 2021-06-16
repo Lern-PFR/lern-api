@@ -17,12 +17,12 @@ namespace Lern_API.Services.Database
     public class ExerciseService : DatabaseService<Exercise, ExerciseRequest>, IExerciseService
     {
         private readonly IAuthorizationService _authorizationService;
-        private readonly ISubjectService _subjectService;
+        private readonly IStateService _stateService;
 
-        public ExerciseService(LernContext context, IHttpContextAccessor httpContextAccessor, IAuthorizationService authorizationService, ISubjectService subjectService) : base(context, httpContextAccessor)
+        public ExerciseService(LernContext context, IHttpContextAccessor httpContextAccessor, IAuthorizationService authorizationService, IStateService stateService) : base(context, httpContextAccessor)
         {
             _authorizationService = authorizationService;
-            _subjectService = subjectService;
+            _stateService = stateService;
         }
 
         protected override IQueryable<Exercise> WithDefaultIncludes(DbSet<Exercise> set)
@@ -60,7 +60,7 @@ namespace Lern_API.Services.Database
                 return null;
 
             var subject = await Context.Subjects.FirstOrDefaultAsync(x => x.Modules.Any(module => module.Concepts.Any(concept => concept.Id == result.ConceptId) || module.Concepts.Any(concept => concept.Courses.Any(course => course.Id == result.CourseId))), token);
-            await _subjectService.UpdateState(subject?.Id ?? default, token);
+            await _stateService.UpdateSubjectState(subject?.Id ?? default, token);
 
             return result;
         }
@@ -74,7 +74,7 @@ namespace Lern_API.Services.Database
                 return false;
 
             var subject = await Context.Subjects.FirstOrDefaultAsync(x => x.Modules.Any(module => module.Concepts.Any(concept => concept.Id == entity.ConceptId) || module.Concepts.Any(concept => concept.Courses.Any(course => course.Id == entity.CourseId))), token);
-            await _subjectService.UpdateState(subject?.Id ?? default, token);
+            await _stateService.UpdateSubjectState(subject?.Id ?? default, token);
 
             return true;
         }
@@ -87,7 +87,7 @@ namespace Lern_API.Services.Database
                 return null;
 
             var subject = await Context.Subjects.FirstOrDefaultAsync(x => x.Modules.Any(module => module.Concepts.Any(concept => concept.Id == result.ConceptId) || module.Concepts.Any(concept => concept.Courses.Any(course => course.Id == result.CourseId))), token);
-            await _subjectService.UpdateState(subject?.Id ?? default, token);
+            await _stateService.UpdateSubjectState(subject?.Id ?? default, token);
 
             return result;
         }

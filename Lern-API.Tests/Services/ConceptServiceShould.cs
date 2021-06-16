@@ -18,7 +18,7 @@ namespace Lern_API.Tests.Services
     {
         [Theory]
         [AutoMoqData]
-        public async Task Get_Entire_Concept_With_Write_Access(Mock<IAuthorizationService> authorizationService, ISubjectService subjectService, Concept concept, User user)
+        public async Task Get_Entire_Concept_With_Write_Access(Mock<IAuthorizationService> authorizationService, IStateService stateService, Concept concept, User user)
         {
             authorizationService.Setup(x => x.HasWriteAccess(user, concept, It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
@@ -31,7 +31,7 @@ namespace Lern_API.Tests.Services
             await context.Concepts.AddRangeAsync(concept);
             await context.SaveChangesAsync();
 
-            var service = new ConceptService(context, httpContext, authorizationService.Object, subjectService);
+            var service = new ConceptService(context, httpContext, authorizationService.Object, stateService);
             var result = await service.Get(concept.Id);
 
             result.Should().BeEquivalentTo(concept);
@@ -39,7 +39,7 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Get_Concept_With_A_Course_And_An_Exercise(Mock<IAuthorizationService> authorizationService, ISubjectService subjectService, Concept concept, Concept invalidConcept, User user)
+        public async Task Get_Concept_With_A_Course_And_An_Exercise(Mock<IAuthorizationService> authorizationService, IStateService stateService, Concept concept, Concept invalidConcept, User user)
         {
             authorizationService.Setup(x => x.HasWriteAccess(user, It.IsAny<Concept>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
@@ -55,7 +55,7 @@ namespace Lern_API.Tests.Services
             await context.Concepts.AddAsync(invalidConcept);
             await context.SaveChangesAsync();
 
-            var service = new ConceptService(context, httpContext, authorizationService.Object, subjectService);
+            var service = new ConceptService(context, httpContext, authorizationService.Object, stateService);
             var result = await service.Get(concept.Id);
             var invalidResult = await service.Get(invalidConcept.Id);
 
@@ -65,9 +65,9 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Update_Subject_State_On_Update(Mock<IAuthorizationService> authorizationService, Mock<ISubjectService> subjectService, Concept concept, ConceptRequest request)
+        public async Task Update_Subject_State_On_Update(Mock<IAuthorizationService> authorizationService, Mock<IStateService> stateService, Concept concept, ConceptRequest request)
         {
-            subjectService.Setup(x => x.UpdateState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
+            stateService.Setup(x => x.UpdateSubjectState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
             
             var context = TestSetup.SetupContext();
             var httpContext = TestSetup.SetupHttpContext();
@@ -75,32 +75,32 @@ namespace Lern_API.Tests.Services
             await context.Concepts.AddAsync(concept);
             await context.SaveChangesAsync();
 
-            var service = new ConceptService(context, httpContext, authorizationService.Object, subjectService.Object);
+            var service = new ConceptService(context, httpContext, authorizationService.Object, stateService.Object);
             await service.Update(concept.Id, request);
 
-            subjectService.VerifyAll();
+            stateService.VerifyAll();
         }
 
         [Theory]
         [AutoMoqData]
-        public async Task Update_Subject_State_On_Create(Mock<IAuthorizationService> authorizationService, Mock<ISubjectService> subjectService, ConceptRequest request)
+        public async Task Update_Subject_State_On_Create(Mock<IAuthorizationService> authorizationService, Mock<IStateService> stateService, ConceptRequest request)
         {
-            subjectService.Setup(x => x.UpdateState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
+            stateService.Setup(x => x.UpdateSubjectState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
             
             var context = TestSetup.SetupContext();
             var httpContext = TestSetup.SetupHttpContext();
             
-            var service = new ConceptService(context, httpContext, authorizationService.Object, subjectService.Object);
+            var service = new ConceptService(context, httpContext, authorizationService.Object, stateService.Object);
             await service.Create(request);
 
-            subjectService.VerifyAll();
+            stateService.VerifyAll();
         }
 
         [Theory]
         [AutoMoqData]
-        public async Task Update_Subject_State_On_Delete(Mock<IAuthorizationService> authorizationService, Mock<ISubjectService> subjectService, Concept concept)
+        public async Task Update_Subject_State_On_Delete(Mock<IAuthorizationService> authorizationService, Mock<IStateService> stateService, Concept concept)
         {
-            subjectService.Setup(x => x.UpdateState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
+            stateService.Setup(x => x.UpdateSubjectState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
             
             var context = TestSetup.SetupContext();
             var httpContext = TestSetup.SetupHttpContext();
@@ -108,10 +108,10 @@ namespace Lern_API.Tests.Services
             await context.Concepts.AddAsync(concept);
             await context.SaveChangesAsync();
 
-            var service = new ConceptService(context, httpContext, authorizationService.Object, subjectService.Object);
+            var service = new ConceptService(context, httpContext, authorizationService.Object, stateService.Object);
             await service.Delete(concept.Id);
 
-            subjectService.VerifyAll();
+            stateService.VerifyAll();
         }
     }
 }

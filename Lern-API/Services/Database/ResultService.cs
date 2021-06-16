@@ -13,7 +13,6 @@ namespace Lern_API.Services.Database
         Task<IEnumerable<Result>> GetAll(User user, Subject subject, CancellationToken token = default);
         Task<IEnumerable<Result>> GetAll(User user, Exercise exercise, CancellationToken token = default);
         Task<Result> Get(User user, Question question, CancellationToken token = default);
-        Task<bool> RegisterAnswers(User user, IEnumerable<ResultRequest> answers, CancellationToken token = default);
     }
 
     public class ResultService : AbstractDatabaseService<Result>, IResultService
@@ -53,18 +52,6 @@ namespace Lern_API.Services.Database
         public async Task<Result> Get(User user, Question question, CancellationToken token = default)
         {
             return await WithDefaultIncludes(DbSet).FirstOrDefaultAsync(x => x.UserId == user.Id && x.QuestionId == question.Id, token);
-        }
-
-        public async Task<bool> RegisterAnswers(User user, IEnumerable<ResultRequest> answers, CancellationToken token = default)
-        {
-            var results = answers.Select(answer => new Result
-            {
-                AnswerId = answer.AnswerId,
-                QuestionId = answer.QuestionId,
-                UserId = user.Id
-            }).ToList();
-
-            return await SafeExecute(async set => await set.AddRangeAsync(results, token), token);
         }
     }
 }

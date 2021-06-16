@@ -28,5 +28,7 @@ namespace Lern_API.Models
         public bool Completed { get; set; }
         [ReadOnly(true), Range(0, 100)]
         public double Completion { get; set; }
+        [ReadOnly(true), Range(0, 100)]
+        public double Score { get; set; }
     }
 }
