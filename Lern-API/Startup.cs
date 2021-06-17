@@ -13,6 +13,7 @@ using Lern_API.Helpers.Swagger;
 using Lern_API.Services;
 using Lern_API.Services.Database;
 using Lern_API.Utils;
+using MailKit.Security;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -55,8 +56,10 @@ namespace Lern_API
                     Server = Configuration.Get<string>("SmtpServer"),
                     Port = Configuration.Get<int>("SmtpPort"),
                     User = Configuration.Get<string>("SmtpUser"),
+                    Password = Configuration.Get<string>("SmtpPassword"),
                     RequiresAuthentication = !string.IsNullOrEmpty(Configuration.Get<string>("SmtpUser")),
-                    UseSsl = Configuration.Get<bool>("SmtpUseSsl")
+                    UseSsl = Configuration.Get<bool>("SmtpUseSsl"),
+                    SocketOptions = SecureSocketOptions.StartTlsWhenAvailable,
                 });
 
             // Ajout des contrôleurs applicatifs
