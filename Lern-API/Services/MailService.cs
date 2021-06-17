@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentEmail.Core;
 using FluentEmail.Core.Models;
+using Lern_API.Helpers;
 using Lern_API.Models;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,6 +19,9 @@ namespace Lern_API.Services
     public class MailService : IMailService
     {
         private readonly IServiceProvider _serviceProvider;
+
+        private string FromAddress { get; } = Configuration.Get<string>("SenderEmail");
+        private string FromName { get; } = Configuration.Get<string>("SenderName");
 
         public MailService(IServiceProvider serviceProvider)
         {
@@ -37,6 +41,7 @@ namespace Lern_API.Services
             // Unfortunately, this line is required for the IFluentEmailFactory to be retrieved without crashing the entire server
             return await scope.ServiceProvider.GetRequiredService<IFluentEmailFactory>()
                 .Create()
+                .SetFrom(FromAddress, FromName)
                 .To(recipientAddress, recipientName)
                 .Subject(subject)
                 .UsingTemplateFromFile(Path.Combine("Templates", $"{template}.liquid"), model)
