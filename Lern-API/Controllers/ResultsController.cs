@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Lern_API.DataTransferObjects.Requests;
 using Lern_API.Helpers.JWT;
 using Lern_API.Models;
+using Lern_API.Services;
 using Lern_API.Services.Database;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,12 +18,14 @@ namespace Lern_API.Controllers
         private readonly IResultService _results;
         private readonly IQuestionService _questions;
         private readonly IExerciseService _exercises;
+        private readonly IStateService _state;
 
-        public ResultsController(IResultService results, IQuestionService questions, IExerciseService exercises)
+        public ResultsController(IResultService results, IQuestionService questions, IExerciseService exercises, IStateService state)
         {
             _results = results;
             _questions = questions;
             _exercises = exercises;
+            _state = state;
         }
         
         /// <summary>
@@ -85,7 +88,7 @@ namespace Lern_API.Controllers
         [HttpPost]
         public async Task<IActionResult> RegisterAnswers(IEnumerable<ResultRequest> answers)
         {
-            var result = await _results.RegisterAnswers(HttpContext.GetUser(), answers, HttpContext.RequestAborted);
+            var result = await _state.RegisterAnswers(HttpContext.GetUser(), answers, HttpContext.RequestAborted);
 
             return result ? Ok() : Forbid();
         }

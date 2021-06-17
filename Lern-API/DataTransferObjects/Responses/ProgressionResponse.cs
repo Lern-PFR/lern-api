@@ -16,6 +16,8 @@ namespace Lern_API.DataTransferObjects.Responses
         public bool Completed { get; set; }
         [Range(0, 100)]
         public double Completion { get; set; }
+        [Range(0, 100)]
+        public double Score { get; set; }
 
         public ProgressionResponse(Progression progression)
         {

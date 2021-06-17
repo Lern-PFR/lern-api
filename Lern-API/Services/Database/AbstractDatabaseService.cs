@@ -9,10 +9,11 @@ namespace Lern_API.Services.Database
     public interface IAbstractDatabaseService<TEntity> where TEntity : class
     {
         Task<T> ExecuteTransaction<T>(Func<DbSet<TEntity>, Task<T>> operations, CancellationToken token = default);
+        Task<bool> ExecuteTransaction(Func<DbSet<TEntity>, Task> operations, CancellationToken token = default);
         Task<T> ExecuteTransaction<T>(Func<DbSet<TEntity>, T> operations, CancellationToken token = default);
         Task<bool> ExecuteTransaction(Action<DbSet<TEntity>> operations, CancellationToken token = default);
         Task<T> ExecuteQuery<T>(Func<IQueryable<TEntity>, Task<T>> query, CancellationToken token = default);
-        T ExecuteQuery<T>(Func<IQueryable<TEntity>, T> query, CancellationToken token = default);
+        T ExecuteQuery<T>(Func<IQueryable<TEntity>, T> query);
     }
 
     public abstract class AbstractDatabaseService<TEntity> : IAbstractDatabaseService<TEntity> where TEntity : class
@@ -32,6 +33,11 @@ namespace Lern_API.Services.Database
         }
 
         public async Task<T> ExecuteTransaction<T>(Func<DbSet<TEntity>, Task<T>> operations, CancellationToken token = default)
+        {
+            return await SafeExecute(operations, token);
+        }
+
+        public async Task<bool> ExecuteTransaction(Func<DbSet<TEntity>, Task> operations, CancellationToken token = default)
         {
             return await SafeExecute(operations, token);
         }
@@ -60,7 +66,7 @@ namespace Lern_API.Services.Database
             }
         }
 
-        public T ExecuteQuery<T>(Func<IQueryable<TEntity>, T> query, CancellationToken token = default)
+        public T ExecuteQuery<T>(Func<IQueryable<TEntity>, T> query)
         {
             try
             {

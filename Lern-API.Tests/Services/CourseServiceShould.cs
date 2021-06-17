@@ -20,7 +20,7 @@ namespace Lern_API.Tests.Services
     {
         [Theory]
         [AutoMoqData]
-        public async Task Get_Entire_Course_With_Write_Access(Mock<IAuthorizationService> authorizationService, ISubjectService subjectService, Course course, User user)
+        public async Task Get_Entire_Course_With_Write_Access(Mock<IAuthorizationService> authorizationService, IStateService stateService, Course course, User user)
         {
             authorizationService.Setup(x => x.HasWriteAccess(user, course, It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
@@ -33,7 +33,7 @@ namespace Lern_API.Tests.Services
             await context.Courses.AddRangeAsync(course);
             await context.SaveChangesAsync();
 
-            var service = new CourseService(context, httpContext, authorizationService.Object, subjectService);
+            var service = new CourseService(context, httpContext, authorizationService.Object, stateService);
             var result = await service.Get(course.Id);
 
             result.Should().BeEquivalentTo(course);
@@ -41,7 +41,7 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Get_Course_With_A_Valid_Exercise(Mock<IAuthorizationService> authorizationService, ISubjectService subjectService, Course course, Course invalidCourse, User user)
+        public async Task Get_Course_With_A_Valid_Exercise(Mock<IAuthorizationService> authorizationService, IStateService stateService, Course course, Course invalidCourse, User user)
         {
             authorizationService.Setup(x => x.HasWriteAccess(user, It.IsAny<Course>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
@@ -56,7 +56,7 @@ namespace Lern_API.Tests.Services
             await context.Courses.AddAsync(invalidCourse);
             await context.SaveChangesAsync();
 
-            var service = new CourseService(context, httpContext, authorizationService.Object, subjectService);
+            var service = new CourseService(context, httpContext, authorizationService.Object, stateService);
             var result = await service.Get(course.Id);
             var invalidResult = await service.Get(invalidCourse.Id);
 
@@ -66,10 +66,10 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Get_Single_Course_Or_Null(IAuthorizationService authorizationService, ISubjectService subjectService, List<Course> entities, Course target)
+        public async Task Get_Single_Course_Or_Null(IAuthorizationService authorizationService, IStateService stateService, List<Course> entities, Course target)
         {
             var context = TestSetup.SetupContext();
-            var service = new CourseService(context, TestSetup.SetupHttpContext(), authorizationService, subjectService);
+            var service = new CourseService(context, TestSetup.SetupHttpContext(), authorizationService, stateService);
 
             await context.Courses.AddRangeAsync(entities);
             await context.Courses.AddAsync(target);
@@ -84,13 +84,13 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Get_Latest_Version(IAuthorizationService authorizationService, ISubjectService subjectService, List<Course> entities, Course target)
+        public async Task Get_Latest_Version(IAuthorizationService authorizationService, IStateService stateService, List<Course> entities, Course target)
         {
             var request = new CourseRequest();
             request.CloneFrom(target);
 
             var context = TestSetup.SetupContext();
-            var service = new CourseService(context, TestSetup.SetupHttpContext(), authorizationService, subjectService);
+            var service = new CourseService(context, TestSetup.SetupHttpContext(), authorizationService, stateService);
 
             await context.Courses.AddRangeAsync(entities);
             await context.Courses.AddAsync(target);
@@ -104,7 +104,7 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Get_Exact_Version(IAuthorizationService authorizationService, ISubjectService subjectService, List<Course> entities, Course target)
+        public async Task Get_Exact_Version(IAuthorizationService authorizationService, IStateService stateService, List<Course> entities, Course target)
         {
             var delta = 1;
 
@@ -116,7 +116,7 @@ namespace Lern_API.Tests.Services
             });
 
             var context = TestSetup.SetupContext();
-            var service = new CourseService(context, TestSetup.SetupHttpContext(), authorizationService, subjectService);
+            var service = new CourseService(context, TestSetup.SetupHttpContext(), authorizationService, stateService);
 
             await context.Courses.AddRangeAsync(entities);
             await context.Courses.AddAsync(target);
@@ -129,10 +129,10 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Update_Course_Version(IAuthorizationService authorizationService, ISubjectService subjectService, Course entity, CourseRequest request)
+        public async Task Update_Course_Version(IAuthorizationService authorizationService, IStateService stateService, Course entity, CourseRequest request)
         {
             var context = TestSetup.SetupContext();
-            var service = new CourseService(context, TestSetup.SetupHttpContext(), authorizationService, subjectService);
+            var service = new CourseService(context, TestSetup.SetupHttpContext(), authorizationService, stateService);
 
             await context.Courses.AddAsync(entity);
             await context.SaveChangesAsync();
@@ -150,10 +150,10 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Delete_All_Versions(IAuthorizationService authorizationService, ISubjectService subjectService, List<Course> entities, Course target)
+        public async Task Delete_All_Versions(IAuthorizationService authorizationService, IStateService stateService, List<Course> entities, Course target)
         {
             var context = TestSetup.SetupContext();
-            var service = new CourseService(context, TestSetup.SetupHttpContext(), authorizationService, subjectService);
+            var service = new CourseService(context, TestSetup.SetupHttpContext(), authorizationService, stateService);
 
             await context.Courses.AddRangeAsync(entities);
 
@@ -179,9 +179,9 @@ namespace Lern_API.Tests.Services
         
         [Theory]
         [AutoMoqData]
-        public async Task Update_Subject_State_On_Update(Mock<IAuthorizationService> authorizationService, Mock<ISubjectService> subjectService, Course course, CourseRequest request)
+        public async Task Update_Subject_State_On_Update(Mock<IAuthorizationService> authorizationService, Mock<IStateService> stateService, Course course, CourseRequest request)
         {
-            subjectService.Setup(x => x.UpdateState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
+            stateService.Setup(x => x.UpdateSubjectState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
             
             var context = TestSetup.SetupContext();
             var httpContext = TestSetup.SetupHttpContext();
@@ -189,32 +189,32 @@ namespace Lern_API.Tests.Services
             await context.Courses.AddAsync(course);
             await context.SaveChangesAsync();
 
-            var service = new CourseService(context, httpContext, authorizationService.Object, subjectService.Object);
+            var service = new CourseService(context, httpContext, authorizationService.Object, stateService.Object);
             await service.Update(course.Id, request);
 
-            subjectService.VerifyAll();
+            stateService.VerifyAll();
         }
 
         [Theory]
         [AutoMoqData]
-        public async Task Update_Subject_State_On_Create(Mock<IAuthorizationService> authorizationService, Mock<ISubjectService> subjectService, CourseRequest request)
+        public async Task Update_Subject_State_On_Create(Mock<IAuthorizationService> authorizationService, Mock<IStateService> stateService, CourseRequest request)
         {
-            subjectService.Setup(x => x.UpdateState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
+            stateService.Setup(x => x.UpdateSubjectState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
             
             var context = TestSetup.SetupContext();
             var httpContext = TestSetup.SetupHttpContext();
             
-            var service = new CourseService(context, httpContext, authorizationService.Object, subjectService.Object);
+            var service = new CourseService(context, httpContext, authorizationService.Object, stateService.Object);
             await service.Create(request);
 
-            subjectService.VerifyAll();
+            stateService.VerifyAll();
         }
 
         [Theory]
         [AutoMoqData]
-        public async Task Update_Subject_State_On_Delete(Mock<IAuthorizationService> authorizationService, Mock<ISubjectService> subjectService, Course course)
+        public async Task Update_Subject_State_On_Delete(Mock<IAuthorizationService> authorizationService, Mock<IStateService> stateService, Course course)
         {
-            subjectService.Setup(x => x.UpdateState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
+            stateService.Setup(x => x.UpdateSubjectState(It.IsAny<Guid>(), It.IsAny<CancellationToken>()));
             
             var context = TestSetup.SetupContext();
             var httpContext = TestSetup.SetupHttpContext();
@@ -222,10 +222,10 @@ namespace Lern_API.Tests.Services
             await context.Courses.AddAsync(course);
             await context.SaveChangesAsync();
 
-            var service = new CourseService(context, httpContext, authorizationService.Object, subjectService.Object);
+            var service = new CourseService(context, httpContext, authorizationService.Object, stateService.Object);
             await service.Delete(course.Id);
 
-            subjectService.VerifyAll();
+            stateService.VerifyAll();
         }
     }
 }

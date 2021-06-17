@@ -17,12 +17,12 @@ namespace Lern_API.Services.Database
     public class ConceptService : DatabaseService<Concept, ConceptRequest>, IConceptService
     {
         private readonly IAuthorizationService _authorizationService;
-        private readonly ISubjectService _subjectService;
+        private readonly IStateService _stateService;
 
-        public ConceptService(LernContext context, IHttpContextAccessor httpContextAccessor, IAuthorizationService authorizationService, ISubjectService subjectService) : base(context, httpContextAccessor)
+        public ConceptService(LernContext context, IHttpContextAccessor httpContextAccessor, IAuthorizationService authorizationService, IStateService stateService) : base(context, httpContextAccessor)
         {
             _authorizationService = authorizationService;
-            _subjectService = subjectService;
+            _stateService = stateService;
         }
 
         protected override IQueryable<Concept> WithDefaultIncludes(DbSet<Concept> set)
@@ -73,7 +73,7 @@ namespace Lern_API.Services.Database
                 return null;
 
             var subject = await Context.Subjects.FirstOrDefaultAsync(x => x.Modules.Any(module => module.Id == result.ModuleId), token);
-            await _subjectService.UpdateState(subject?.Id ?? default, token);
+            await _stateService.UpdateSubjectState(subject?.Id ?? default, token);
 
             return result;
         }
@@ -87,7 +87,7 @@ namespace Lern_API.Services.Database
                 return false;
 
             var subject = await Context.Subjects.FirstOrDefaultAsync(x => x.Modules.Any(module => module.Id == entity.ModuleId), token);
-            await _subjectService.UpdateState(subject?.Id ?? default, token);
+            await _stateService.UpdateSubjectState(subject?.Id ?? default, token);
 
             return true;
         }
@@ -100,7 +100,7 @@ namespace Lern_API.Services.Database
                 return null;
 
             var subject = await Context.Subjects.FirstOrDefaultAsync(x => x.Modules.Any(module => module.Id == result.ModuleId), token);
-            await _subjectService.UpdateState(subject?.Id ?? default, token);
+            await _stateService.UpdateSubjectState(subject?.Id ?? default, token);
 
             return result;
         }
