@@ -5,7 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 using FluentValidation;
 using Lern_API.Helpers.Validation;
 using Lern_API.Models;
-using Lern_API.Services;
 using Lern_API.Services.Database;
 
 namespace Lern_API.DataTransferObjects.Requests
