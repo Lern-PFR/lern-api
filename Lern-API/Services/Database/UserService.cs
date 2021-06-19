@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Flurl;
 using Lern_API.DataTransferObjects.Requests;
 using Lern_API.DataTransferObjects.Responses;
+using Lern_API.Helpers;
 using Lern_API.Helpers.JWT;
 using Lern_API.Helpers.Models;
 using Lern_API.Models;
@@ -41,7 +42,19 @@ namespace Lern_API.Services.Database
             entity.Password = BCrypt.Net.BCrypt.EnhancedHashPassword(entity.Password);
             entity.Email = entity.Email.ToLowerInvariant();
 
-            return await base.Create(entity, token);
+            var user = await base.Create(entity, token);
+
+            if (user == null)
+                return null;
+            
+            await _mails.SendEmailAsync(user, "Création de votre compte Lern.", "Welcome", new
+            {
+                AssetsUrl = Url.Combine(Configuration.Get<string>("ApiHost"), "assets"),
+                HomePageUrl = Configuration.Get<string>("FrontendHost"),
+                Username = user.Nickname
+            }, token);
+
+            return user;
         }
 
         public override async Task<User> Update(Guid id, UserRequest entity, CancellationToken token = default)
@@ -80,8 +93,10 @@ namespace Lern_API.Services.Database
             {
                 await _mails.SendEmailAsync(user, "Récupération du compte", "RecoverAccount", new
                 {
+                    AssetsUrl = Url.Combine(Configuration.Get<string>("ApiHost"), "assets"),
+                    HomePageUrl = Configuration.Get<string>("FrontendHost"),
                     Username = user.Nickname,
-                    GeneratedLink = Url.Combine(appBaseUrl, user.GenerateForgottenPasswordToken())
+                    GeneratedLink = Url.Combine(Configuration.Get<string>("FrontendHost"), user.GenerateForgottenPasswordToken())
                 }, token);
             }
             
