@@ -39,7 +39,7 @@ namespace Lern_API.Tests.Services
                     AnswerId = question.Answers.First().Id,
                     UserId = user.Id
                 }))))
-                .Concat(subject.Modules.SelectMany(module => module.Concepts.SelectMany(concept => concept.Courses.SelectMany(course => course.Exercises.SelectMany(exercise => exercise.Questions.Select(question => new Result
+                .Concat(subject.Modules.SelectMany(module => module.Concepts.SelectMany(concept => concept.Lessons.SelectMany(lesson => lesson.Exercises.SelectMany(exercise => exercise.Questions.Select(question => new Result
                     {
                         QuestionId = question.Id,
                         AnswerId = question.Answers.First().Id,
@@ -100,7 +100,7 @@ namespace Lern_API.Tests.Services
                     AnswerId = question.Answers.First().Id,
                     UserId = user.Id
                 }))))
-                .Concat(subject.Modules.SelectMany(module => module.Concepts.SelectMany(concept => concept.Courses.SelectMany(course => course.Exercises.SelectMany(exercise => exercise.Questions.Select(question => new Result
+                .Concat(subject.Modules.SelectMany(module => module.Concepts.SelectMany(concept => concept.Lessons.SelectMany(lesson => lesson.Exercises.SelectMany(exercise => exercise.Questions.Select(question => new Result
                     {
                         QuestionId = question.Id,
                         AnswerId = question.Answers.First().Id,
@@ -209,7 +209,7 @@ namespace Lern_API.Tests.Services
                     AnswerId = question.Answers.First(answer => answer.Valid).Id,
                     UserId = user.Id
                 }))))
-                .Concat(subject.Modules.SelectMany(module => module.Concepts.SelectMany(concept => concept.Courses.SelectMany(course => course.Exercises.SelectMany(exercise => exercise.Questions.Select(question => new Result
+                .Concat(subject.Modules.SelectMany(module => module.Concepts.SelectMany(concept => concept.Lessons.SelectMany(lesson => lesson.Exercises.SelectMany(exercise => exercise.Questions.Select(question => new Result
                     {
                         QuestionId = question.Id,
                         AnswerId = question.Answers.First(answer => answer.Valid).Id,
@@ -271,7 +271,7 @@ namespace Lern_API.Tests.Services
                     AnswerId = question.Answers.First(answer => answer.Valid).Id,
                     UserId = user.Id
                 }))))
-                .Concat(subject.Modules.SelectMany(module => module.Concepts.SelectMany(concept => concept.Courses.SelectMany(course => course.Exercises.SelectMany(exercise => exercise.Questions.Select(question => new Result
+                .Concat(subject.Modules.SelectMany(module => module.Concepts.SelectMany(concept => concept.Lessons.SelectMany(lesson => lesson.Exercises.SelectMany(exercise => exercise.Questions.Select(question => new Result
                     {
                         QuestionId = question.Id,
                         Question = question,
@@ -341,7 +341,7 @@ namespace Lern_API.Tests.Services
                     AnswerId = question.Answers.First(answer => !answer.Valid).Id,
                     UserId = user.Id
                 }))))
-                .Concat(subject.Modules.SelectMany(module => module.Concepts.SelectMany(concept => concept.Courses.SelectMany(course => course.Exercises.SelectMany(exercise => exercise.Questions.Select(question => new Result
+                .Concat(subject.Modules.SelectMany(module => module.Concepts.SelectMany(concept => concept.Lessons.SelectMany(lesson => lesson.Exercises.SelectMany(exercise => exercise.Questions.Select(question => new Result
                     {
                         QuestionId = question.Id,
                         AnswerId = question.Answers.First(answer => !answer.Valid).Id,
@@ -420,7 +420,7 @@ namespace Lern_API.Tests.Services
             subject.Modules.First().Concepts.First().Exercises.First().Questions.First().Answers.First().Valid = true;
 
             invalidSubject.Modules.First().Concepts.First().Exercises.First().Questions.First().Answers.ForEach(x => x.Valid = false);
-            invalidSubject.Modules.First().Concepts.First().Courses.Clear();
+            invalidSubject.Modules.First().Concepts.First().Lessons.Clear();
 
             var context = TestSetup.SetupContext();
 

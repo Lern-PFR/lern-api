@@ -28,8 +28,8 @@ namespace Lern_API.Services.Database
         protected override IQueryable<Concept> WithDefaultIncludes(DbSet<Concept> set)
         {
             return base.WithDefaultIncludes(set)
-                .Include(concept => concept.Courses)
-                .ThenInclude(course => course.Exercises)
+                .Include(concept => concept.Lessons)
+                .ThenInclude(lesson => lesson.Exercises)
                 .ThenInclude(exercise => exercise.Questions)
                 .ThenInclude(question => question.Answers)
                 .Include(concept => concept.Exercises)
@@ -50,8 +50,8 @@ namespace Lern_API.Services.Database
                 return entity;
 
             return await DbSet
-                .Include(concept => concept.Courses)
-                .ThenInclude(course => course.Exercises.Where(exercise => exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid))))
+                .Include(concept => concept.Lessons)
+                .ThenInclude(lesson => lesson.Exercises.Where(exercise => exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid))))
                 .ThenInclude(exercise =>
                     exercise.Questions.Where(question => question.Answers.Any(answer => answer.Valid)))
                 .ThenInclude(question => question.Answers)
@@ -59,7 +59,7 @@ namespace Lern_API.Services.Database
                 .ThenInclude(exercise =>
                     exercise.Questions.Where(question => question.Answers.Any(answer => answer.Valid)))
                 .ThenInclude(question => question.Answers)
-                .Where(concept => concept.Courses.Any() && concept.Exercises.Any() && concept.Exercises.All(exercise =>
+                .Where(concept => concept.Lessons.Any() && concept.Exercises.Any() && concept.Exercises.All(exercise =>
                         exercise.Questions.Any() && exercise.Questions.All(question => question.Answers.Any(answer => answer.Valid))
                     )
                 ).FirstOrDefaultAsync(concept => concept.Id == id, token);

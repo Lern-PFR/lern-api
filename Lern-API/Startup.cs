@@ -136,7 +136,7 @@ namespace Lern_API
             services.AddScoped<IConceptService, ConceptService>();
             services.AddScoped<IExerciseService, ExerciseService>();
             services.AddScoped<ISubjectService, SubjectService>();
-            services.AddScoped<ICourseService, CourseService>();
+            services.AddScoped<ILessonService, LessonService>();
             services.AddScoped<IQuestionService, QuestionService>();
             services.AddScoped<IResultService, ResultService>();
             services.AddScoped<IProgressionService, ProgressionService>();

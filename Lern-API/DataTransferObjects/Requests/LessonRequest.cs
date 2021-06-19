@@ -4,12 +4,11 @@ using System.Diagnostics.CodeAnalysis;
 using FluentValidation;
 using Lern_API.Helpers.Validation;
 using Lern_API.Models;
-using Lern_API.Services;
 using Lern_API.Services.Database;
 
 namespace Lern_API.DataTransferObjects.Requests
 {
-    public class CourseRequest
+    public class LessonRequest
     {
         [Required]
         public Guid ConceptId { get; set; }
@@ -24,9 +23,9 @@ namespace Lern_API.DataTransferObjects.Requests
     }
 
     [ExcludeFromCodeCoverage]
-    public class CourseRequestValidator : AbstractValidator<CourseRequest>
+    public class LessonRequestValidator : AbstractValidator<LessonRequest>
     {
-        public CourseRequestValidator(IDatabaseService<Concept, ConceptRequest> conceptService)
+        public LessonRequestValidator(IDatabaseService<Concept, ConceptRequest> conceptService)
         {
             RuleFor(x => x.ConceptId).NotNull().MustExistInDatabase(conceptService);
             RuleFor(x => x.Title).NotNull().Length(3, 50);

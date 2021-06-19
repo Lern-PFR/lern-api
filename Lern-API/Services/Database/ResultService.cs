@@ -36,8 +36,8 @@ namespace Lern_API.Services.Database
                 module.Concepts.Any(concept =>
                    concept.Exercises.Any(exercise =>
                        exercise.Questions.Any(question => question.Id == x.QuestionId)) ||
-                   concept.Courses.Any(course =>
-                       course.Exercises.Any(exercise =>
+                   concept.Lessons.Any(lesson =>
+                       lesson.Exercises.Any(exercise =>
                            exercise.Questions.Any(question => question.Id == x.QuestionId)
                 )))));
         }

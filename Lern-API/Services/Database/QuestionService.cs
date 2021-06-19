@@ -50,7 +50,7 @@ namespace Lern_API.Services.Database
 
             var subject = await Context.Subjects.FirstOrDefaultAsync(x =>
                     x.Modules.Any(module => module.Concepts.Any(concept => concept.Exercises.Any(exercise => exercise.Id == result.Entity.ExerciseId)) ||
-                                            module.Concepts.Any(concept => concept.Courses.Any(course => course.Exercises.Any(exercise => exercise.Id == result.Entity.ExerciseId)))),
+                                            module.Concepts.Any(concept => concept.Lessons.Any(lesson => lesson.Exercises.Any(exercise => exercise.Id == result.Entity.ExerciseId)))),
                 token
             );
 
@@ -87,7 +87,7 @@ namespace Lern_API.Services.Database
 
             var subject = await Context.Subjects.FirstOrDefaultAsync(x =>
                     x.Modules.Any(module => module.Concepts.Any(concept => concept.Exercises.Any(exercise => exercise.Id == result.Entity.ExerciseId)) ||
-                                            module.Concepts.Any(concept => concept.Courses.Any(course => course.Exercises.Any(exercise => exercise.Id == result.Entity.ExerciseId)))),
+                                            module.Concepts.Any(concept => concept.Lessons.Any(lesson => lesson.Exercises.Any(exercise => exercise.Id == result.Entity.ExerciseId)))),
                 token
             );
 
@@ -106,7 +106,7 @@ namespace Lern_API.Services.Database
 
             var subject = await Context.Subjects.FirstOrDefaultAsync(x =>
                 x.Modules.Any(module => module.Concepts.Any(concept => concept.Exercises.Any(exercise => exercise.Id == entity.ExerciseId)) ||
-                                        module.Concepts.Any(concept => concept.Courses.Any(course => course.Exercises.Any(exercise => exercise.Id == entity.ExerciseId)))),
+                                        module.Concepts.Any(concept => concept.Lessons.Any(lesson => lesson.Exercises.Any(exercise => exercise.Id == entity.ExerciseId)))),
                 token
             );
 

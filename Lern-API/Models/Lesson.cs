@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Lern_API.Models
 {
-    public class Course : IModelBase
+    public class Lesson : IModelBase
     {
         [ReadOnly(true), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }

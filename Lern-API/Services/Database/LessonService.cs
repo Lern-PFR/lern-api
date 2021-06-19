@@ -12,35 +12,35 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Lern_API.Services.Database
 {
-    public interface ICourseService : IDatabaseService<Course, CourseRequest>
+    public interface ILessonService : IDatabaseService<Lesson, LessonRequest>
     {
-        Task<Course> GetExact(Guid id, int version, CancellationToken token = default);
+        Task<Lesson> GetExact(Guid id, int version, CancellationToken token = default);
     }
 
-    public class CourseService : DatabaseService<Course, CourseRequest>, ICourseService
+    public class LessonService : DatabaseService<Lesson, LessonRequest>, ILessonService
     {
         private readonly IAuthorizationService _authorizationService;
         private readonly IStateService _stateService;
 
-        public CourseService(LernContext context, IHttpContextAccessor httpContextAccessor, IAuthorizationService authorizationService, IStateService stateService) : base(context, httpContextAccessor)
+        public LessonService(LernContext context, IHttpContextAccessor httpContextAccessor, IAuthorizationService authorizationService, IStateService stateService) : base(context, httpContextAccessor)
         {
             _authorizationService = authorizationService;
             _stateService = stateService;
         }
 
-        protected override IQueryable<Course> WithDefaultIncludes(DbSet<Course> set)
+        protected override IQueryable<Lesson> WithDefaultIncludes(DbSet<Lesson> set)
         {
             return base.WithDefaultIncludes(set)
-                .Include(course => course.Exercises)
+                .Include(lesson => lesson.Exercises)
                 .ThenInclude(exercise => exercise.Questions)
                 .ThenInclude(question => question.Answers);
         }
 
-        public override async Task<Course> Get(Guid id, CancellationToken token = default)
+        public override async Task<Lesson> Get(Guid id, CancellationToken token = default)
         {
             var set = WithDefaultIncludes(DbSet);
 
-            var entity = await set.FirstOrDefaultAsync(x => x.Id == id && x.Version == set.Where(course => course.Id == id).Max(course => course.Version), token);
+            var entity = await set.FirstOrDefaultAsync(x => x.Id == id && x.Version == set.Where(lesson => lesson.Id == id).Max(lesson => lesson.Version), token);
 
             if (entity == null)
                 return null;
@@ -51,16 +51,16 @@ namespace Lern_API.Services.Database
                 return entity;
 
             return await DbSet
-                .Include(course =>
-                    course.Exercises.Where(exercise => exercise.Questions.Any()))
+                .Include(lesson =>
+                    lesson.Exercises.Where(exercise => exercise.Questions.Any()))
                 .ThenInclude(exercise =>
                     exercise.Questions.Where(question => question.Answers.Any(answer => answer.Valid)))
                 .ThenInclude(question => question.Answers)
-                .Where(course => course.Exercises.All(exercise => exercise.Questions.Any() && exercise.Questions.All(question => question.Answers.Any(answer => answer.Valid))))
-                .FirstOrDefaultAsync(course => course.Id == id && course.Version == entity.Version, token);
+                .Where(lesson => lesson.Exercises.All(exercise => exercise.Questions.Any() && exercise.Questions.All(question => question.Answers.Any(answer => answer.Valid))))
+                .FirstOrDefaultAsync(lesson => lesson.Id == id && lesson.Version == entity.Version, token);
         }
 
-        public override async Task<Course> Create(CourseRequest entity, CancellationToken token = default)
+        public override async Task<Lesson> Create(LessonRequest entity, CancellationToken token = default)
         {
             var result = await base.Create(entity, token);
 
@@ -73,19 +73,19 @@ namespace Lern_API.Services.Database
             return result;
         }
 
-        public override async Task<Course> Update(Guid id, CourseRequest entity, CancellationToken token = default)
+        public override async Task<Lesson> Update(Guid id, LessonRequest entity, CancellationToken token = default)
         {
             var entry = await Get(id, token);
             
-            var newVersion = new Course();
+            var newVersion = new Lesson();
             newVersion.CloneFrom(entry);
             newVersion.CloneFrom(entity);
             newVersion.Version += 1;
 
             var result = await SafeExecute(async set =>
             {
-                // Retrieve all exercises associated to the course to clone them and their children
-                var exercises = Context.Exercises.Where(exercise => exercise.CourseId == entry.Id && exercise.CourseVersion == entry.Version)
+                // Retrieve all exercises associated to the lesson to clone them and their children
+                var exercises = Context.Exercises.Where(exercise => exercise.LessonId == entry.Id && exercise.LessonVersion == entry.Version)
                     .Include(exercise => exercise.Questions)
                     .ThenInclude(question => question.Answers)
                     .ToList();
@@ -98,8 +98,8 @@ namespace Lern_API.Services.Database
                     newExercise.CloneFrom(exercise);
 
                     newExercise.Id = default;
-                    newExercise.CourseId = default;
-                    newExercise.CourseVersion = default;
+                    newExercise.LessonId = default;
+                    newExercise.LessonVersion = default;
                     newExercise.Questions = new List<Question>(exercise.Questions.Count);
 
                     foreach (var question in exercise.Questions)
@@ -154,7 +154,7 @@ namespace Lern_API.Services.Database
             return true;
         }
 
-        public async Task<Course> GetExact(Guid id, int version, CancellationToken token = default)
+        public async Task<Lesson> GetExact(Guid id, int version, CancellationToken token = default)
         {
             return await WithDefaultIncludes(DbSet).FirstOrDefaultAsync(x => x.Id == id && x.Version == version, token);
         }
