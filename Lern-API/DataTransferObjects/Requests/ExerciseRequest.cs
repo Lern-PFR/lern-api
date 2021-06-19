@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using FluentValidation;
 using Lern_API.Helpers.Validation;
 using Lern_API.Models;
-using Lern_API.Services;
 using Lern_API.Services.Database;
 
 namespace Lern_API.DataTransferObjects.Requests
@@ -12,7 +11,8 @@ namespace Lern_API.DataTransferObjects.Requests
     public class ExerciseRequest
     {
         public Guid? ConceptId { get; set; }
-        public Guid? CourseId { get; set; }
+        public Guid? LessonId { get; set; }
+        public int? LessonVersion { get; set; }
         [Required, MinLength(3), MaxLength(50)]
         public string Title { get; set; }
         [Required, MinLength(10), MaxLength(300)]
@@ -26,10 +26,10 @@ namespace Lern_API.DataTransferObjects.Requests
     [ExcludeFromCodeCoverage]
     public class ExerciseRequestValidator : AbstractValidator<ExerciseRequest>
     {
-        public ExerciseRequestValidator(IDatabaseService<Concept, ConceptRequest> conceptService, IDatabaseService<Course, CourseRequest> courseService)
+        public ExerciseRequestValidator(IDatabaseService<Concept, ConceptRequest> conceptService, IDatabaseService<Lesson, LessonRequest> lessonService)
         {
-            RuleFor(x => x.ConceptId).MustExistInDatabaseIfNotNull(conceptService).NotNull().When(e => e.CourseId == null).WithMessage("ConceptId and CourseId cannot be both null");
-            RuleFor(x => x.CourseId).MustExistInDatabaseIfNotNull(courseService).NotNull().When(e => e.ConceptId == null).WithMessage("ConceptId and CourseId cannot be both null");
+            RuleFor(x => x.ConceptId).MustExistInDatabaseIfNotNull(conceptService).NotNull().When(e => e.LessonId == null).WithMessage("ConceptId and LessonId cannot be both null");
+            RuleFor(x => x.LessonId).MustExistInDatabaseIfNotNull(lessonService).NotNull().When(e => e.ConceptId == null).WithMessage("ConceptId and LessonId cannot be both null");
             RuleFor(x => x.Title).NotNull().Length(3, 50);
             RuleFor(x => x.Description).NotNull().Length(10, 300);
             RuleFor(x => x.Content).NotNull();
@@ -37,8 +37,8 @@ namespace Lern_API.DataTransferObjects.Requests
 
             RuleSet("Update", () =>
             {
-                RuleFor(x => x.ConceptId).MustExistInDatabaseIfNotNull(conceptService).NotNull().When(e => e.CourseId == null).WithMessage("ConceptId and CourseId cannot be both null");
-                RuleFor(x => x.CourseId).MustExistInDatabaseIfNotNull(courseService).NotNull().When(e => e.ConceptId == null).WithMessage("ConceptId and CourseId cannot be both null");
+                RuleFor(x => x.ConceptId).MustExistInDatabaseIfNotNull(conceptService).NotNull().When(e => e.LessonId == null).WithMessage("ConceptId and LessonId cannot be both null");
+                RuleFor(x => x.LessonId).MustExistInDatabaseIfNotNull(lessonService).NotNull().When(e => e.ConceptId == null).WithMessage("ConceptId and LessonId cannot be both null");
                 RuleFor(x => x.Title).NotNull().Length(3, 50);
                 RuleFor(x => x.Description).NotNull().Length(10, 300);
                 RuleFor(x => x.Order).NotNull().GreaterThanOrEqualTo(0);

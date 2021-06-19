@@ -39,7 +39,7 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Get_Subject_With_A_Course_And_An_Exercise(Mock<IAuthorizationService> authorizationService, IProgressionService progressionService, Mock<IStateService> stateService, Subject subject, Subject invalidSubject, User user)
+        public async Task Get_Subject_With_A_Lesson_And_An_Exercise(Mock<IAuthorizationService> authorizationService, IProgressionService progressionService, Mock<IStateService> stateService, Subject subject, Subject invalidSubject, User user)
         {
             var context = TestSetup.SetupContext();
 
@@ -49,7 +49,7 @@ namespace Lern_API.Tests.Services
             subject.Modules.First().Concepts.First().Exercises.First().Questions.First().Answers.First().Valid = true;
 
             invalidSubject.Modules.First().Concepts.First().Exercises.First().Questions.First().Answers.ForEach(x => x.Valid = false);
-            invalidSubject.Modules.First().Concepts.First().Courses.Clear();
+            invalidSubject.Modules.First().Concepts.First().Lessons.Clear();
             
             var httpContext = TestSetup.SetupHttpContext().SetupSession(user);
 
@@ -109,11 +109,11 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Get_All_Subjects_With_A_Course_And_Exercise(IAuthorizationService authorizationService, IProgressionService progressionService, Mock<IStateService> stateService, List<Subject> subjects, List<Subject> invalidSubjects, User user)
+        public async Task Get_All_Subjects_With_A_Lesson_And_Exercise(IAuthorizationService authorizationService, IProgressionService progressionService, Mock<IStateService> stateService, List<Subject> subjects, List<Subject> invalidSubjects, User user)
         {
             invalidSubjects.ForEach(x => x.Modules.ForEach(y => y.Concepts.ForEach(concept =>
             {
-                concept.Courses.Clear();
+                concept.Lessons.Clear();
                 concept.Exercises.Clear();
             })));
 
@@ -177,7 +177,7 @@ namespace Lern_API.Tests.Services
             context.Subjects.AsEnumerable().Should().NotBeEmpty();
             context.Modules.AsEnumerable().Should().NotBeEmpty();
             context.Concepts.AsEnumerable().Should().NotBeEmpty();
-            context.Courses.AsEnumerable().Should().NotBeEmpty();
+            context.Lessons.AsEnumerable().Should().NotBeEmpty();
             context.Exercises.AsEnumerable().Should().NotBeEmpty();
             context.Questions.AsEnumerable().Should().NotBeEmpty();
             context.Answers.AsEnumerable().Should().NotBeEmpty();
@@ -190,7 +190,7 @@ namespace Lern_API.Tests.Services
             context.Subjects.AsEnumerable().Should().BeEmpty();
             context.Modules.AsEnumerable().Should().BeEmpty();
             context.Concepts.AsEnumerable().Should().BeEmpty();
-            context.Courses.AsEnumerable().Should().BeEmpty();
+            context.Lessons.AsEnumerable().Should().BeEmpty();
             context.Exercises.AsEnumerable().Should().BeEmpty();
             context.Questions.AsEnumerable().Should().BeEmpty();
             context.Answers.AsEnumerable().Should().BeEmpty();
@@ -232,7 +232,7 @@ namespace Lern_API.Tests.Services
             context.Subjects.AsEnumerable().Should().NotBeEmpty();
             context.Modules.AsEnumerable().Should().NotBeEmpty();
             context.Concepts.AsEnumerable().Should().NotBeEmpty();
-            context.Courses.AsEnumerable().Should().NotBeEmpty();
+            context.Lessons.AsEnumerable().Should().NotBeEmpty();
             context.Exercises.AsEnumerable().Should().NotBeEmpty();
             context.Questions.AsEnumerable().Should().NotBeEmpty();
             context.Answers.AsEnumerable().Should().NotBeEmpty();
@@ -247,7 +247,7 @@ namespace Lern_API.Tests.Services
             context.Subjects.AsEnumerable().Should().BeEmpty();
             context.Modules.AsEnumerable().Should().BeEmpty();
             context.Concepts.AsEnumerable().Should().BeEmpty();
-            context.Courses.AsEnumerable().Should().BeEmpty();
+            context.Lessons.AsEnumerable().Should().BeEmpty();
             context.Exercises.AsEnumerable().Should().BeEmpty();
             context.Questions.AsEnumerable().Should().BeEmpty();
             context.Answers.AsEnumerable().Should().BeEmpty();

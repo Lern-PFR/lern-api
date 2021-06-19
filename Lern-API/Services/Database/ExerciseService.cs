@@ -59,7 +59,7 @@ namespace Lern_API.Services.Database
             if (result == null)
                 return null;
 
-            var subject = await Context.Subjects.FirstOrDefaultAsync(x => x.Modules.Any(module => module.Concepts.Any(concept => concept.Id == result.ConceptId) || module.Concepts.Any(concept => concept.Courses.Any(course => course.Id == result.CourseId))), token);
+            var subject = await Context.Subjects.FirstOrDefaultAsync(x => x.Modules.Any(module => module.Concepts.Any(concept => concept.Id == result.ConceptId) || module.Concepts.Any(concept => concept.Lessons.Any(lesson => lesson.Id == result.LessonId))), token);
             await _stateService.UpdateSubjectState(subject?.Id ?? default, token);
 
             return result;
@@ -73,7 +73,7 @@ namespace Lern_API.Services.Database
             if (!result)
                 return false;
 
-            var subject = await Context.Subjects.FirstOrDefaultAsync(x => x.Modules.Any(module => module.Concepts.Any(concept => concept.Id == entity.ConceptId) || module.Concepts.Any(concept => concept.Courses.Any(course => course.Id == entity.CourseId))), token);
+            var subject = await Context.Subjects.FirstOrDefaultAsync(x => x.Modules.Any(module => module.Concepts.Any(concept => concept.Id == entity.ConceptId) || module.Concepts.Any(concept => concept.Lessons.Any(lesson => lesson.Id == entity.LessonId))), token);
             await _stateService.UpdateSubjectState(subject?.Id ?? default, token);
 
             return true;
@@ -86,7 +86,7 @@ namespace Lern_API.Services.Database
             if (result == null)
                 return null;
 
-            var subject = await Context.Subjects.FirstOrDefaultAsync(x => x.Modules.Any(module => module.Concepts.Any(concept => concept.Id == result.ConceptId) || module.Concepts.Any(concept => concept.Courses.Any(course => course.Id == result.CourseId))), token);
+            var subject = await Context.Subjects.FirstOrDefaultAsync(x => x.Modules.Any(module => module.Concepts.Any(concept => concept.Id == result.ConceptId) || module.Concepts.Any(concept => concept.Lessons.Any(lesson => lesson.Id == result.LessonId))), token);
             await _stateService.UpdateSubjectState(subject?.Id ?? default, token);
 
             return result;

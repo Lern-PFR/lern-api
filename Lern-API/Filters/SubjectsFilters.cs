@@ -12,23 +12,23 @@ namespace Lern_API.Filters
                 .Include(subject => subject.Author)
                 .Include(subject => subject.Modules.Where(module => module.Concepts.Any()))
                 .ThenInclude(module => module.Concepts.Where(concept =>
-                    concept.Courses.Any() && concept.Exercises.Any(exercise =>
+                    concept.Lessons.Any() && concept.Exercises.Any(exercise =>
                         exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid)))))
-                .ThenInclude(concept => concept.Courses)
-                .ThenInclude(course => course.Exercises.Where(exercise =>
+                .ThenInclude(concept => concept.Lessons)
+                .ThenInclude(lesson => lesson.Exercises.Where(exercise =>
                     exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid))))
                 .ThenInclude(exercise => exercise.Questions.Where(question => question.Answers.Any(answer => answer.Valid)))
                 .ThenInclude(question => question.Answers)
                 .Include(subject => subject.Modules.Where(module => module.Concepts.Any()))
                 .ThenInclude(module => module.Concepts.Where(concept =>
-                    concept.Courses.Any() && concept.Exercises.Any(exercise =>
+                    concept.Lessons.Any() && concept.Exercises.Any(exercise =>
                         exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid)))))
                 .ThenInclude(concept => concept.Exercises.Where(exercise => exercise.Questions.Any()))
                 .ThenInclude(exercise => exercise.Questions.Where(question => question.Answers.Any(answer => answer.Valid)))
                 .ThenInclude(question => question.Answers)
                 .Where(subject =>
                     subject.Modules.Any() && subject.Modules.All(module =>
-                        module.Concepts.Any() && module.Concepts.All(concept => concept.Courses.Any() &&
+                        module.Concepts.Any() && module.Concepts.All(concept => concept.Lessons.Any() &&
                                                                                 concept.Exercises.Any() &&
                                                                                 concept.Exercises.All(exercise =>
                                                                                     exercise.Questions.Any() &&

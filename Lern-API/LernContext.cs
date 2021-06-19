@@ -13,7 +13,7 @@ namespace Lern_API
         public DbSet<Subject> Subjects { get; set; }
         public DbSet<Module> Modules { get; set; }
         public DbSet<Concept> Concepts { get; set; }
-        public DbSet<Course> Courses { get; set; }
+        public DbSet<Lesson> Lessons { get; set; }
         public DbSet<Exercise> Exercises { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<Answer> Answers { get; set; }
@@ -45,7 +45,7 @@ namespace Lern_API
                 .IsRequired();
 
             modelBuilder.Entity<Concept>()
-                .HasMany(x => x.Courses)
+                .HasMany(x => x.Lessons)
                 .WithOne().HasForeignKey(x => x.ConceptId)
                 .IsRequired();
             modelBuilder.Entity<Concept>()
@@ -53,11 +53,11 @@ namespace Lern_API
                 .WithOne().HasForeignKey(x => x.ConceptId)
                 .OnDelete(DeleteBehavior.Cascade);
             
-            modelBuilder.Entity<Course>()
+            modelBuilder.Entity<Lesson>()
                 .HasKey(x => new { x.Id, x.Version });
-            modelBuilder.Entity<Course>()
+            modelBuilder.Entity<Lesson>()
                 .HasMany(x => x.Exercises)
-                .WithOne().HasForeignKey(x => new { x.CourseId, x.CourseVersion })
+                .WithOne().HasForeignKey(x => new { x.LessonId, x.LessonVersion })
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Exercise>()

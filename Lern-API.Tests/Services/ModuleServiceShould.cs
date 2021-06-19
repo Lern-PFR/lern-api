@@ -39,14 +39,14 @@ namespace Lern_API.Tests.Services
 
         [Theory]
         [AutoMoqData]
-        public async Task Get_Module_With_A_Course_And_An_Exercise(Mock<IAuthorizationService> authorizationService, IStateService stateService, Module module, Module invalidModule, User user)
+        public async Task Get_Module_With_A_Lesson_And_An_Exercise(Mock<IAuthorizationService> authorizationService, IStateService stateService, Module module, Module invalidModule, User user)
         {
             authorizationService.Setup(x => x.HasWriteAccess(user, It.IsAny<Module>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
             module.Concepts.First().Exercises.First().Questions.First().Answers.First().Valid = true;
 
             invalidModule.Concepts.First().Exercises.First().Questions.First().Answers.ForEach(x => x.Valid = false);
-            invalidModule.Concepts.First().Courses.Clear();
+            invalidModule.Concepts.First().Lessons.Clear();
 
             var context = TestSetup.SetupContext();
             var httpContext = TestSetup.SetupHttpContext().SetupSession(user);

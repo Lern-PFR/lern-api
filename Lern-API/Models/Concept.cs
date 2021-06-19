@@ -23,7 +23,7 @@ namespace Lern_API.Models
         [Required]
         public int Order { get; set; }
         [ReadOnly(true)]
-        public List<Course> Courses { get; set; }
+        public List<Lesson> Lessons { get; set; }
         [ReadOnly(true)]
         public List<Exercise> Exercises { get; set; }
     }

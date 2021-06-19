@@ -57,7 +57,7 @@ namespace Lern_API.Services
             var questionsCount =
                 subject.Modules.Sum(module =>
                     module.Concepts.Sum(concept =>
-                        concept.Exercises.Sum(exercise => exercise.Questions.Count) + concept.Courses.Sum(course => course.Exercises.Sum(exercise => exercise.Questions.Count))));
+                        concept.Exercises.Sum(exercise => exercise.Questions.Count) + concept.Lessons.Sum(lesson => lesson.Exercises.Sum(exercise => exercise.Questions.Count))));
 
             var completion = (resultsCount * 100d) / questionsCount;
             var score = (validResultsCount * 100d) / questionsCount;
@@ -102,8 +102,8 @@ namespace Lern_API.Services
                 module.Concepts.Any(concept =>
                     concept.Exercises.Any(exercise =>
                         exercise.Questions.Any(question => results.Any(result => result.QuestionId == question.Id))) ||
-                    concept.Courses.Any(course =>
-                        course.Exercises.Any(exercise =>
+                    concept.Lessons.Any(lesson =>
+                        lesson.Exercises.Any(exercise =>
                             exercise.Questions.Any(question => results.Any(result => result.QuestionId == question.Id))))
                     )));
 
