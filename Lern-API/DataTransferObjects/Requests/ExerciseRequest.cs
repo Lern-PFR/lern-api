@@ -12,6 +12,7 @@ namespace Lern_API.DataTransferObjects.Requests
     {
         public Guid? ConceptId { get; set; }
         public Guid? LessonId { get; set; }
+        public int? LessonVersion { get; set; }
         [Required, MinLength(3), MaxLength(50)]
         public string Title { get; set; }
         [Required, MinLength(10), MaxLength(300)]
