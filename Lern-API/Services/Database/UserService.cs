@@ -49,7 +49,7 @@ namespace Lern_API.Services.Database
             
             await _mails.SendEmailAsync(user, "Création de votre compte Lern.", "Welcome", new
             {
-                AssetsUrl = Url.Combine(Configuration.Get<string>("ApiHost"), "Assets"),
+                AssetsUrl = Url.Combine(Configuration.Get<string>("ApiHost"), "assets"),
                 HomePageUrl = Configuration.Get<string>("FrontendHost"),
                 Username = user.Nickname
             }, token);
@@ -93,7 +93,7 @@ namespace Lern_API.Services.Database
             {
                 await _mails.SendEmailAsync(user, "Récupération du compte", "RecoverAccount", new
                 {
-                    AssetsUrl = Url.Combine(Configuration.Get<string>("ApiHost"), "Assets"),
+                    AssetsUrl = Url.Combine(Configuration.Get<string>("ApiHost"), "assets"),
                     HomePageUrl = Configuration.Get<string>("FrontendHost"),
                     Username = user.Nickname,
                     GeneratedLink = Url.Combine(Configuration.Get<string>("FrontendHost"), user.GenerateForgottenPasswordToken())
