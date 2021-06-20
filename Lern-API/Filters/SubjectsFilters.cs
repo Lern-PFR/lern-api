@@ -29,13 +29,14 @@ namespace Lern_API.Filters
                 .Where(subject =>
                     subject.Modules.Any() && subject.Modules.All(module =>
                         module.Concepts.Any() && module.Concepts.All(concept => concept.Lessons.Any() &&
-                                                                                concept.Exercises.Any() &&
-                                                                                concept.Exercises.All(exercise =>
-                                                                                    exercise.Questions.Any() &&
-                                                                                    exercise.Questions.All(question =>
-                                                                                        question.Answers.Any(answer =>
-                                                                                            answer.Valid))
-                                                                                ))));
+                                                                                concept.Exercises.Any() // &&
+                                                                                // concept.Exercises.All(exercise =>
+                                                                                //    exercise.Questions.Any() &&
+                                                                                //    exercise.Questions.All(question =>
+                                                                                //        question.Answers.Any(answer =>
+                                                                                //            answer.Valid))
+                                                                                //)
+                                                                                )));
         }
     }
 }
