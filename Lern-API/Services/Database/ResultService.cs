@@ -25,6 +25,7 @@ namespace Lern_API.Services.Database
         {
             return base.WithDefaultIncludes(set)
                 .Include(result => result.Answer)   
+                .Include(result => result.Question)
                 .Include(result => result.User);
         }
         
@@ -35,10 +36,10 @@ namespace Lern_API.Services.Database
             return results.Where(x => subject.Modules.Any(module =>
                 module.Concepts.Any(concept =>
                    concept.Exercises.Any(exercise =>
-                       exercise.Questions.Any(question => question.Id == x.QuestionId)) ||
+                       exercise.Questions != null && exercise.Questions.Any(question => question.Id == x.QuestionId)) ||
                    concept.Lessons.Any(lesson =>
                        lesson.Exercises.Any(exercise =>
-                           exercise.Questions.Any(question => question.Id == x.QuestionId)
+                           exercise.Questions != null && exercise.Questions.Any(question => question.Id == x.QuestionId)
                 )))));
         }
 
