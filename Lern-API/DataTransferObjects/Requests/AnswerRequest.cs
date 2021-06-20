@@ -8,7 +8,7 @@ namespace Lern_API.DataTransferObjects.Requests
 {
     public class AnswerRequest
     {
-        [Required, MinLength(3), MaxLength(300)]
+        [Required, MinLength(1), MaxLength(300)]
         public string Text { get; set; }
         [Required]
         public bool Valid { get; set; }
@@ -19,11 +19,11 @@ namespace Lern_API.DataTransferObjects.Requests
     {
         public AnswerRequestValidator(IDatabaseService<Question, QuestionRequest> questionService)
         {
-            RuleFor(x => x.Text).NotEmpty().Length(3, 300);
+            RuleFor(x => x.Text).NotEmpty().Length(1, 300);
             
             RuleSet("Update", () =>
             {
-                RuleFor(x => x.Text).NotEmpty().Length(3, 300);
+                RuleFor(x => x.Text).NotEmpty().Length(1, 300);
             });
         }
     }
