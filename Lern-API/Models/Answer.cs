@@ -14,7 +14,7 @@ namespace Lern_API.Models
         public DateTime CreatedAt { get; set; }
         [ReadOnly(true)]
         public DateTime UpdatedAt { get; set; }
-        [Required, MinLength(3), MaxLength(300)]
+        [Required, MinLength(1), MaxLength(300)]
         public string Text { get; set; }
         [Required]
         public bool Valid { get; set; }
