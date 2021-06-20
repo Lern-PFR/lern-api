@@ -90,7 +90,7 @@ namespace Lern_API.Controllers
         {
             var result = await _state.RegisterAnswers(HttpContext.GetUser(), answers, HttpContext.RequestAborted);
 
-            return result ? Ok() : Forbid();
+            return result ? NoContent() : Forbid();
         }
     }
 }

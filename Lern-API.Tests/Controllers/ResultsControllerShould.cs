@@ -122,7 +122,7 @@ namespace Lern_API.Tests.Controllers
 
             stateService.VerifyAll();
             result.Should().NotBeNull();
-            result.Should().BeOfType<OkResult>();
+            result.Should().BeOfType<NoContentResult>();
         }
 
         [Theory]
