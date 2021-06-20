@@ -17,7 +17,7 @@ namespace Lern_API.DataTransferObjects.Requests
         public QuestionType Type { get; set; }
         [Required, MinLength(3), MaxLength(300)]
         public string Statement { get; set; }
-        [MinLength(10), MaxLength(3000)]
+        [MaxLength(3000)]
         public string Explanation { get; set; }
         [Required]
         public List<AnswerRequest> Answers { get; set; }
@@ -30,14 +30,14 @@ namespace Lern_API.DataTransferObjects.Requests
         {
             RuleFor(x => x.ExerciseId).NotNull().MustExistInDatabase(exerciseService);
             RuleFor(x => x.Statement).NotEmpty().Length(3, 300);
-            RuleFor(x => x.Explanation).Length(10, 3000).Unless(x => string.IsNullOrWhiteSpace(x.Explanation));
+            RuleFor(x => x.Explanation).MaximumLength(3000).Unless(x => string.IsNullOrWhiteSpace(x.Explanation));
             RuleFor(x => x.Answers).NotEmpty();
             
             RuleSet("Update", () =>
             {
                 RuleFor(x => x.ExerciseId).NotNull().MustExistInDatabase(exerciseService);
                 RuleFor(x => x.Statement).NotEmpty().Length(3, 300);
-                RuleFor(x => x.Explanation).Length(10, 3000).Unless(x => string.IsNullOrWhiteSpace(x.Explanation));
+                RuleFor(x => x.Explanation).MaximumLength(3000).Unless(x => string.IsNullOrWhiteSpace(x.Explanation));
                 RuleFor(x => x.Answers).NotEmpty();
             });
         }
