@@ -11,6 +11,28 @@ namespace Lern_API.Filters
             return subjects
                 .Include(subject => subject.Author)
                 .Include(subject => subject.Modules.Where(module => module.Concepts.Any()))
+                .ThenInclude(module => module.Concepts.Where(concept => concept.Lessons.Any()))
+                .ThenInclude(concept => concept.Lessons)
+                .ThenInclude(lesson => lesson.Exercises.Where(exercise =>
+                    exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid))))
+                .ThenInclude(exercise => exercise.Questions.Where(question => question.Answers.Any(answer => answer.Valid)))
+                .ThenInclude(question => question.Answers)
+                .Include(subject => subject.Modules.Where(module => module.Concepts.Any()))
+                .ThenInclude(module => module.Concepts.Where(concept => concept.Lessons.Any()))
+                .ThenInclude(concept => concept.Exercises.Where(exercise => exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid))))
+                .ThenInclude(exercise => exercise.Questions.Where(question => question.Answers.Any(answer => answer.Valid)))
+                .ThenInclude(question => question.Answers)
+                .Where(subject =>
+                    subject.Modules.Any() && subject.Modules.All(module =>
+                        module.Concepts.Any() && module.Concepts.All(concept => concept.Lessons.Any())));
+        }
+
+        /*
+        public static IQueryable<Subject> ValidSubjects(IQueryable<Subject> subjects)
+        {
+            return subjects
+                .Include(subject => subject.Author)
+                .Include(subject => subject.Modules.Where(module => module.Concepts.Any()))
                 .ThenInclude(module => module.Concepts.Where(concept =>
                     concept.Lessons.Any() && concept.Exercises.Any(exercise =>
                         exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid)))))
@@ -29,14 +51,14 @@ namespace Lern_API.Filters
                 .Where(subject =>
                     subject.Modules.Any() && subject.Modules.All(module =>
                         module.Concepts.Any() && module.Concepts.All(concept => concept.Lessons.Any() &&
-                                                                                concept.Exercises.Any() // &&
-                                                                                // concept.Exercises.All(exercise =>
-                                                                                //    exercise.Questions.Any() &&
-                                                                                //    exercise.Questions.All(question =>
-                                                                                //        question.Answers.Any(answer =>
-                                                                                //            answer.Valid))
-                                                                                //)
-                                                                                )));
+                                                                                concept.Exercises.Any() &&
+                                                                                concept.Exercises.All(exercise =>
+                                                                                    exercise.Questions.Any() &&
+                                                                                    exercise.Questions.All(question =>
+                                                                                        question.Answers.Any(answer =>
+                                                                                            answer.Valid))
+                                                                                ))));
         }
+        */
     }
 }
