@@ -66,9 +66,9 @@ namespace Lern_API.Services.Database
                     exercise.Questions.Where(question => question.Answers.Any(answer => answer.Valid)))
                 .ThenInclude(question => question.Answers)
                 .Where(module =>
-                    module.Concepts.Any() && module.Concepts.All(concept => concept.Lessons.Any() && concept.Exercises.Any() && concept.Exercises.All(exercise =>
-                        exercise.Questions.Any() && exercise.Questions.All(question => question.Answers.Any(answer => answer.Valid))
-                    ))
+                    module.Concepts.Any() && module.Concepts.All(concept => concept.Lessons.Any() /*&& concept.Exercises.Any() && concept.Exercises.All(exercise =>
+                        exercise.Questions.Any() && exercise.Questions.All(question => question.Answers.Any(answer => answer.Valid))*/
+                    )
                 ).FirstOrDefaultAsync(module => module.Id == id, token);
         }
 
