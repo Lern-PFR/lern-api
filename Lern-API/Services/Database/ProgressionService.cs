@@ -27,6 +27,10 @@ namespace Lern_API.Services.Database
             return base.WithDefaultIncludes(set)
                 .Include(progression => progression.Concept)
                 .Include(progression => progression.Subject)
+                .ThenInclude(subject => subject.Modules.Where(module => module.Concepts.Any()))
+                .ThenInclude(module => module.Concepts.Where(concept =>
+                    concept.Lessons.Any() && concept.Exercises.Any(exercise =>
+                        exercise.Questions.Any(question => question.Answers.Any(answer => answer.Valid)))))
                 .Include(progression => progression.User);
         }
 

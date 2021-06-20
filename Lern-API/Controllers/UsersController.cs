@@ -114,7 +114,7 @@ namespace Lern_API.Controllers
         /// <param name="request">User credentials</param>
         /// <returns>User information and an access token</returns>
         /// <response code="200">User information and an access token</response>
-        /// <response code="400">If given name or email already exists in our database</response>
+        /// <response code="400">If given login or password do not match a valid user</response>
         [HttpPost("/api/Login")]
         public async Task<ActionResult<LoginResponse>> Login(LoginRequest request)
         {
